@@ -17,5 +17,5 @@
 - Download [Kali VM](https://help.offsec.com/hc/en-us/articles/360049796792-Kali-Linux-Virtual-Machine)
 - Launching the VM (browse the .vmx file)
 - Login kali (username:kali, password:kali)
-- Kali terminal `sudo updatedb
+- Kali terminal `sudo updatedb`
 - Connect to PWK Lab
