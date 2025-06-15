@@ -12,10 +12,10 @@
 - [OffSec Discord](https://discord.gg/offsec)
 
 ## Workstation setup
-- Register [Broadcom account](https://profile.broadcom.com/web/registration)
-- Download "VMware Workstation Pro"
-- Download [Kali VM](https://help.offsec.com/hc/en-us/articles/360049796792-Kali-Linux-Virtual-Machine)
-- Launching the VM (browse the .vmx file)
-- Login kali (username:kali, password:kali)
-- Kali terminal `sudo updatedb`
-- Connect to PWK Lab
+1. Register [Broadcom account](https://profile.broadcom.com/web/registration)
+1. Download "VMware Workstation Pro"
+1. Download [Kali VM](https://help.offsec.com/hc/en-us/articles/360049796792-Kali-Linux-Virtual-Machine)
+1. Launching the VM (browse the .vmx file)
+1. Login kali (username:kali, password:kali)
+1. Kali terminal `sudo updatedb`
+1. Connect to PWK Lab
