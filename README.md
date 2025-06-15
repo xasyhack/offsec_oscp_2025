@@ -28,6 +28,25 @@
    - `sudo openvpn universal.ovpn`
    - output reads "Initialization Sequence Completed"
    - disconnect VPN by pressing Ctrl+C
+ 1. Recommended software
+    - Notetaking: [notion.so](http://notion.so)  or Obsidian
+    - Scanning tool: [Rustscan](https://github.com/RustScan/RustScan/releases)  
+      `dpkg -i rustscan_2.3.0_amd64.deb`
+    - file upload/transfer purpose: Updog    
+      ```  
+      pip3 install updog  
+      export PATH="/home/kali/.local/bin:$PATH"
+      ```
+    - Privilege Escalation: peass  
+      `sudo apt install peass`
+    - DNS: Gobuster  
+      `sudo apt install gobuster`
+    - Hosting a WebDAV share (for exploits, exfil, or testing): WsgiDAV  
+      `sudo apt install wsgidav`
+    - Lateral movement / privilege escalation: Bloodhound  
+      `sudo apt update && sudo apt install -y bloodhound`
+    - Stores AD data for querying & analysis: Neo4j  
+      `sudo neo4j console`
 
 ## PWK-200 syallabus
 1. Password attacks
