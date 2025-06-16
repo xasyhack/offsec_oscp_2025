@@ -77,7 +77,7 @@
 3. Common web application attacks
 4. Information gathering
    - **OSINT**: public available info of a target
-   - **Whois**: domain name info
+   - **Whois**: domain name info  
      `whois megacorpone.com -h 192.168.50.251`: lookup personnel, name server
      `whois 38.100.193.70 -h 192.168.50.251`: reverse lookup
    - **google hacking**: uncover critical information, vulnerabilities, and misconfigured websites
