@@ -116,8 +116,8 @@
    - **Whois**: domain name info  
      `whois megacorpone.com -h 192.168.50.251`: lookup personnel contact, name server  
      `whois 38.100.193.70 -h 192.168.50.251`: reverse lookup
-   - **google hacking**: uncover critical information, vulnerabilities, and misconfigured websites
-     `site:mega.com filetype:txt`
+   - **google hacking**: uncover critical information, vulnerabilities, and misconfigured websites  
+     `site:mega.com filetype:txt`  
      `site:mega.com -filetype:html` : exclude html page  
      `intitle: "index of" "parent directory"`: directory listing
    - [Google hacking database](https://www.exploit-db.com/google-hacking-database)
