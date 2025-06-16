@@ -34,7 +34,7 @@
    - `sudo openvpn universal.ovpn`
    - output reads "Initialization Sequence Completed"
    - disconnect VPN by pressing Ctrl+C
- 1. Package install
+1. Package install
    - `sudo apt update`
    - `sudo apt install golang`
  1. Recommended software
