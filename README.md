@@ -75,8 +75,14 @@
 2. Windows privilege escalation
 3. Common web application attacks
 4. Information gathering
-   - OSINT
-   - 
+   - OSINT: public available info of a target
+   - Whois: domain name info
+     `whois megacorpone.com -h 192.168.50.251`: lookup personnel, name server
+     `whois 38.100.193.70 -h 192.168.50.251`: reverse lookup
+   - google hacking: uncover critical information, vulnerabilities, and misconfigured websites
+     `site:mega.com filetype:txt`
+     `site:mega.com -filetype:html` : exclude html page
+   - ddd
 6. Vulnerability scanning
 7. Windows privilege escalation
 8. Introduction to web applcation attacks
