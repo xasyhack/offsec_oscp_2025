@@ -75,14 +75,38 @@
 2. Windows privilege escalation
 3. Common web application attacks
 4. Information gathering
-   - OSINT: public available info of a target
-   - Whois: domain name info
+   - **OSINT**: public available info of a target
+   - **Whois**: domain name info
      `whois megacorpone.com -h 192.168.50.251`: lookup personnel, name server
      `whois 38.100.193.70 -h 192.168.50.251`: reverse lookup
-   - google hacking: uncover critical information, vulnerabilities, and misconfigured websites
+   - **google hacking**: uncover critical information, vulnerabilities, and misconfigured websites
      `site:mega.com filetype:txt`
-     `site:mega.com -filetype:html` : exclude html page
-   - ddd
+     `site:mega.com -filetype:html` : exclude html page  
+     `intitle: "index of" "parent directory"`: directory listing
+   - [Google hacking database](https://www.exploit-db.com/google-hacking-database)
+   - [faster google dorking](https://dorksearch.com/)
+   - [Netcraft](https://searchdns.netcraft.com/): discover site tech, subdomains
+   - [wappalzer](https://www.wappalyzer.com/websites/<domain>/)
+   - **open-source code** search (small repo:GitHub, GitHub Gist, GitLab, SourceForge. larger repos: Gitrob, Gitleaks)
+     `gitleaks detect --source https://github.com/username/repo.git`: scans for API keys, private keys, credentials
+   - [Shodan](https://www.shodan.io/): search engine for internet-connected devices to discover servers, devices, DBs, IoT
+   - **nmap**  
+     `nmap -sVC -p- -v -T4 -sT --open IP_ADDRESS -oN results`: scans all open 65535 TCP ports  
+     `sudo nmap -sU -p 1-1024 -v IP_ADDRESS -oA results_UDP`: scans 1-1024 common UDP ports  
+
+      | Flag         | Description                                                                 |
+      |--------------|-----------------------------------------------------------------------------|
+      | `-sV`        | Enables **version detection** to identify software versions on services     |
+      | `-sC`        | Runs Nmap’s **default NSE scripts** (same as `--script=default`)            |
+      | `-p-`        | Scans **all 65535 TCP ports**                                               |
+      | `-v`         | Enables **verbose output** to see scan progress in real time                |
+      | `-T4`        | Sets scan to **aggressive timing** (faster, less stealthy)                  |
+      | `-sT`        | Performs a **TCP connect scan** (full 3-way handshake, useful if not root)  |
+      | `--open`     | Shows **only open ports**, hides closed or filtered ports                   |
+      | `IP_ADDRESS` | Target IP address to scan (replace with actual target)                      |
+      | `-oN results`| Saves output in **normal format** to a file named `results`                 |
+
+   - dd
 6. Vulnerability scanning
 7. Windows privilege escalation
 8. Introduction to web applcation attacks
