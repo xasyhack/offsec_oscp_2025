@@ -2,9 +2,11 @@
 
 - [Resources](#resources)
 - [Kali setup](#kali-setup)
+- [Penetration testing stages](#penetration-testing-stages)
 - [Penetration testing report](#penetration-testing-report)
 - [PWK-200 syallabus](#pwk-200-syallabus)
-- [Penetration testing stages](#penetration-testing-stages)
+- [PWK-200 labs](#pwk-200-labs)
+
 - [Usage](#usage)
 
 ## 📚 Resources
@@ -56,10 +58,46 @@
 
 ## Penetration testing report 
 - note editor:
- - [Sublime-syntax highlight]()
- - [CherryTree Kali]
- - [Obsidian-markdown editor]()
-- taking screenshots
+ - [Sublime-syntax highlight](https://www.sublimetext.com/download)
+ - [CherryTree Kali](https://github.com/giuspen/cherrytree)
+ - [Obsidian-markdown editor](https://obsidian.md/)
+- taking screenshots:
+ - snipping tool （win:win+shift+S. Linux:shift+print screen)
+ - 【flameshot](https://github.com/flameshot-org/flameshot）
+- effectiv penetration testing report
+  - purpose: highlights all the present flaws, remediation, scope
+  - tailor for audience:
+   - c-suite: scope + timeframeout, rules of engagement + methodology + executive summary (impact/work-case scenario, trends, strategic advise)  
+     **--engagement**    
+     The Client hired OffSec to conduct a penetration test of their kali.org web application in October of 2025. The test was conducted from a remote IP between the hours of 9 AM and 5 PM, with no users provided by the Client."  
+     **--positives**    
+     The application had many forms of hardening in place. First, OffSec was unable toupload malicious files due to the strong filteringin place. OffSec was also unable to brute force user accountsbecause of the robust lockout policy in place. Finally, the strongpassword policy made trivial password attacks unlikely to succeed.This points to a commendable culture of user account protections    
+     **--vulnerabilities**    
+     However, there were still areas of concern within the application.OffSec was able to inject arbitrary JavaScript into the browser ofan unwitting victim that would then be run in the context of thatvictim. In conjunction with the username enumeration on the loginfield, there seems to be a trend of unsanitized user input compoundedby verbose error messages being returned to the user. This can leadto some impactful issues, such as password or session stealing. It isrecommended that all input and error messages that are returned to theuser be sanitized and made generic to prevent this class of issue fromcropping up.  
+     **--conclusion**    
+     These vulnerabilities and their remediations are described in moredetail below. Should any questions arise, OffSec is happyto provide further advice and remediation help
+   - technical staff/summary: technical detail + impact + remediation
+    - User and Privilege Management
+    - Architecture
+    - Authorization
+    - Patch Management
+    - Integrity and Signatures
+    - Authentication
+    - Access Control
+    - Audit, Log Management and Monitoring
+    - Traffic and Data Encryption
+    - Security Misconfigurations
+     ```
+     Patch Management  
+     Windows and Ubuntu operating systems that are not up to date wereidentified. These are shown to be vulnerable to publicly-availableexploits and could result in malicious execution of code, theftof sensitive information, or cause denial of services which        mayimpact the infrastructure. Using outdated applications increases thepossibility of an intruder gaining unauthorized access by exploitingknown vulnerabilities. Patch management ought to be improved andupdates should be applied in conjunction with change      management.
+     ```
+   - technical findings and recommendation  
+     | Ref | Risk Rating | Issue Description and Implications                                                                                                                                                                                                                                   | Recommendations                                                                                                                                                                 |
+|-----|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1   | High (H)    | Account, Password, and Privilege Management is inadequate. Account management includes provisioning new accounts and removing unused accounts. Post-compromise analysis of 122,624 user accounts revealed: <br> - 722 accounts set to never expire <br> - 23,142 accounts never logged in <br> - 6 users were domain admins <br> - 968 accounts used default initial passwords | - Enforce a strict password policy on all accounts <br> - Require password changes for accounts with weak/default passwords <br> - Set all accounts to expire automatically <br> - Remove accounts that are no longer required |
+
+   - ddd
+- ddd
 
 ## Penetration testing stages
 - scope: IP range, hosts, applications
@@ -124,4 +162,7 @@
 19. Attacking active drectiory authentication
 20. Lateral movement in active directory
 21. Assembling the pieces
+
+## PWK-200 labs
+
 
