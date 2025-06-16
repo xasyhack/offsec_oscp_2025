@@ -165,15 +165,15 @@
 ### Information gathering
 - 6.2.1 Whois Enumeration  
   `whois megacorpone.com -h 192.168.50.251`
-- 6.2.2 Google Hacking
-  `site:megacorpone.com intext:"VP of Legal"`
-  `site:linkedin.com/in "MegaCorp One"`  
+- 6.2.2 Google Hacking  
+  `site:megacorpone.com intext:"VP of Legal"`  
+  `site:linkedin.com/in "MegaCorp One"`    
   Google: rocketreach.co "MegaCorp One"
-- 6.2.3 Netcraft
+- 6.2.3 Netcraft  
   `https://sitereport.netcraft.com/?url=http://www.megacorpone.com` (View the report under section Network & site technology)
-- 6.2.4 Open-Source Code
-  `./gitleaks dir /home/kali/offsec/megacorpone.com/megacorpone -v` (No leaks)
-  `nano config/gitleaks.toml`
+- 6.2.4 Open-Source Code  
+  `./gitleaks dir /home/kali/offsec/megacorpone.com/megacorpone -v` (No leaks)  
+  `nano config/gitleaks.toml`  
   ```
   [[rules]]
   id = "apache-htpasswd-md5"
