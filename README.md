@@ -6,7 +6,7 @@
 - [Penetration testing report](#penetration-testing-report)
 - [PWK-200 syallabus](#pwk-200-syallabus)
 - [PWK-200 labs](#pwk-200-labs)  
-  - [subsection 1.1](#subsection-11)
+  - [Information gathering](#information-gathering)
 
 ## 📚 Resources
 - [OffSec student portal](https://help.offsec.com/hc/en-us/articles/9550819362964-Connectivity-Guide) 
@@ -34,6 +34,9 @@
    - `sudo openvpn universal.ovpn`
    - output reads "Initialization Sequence Completed"
    - disconnect VPN by pressing Ctrl+C
+ 1. Package install
+   - `sudo apt update`
+   - `sudo apt install golang`
  1. Recommended software
     - Notetaking: [notion.so](http://notion.so)  or Obsidian
     - Scanning tool: [Rustscan](https://github.com/RustScan/RustScan/releases)  
@@ -111,7 +114,7 @@
 4. Information gathering
    - **OSINT**: public available info of a target
    - **Whois**: domain name info  
-     `whois megacorpone.com -h 192.168.50.251`: lookup personnel, name server
+     `whois megacorpone.com -h 192.168.50.251`: lookup personnel contact, name server  
      `whois 38.100.193.70 -h 192.168.50.251`: reverse lookup
    - **google hacking**: uncover critical information, vulnerabilities, and misconfigured websites
      `site:mega.com filetype:txt`
@@ -121,7 +124,7 @@
    - [faster google dorking](https://dorksearch.com/)
    - [Netcraft](https://searchdns.netcraft.com/): discover site tech, subdomains
    - [wappalzer](https://www.wappalyzer.com/websites/<domain>/)
-   - **open-source code** search (small repo:GitHub, GitHub Gist, GitLab, SourceForge. larger repos: Gitrob, Gitleaks)
+   - **open-source code** search (small repo:[GitHub](https://github.com/), [GitHub Gist](https://gist.github.com/), [GitLab](https://about.gitlab.com/), [SourceForge](https://sourceforge.net/). larger repos: [Gitrob](https://github.com/michenriksen/gitrob), [Gitleaks](https://github.com/zricethezav/gitleaks))
      `gitleaks detect --source https://github.com/username/repo.git`: scans for API keys, private keys, credentials
    - [Shodan](https://www.shodan.io/): search engine for internet-connected devices to discover servers, devices, DBs, IoT
    - **nmap**  
@@ -159,6 +162,29 @@
 21. Assembling the pieces
 
 ## PWK-200 labs
-### Subsection 1.1
+### Information gathering
+- 6.2.1 Whois Enumeration  
+  `whois megacorpone.com -h 192.168.50.251`
+- 6.2.2 Google Hacking
+  `site:megacorpone.com intext:"VP of Legal"`
+  `site:linkedin.com/in "MegaCorp One"`  
+  Google: rocketreach.co "MegaCorp One"
+- 6.2.3 Netcraft
+  `https://sitereport.netcraft.com/?url=http://www.megacorpone.com` (View the report under section Network & site technology)
+- 6.2.4 Open-Source Code
+  `./gitleaks dir /home/kali/offsec/megacorpone.com/megacorpone -v` (No leaks)
+  `nano config/gitleaks.toml`
+  ```
+  [[rules]]
+  id = "apache-htpasswd-md5"
+  description = "Detect Apache htpasswd MD5 hash (APR1)"
+  regex = '''(?i)\b[a-z0-9._%-]+:\$apr1\$[A-Za-z0-9./$]{8,}'''
+  keywords = ["$apr1$"]
+  tags = ["password", "apache", "htpasswd"]
+  ```
+  `./gitleaks dir /home/kali/offsec/megacorpone.com/megacorpone -v -c=config/gitleaks.toml` (Leaks found on home/kali/offsec/megacorpone.com/megacorpone/xampp.users)  
+- 6.2.5 Shodan
+- 6.2.6 Security Headers and SSL/TLS
+
 
 
