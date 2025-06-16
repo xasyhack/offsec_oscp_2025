@@ -4,6 +4,7 @@
 - [Kali setup](#kali-setup)
 - [Penetration testing report](#penetration-testing-report)
 - [PWK-200 syallabus](#pwk-200-syallabus)
+- [Penetration testing stages](#penetration-testing-stages)
 - [Usage](#usage)
 
 ## 📚 Resources
@@ -23,6 +24,7 @@
 1. Kali terminal `sudo updatedb`
 1. Download VPNs from OffSec portal (Explorer > VPN)
 1. Connect to PWK Lab
+   - `sudo updatedb` (run on first time only)
    - `locate universal.ovpn`
    - `cd /home/kali/Downloads`
    - `mkdir /home/kali/offsec`
@@ -58,25 +60,37 @@
  - [Obsidian-markdown editor]()
 - taking screenshots
 
+## Penetration testing stages
+- scope: IP range, hosts, applications
+- info gathering (passive or active): org infra, assets, personnel
+- vulnerability detection
+- initial foothold
+- privilege escalation
+- lateral movement
+- report
+- remediation
+
 ## PWK-200 syallabus
 1. Password attacks
 2. Windows privilege escalation
 3. Common web application attacks
 4. Information gathering
-5. Vulnerability scanning
-6. Windows privilege escalation
-7. Introduction to web applcation attacks
-8. SQL injection attacks
-9. Client-site attacks
-10. Antivirus evasion
-11. Fixing exploits
-12. Locating public exploits
-13. Linux privilege escalation
-14. Port redirection and SSH tunneling
-15. Tunneling through deep packet inspectation
-16. The metassploit framework
-17. Active directory introduction and enumeration
-18. Attacking active drectiory authentication
-19. Lateral movement in active directory
-20. Assembling the pieces
+   - OSINT
+   - 
+6. Vulnerability scanning
+7. Windows privilege escalation
+8. Introduction to web applcation attacks
+9. SQL injection attacks
+10. Client-site attacks
+11. Antivirus evasion
+12. Fixing exploits
+13. Locating public exploits
+14. Linux privilege escalation
+15. Port redirection and SSH tunneling
+16. Tunneling through deep packet inspectation
+17. The metassploit framework
+18. Active directory introduction and enumeration
+19. Attacking active drectiory authentication
+20. Lateral movement in active directory
+21. Assembling the pieces
 
