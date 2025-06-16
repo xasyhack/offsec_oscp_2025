@@ -11,6 +11,7 @@
 - [OffSec Study Plan and Exam FAQ](https://help.offsec.com/hc/en-us/sections/6970444968596-Penetration-Testing-with-Kali-Linux-PEN-200)
 - PWK Labs  
   - Credentials (🔒 username:Eric.Wallows, password:EricLikesRunning800)
+- OffSec portal > Explorer > Discord > link OffSec account to discord
 
 ## 🛠️ Kali setup
 1. Register [Broadcom account](https://profile.broadcom.com/web/registration)
