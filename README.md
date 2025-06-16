@@ -2,6 +2,7 @@
 
 - [Resources](#resources)
 - [Kali setup](#kali-setup)
+- [Penetration testing report](#penetration-testing-report)
 - [PWK-200 syallabus](#pwk-200-syallabus)
 - [Usage](#usage)
 
@@ -49,6 +50,13 @@
       `sudo apt update && sudo apt install -y bloodhound`
     - Stores AD data for querying & analysis: Neo4j  
       `sudo neo4j console`
+
+## Penetration testing report 
+- note editor:
+ - [Sublime-syntax highlight]()
+ - [CherryTree Kali]
+ - [Obsidian-markdown editor]()
+- taking screenshots
 
 ## PWK-200 syallabus
 1. Password attacks
