@@ -62,6 +62,7 @@
 - taking screenshots:
   - snipping tool （win:win+shift+S. Linux:shift+print screen)
   - [flameshot](https://github.com/flameshot-org/flameshot)
+- penetration testing notes: application name, URL, request type, issue detail, proof of concept payload  
 - effective penetration testing report
   - purpose: highlights all the present flaws, remediation, scope
   - tailor for audience:  
@@ -91,8 +92,7 @@
     - **technical findings and recommendation** (what vulnerability is + why dangerous + outcome + steps to exploit)
       <img src="https://github.com/xasyhack/oscp2025/blob/main/images/Table%202%20-%20Findings%20and%20Recommendations.png" alt="Alt text" width="400"/>  
       affected URL/endpoint + method of triggering the vulnerability  
-    - **appendices**
-- ddd
+    - **appendices**: articles, reference
 
 ## Penetration testing stages
 1. scope: IP range, hosts, applications
