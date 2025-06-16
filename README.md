@@ -76,25 +76,23 @@
      However, there were still areas of concern within the application.OffSec was able to inject arbitrary JavaScript into the browser ofan unwitting victim that would then be run in the context of thatvictim. In conjunction with the username enumeration on the loginfield, there seems to be a trend of unsanitized user input compoundedby verbose error messages being returned to the user. This can leadto some impactful issues, such as password or session stealing. It isrecommended that all input and error messages that are returned to theuser be sanitized and made generic to prevent this class of issue fromcropping up.  
      **--conclusion**    
      These vulnerabilities and their remediations are described in moredetail below. Should any questions arise, OffSec is happyto provide further advice and remediation help
-   - technical staff/summary: technical detail + impact + remediation
-    - User and Privilege Management
-    - Architecture
-    - Authorization
-    - Patch Management
-    - Integrity and Signatures
-    - Authentication
-    - Access Control
-    - Audit, Log Management and Monitoring
-    - Traffic and Data Encryption
-    - Security Misconfigurations
-     ```
+   - technical staff/summary: technical detail + impact + remediation  
+     - User and Privilege Management
+     - Architecture
+     - Authorization
+     - Patch Management
+     - Integrity and Signatures
+     - Authentication
+     - Access Control
+     - Audit, Log Management and Monitoring
+     - Traffic and Data Encryption
+     - Security Misconfigurations
+       
      Patch Management  
      Windows and Ubuntu operating systems that are not up to date wereidentified. These are shown to be vulnerable to publicly-availableexploits and could result in malicious execution of code, theftof sensitive information, or cause denial of services which        mayimpact the infrastructure. Using outdated applications increases thepossibility of an intruder gaining unauthorized access by exploitingknown vulnerabilities. Patch management ought to be improved andupdates should be applied in conjunction with change      management.
-     ```
    - technical findings and recommendation  
-     | Ref | Risk Rating | Issue Description and Implications                                                                                                                                                                                                                                   | Recommendations                                                                                                                                                                 |
-|-----|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1   | High (H)    | Account, Password, and Privilege Management is inadequate. Account management includes provisioning new accounts and removing unused accounts. Post-compromise analysis of 122,624 user accounts revealed: <br> - 722 accounts set to never expire <br> - 23,142 accounts never logged in <br> - 6 users were domain admins <br> - 968 accounts used default initial passwords | - Enforce a strict password policy on all accounts <br> - Require password changes for accounts with weak/default passwords <br> - Set all accounts to expire automatically <br> - Remove accounts that are no longer required |
+  
+
 
    - ddd
 - ddd
