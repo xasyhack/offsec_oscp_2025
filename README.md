@@ -153,7 +153,10 @@
    - [Wappalyzer](): technology stack
    - [Gobuster](): wordlists to discover directories and files
      `obuster dir -u 192.168.50.20 -w /usr/share/wordlists/dirb/common.txt -t5`  
-   - Burp Suite. _Note:Only http traffic, no cert install_
+   - Burp Suite
+     - Only http traffic, no cert install_, enable_intercept(forward or drop), proxy listerner on localhost:8080
+     - Browser proxy setting: about:preferences#general > settings > networks setting > http proxy (host 127.0.0.1,port 8080 + use this proxy for HTTPS) & SOCKSv4 (host 127.0.0.1, port 9060)
+   - ddd
 10. SQL injection attacks
 11. Client-site attacks
 12. Antivirus evasion
