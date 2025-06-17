@@ -187,19 +187,27 @@
       -d '{"password": "pwned"}'
       ```
    - dd
-10. SQL injection attacks
-11. Client-site attacks
-12. Antivirus evasion
-13. Fixing exploits
-14. Locating public exploits
-15. Linux privilege escalation
-16. Port redirection and SSH tunneling
-17. Tunneling through deep packet inspectation
-18. The metassploit framework
-19. Active directory introduction and enumeration
-20. Attacking active drectiory authentication
-21. Lateral movement in active directory
-22. Assembling the pieces
+10. Common Web Application attacks
+    - **Directory traversal**: access files outside of the web root by using relative paths
+      - absolute path: `cat /home/kali/etc/passwd`  
+      - relative path: `cat ../../etc/pwd`: move 2 directories back to root file
+      - extra ../sequence: `cat ../../../../../../../../../../../etc/passwd`
+    - File inclusion vulnerabilities
+    - File upload vulnerabilities
+    - Command injection
+12. SQL injection attacks
+13. Client-site attacks
+14. Antivirus evasion
+15. Fixing exploits
+16. Locating public exploits
+17. Linux privilege escalation
+18. Port redirection and SSH tunneling
+19. Tunneling through deep packet inspectation
+20. The metassploit framework
+21. Active directory introduction and enumeration
+22. Attacking active drectiory authentication
+23. Lateral movement in active directory
+24. Assembling the pieces
 
 ## PWK-200 labs
 ### Information gathering
