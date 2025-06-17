@@ -147,19 +147,26 @@
 6. Vulnerability scanning
 7. Windows privilege escalation
 8. Introduction to web applcation attacks
-9. SQL injection attacks
-10. Client-site attacks
-11. Antivirus evasion
-12. Fixing exploits
-13. Locating public exploits
-14. Linux privilege escalation
-15. Port redirection and SSH tunneling
-16. Tunneling through deep packet inspectation
-17. The metassploit framework
-18. Active directory introduction and enumeration
-19. Attacking active drectiory authentication
-20. Lateral movement in active directory
-21. Assembling the pieces
+   - Fingerprinting Web Servers with Nmap
+     `sudo nmap -p80 -sV 192.168.50.20`: grab the web server banner
+     `sudo nmap -p80 --script=http-enum 192.168.50.20`: fingerprint web server
+   - [Wappalyzer](): technology stack
+   - [Gobuster](): wordlists to discover directories and files
+     `obuster dir -u 192.168.50.20 -w /usr/share/wordlists/dirb/common.txt -t5`  
+   - Burp Suite. _Note:Only http traffic, no cert install_
+10. SQL injection attacks
+11. Client-site attacks
+12. Antivirus evasion
+13. Fixing exploits
+14. Locating public exploits
+15. Linux privilege escalation
+16. Port redirection and SSH tunneling
+17. Tunneling through deep packet inspectation
+18. The metassploit framework
+19. Active directory introduction and enumeration
+20. Attacking active drectiory authentication
+21. Lateral movement in active directory
+22. Assembling the pieces
 
 ## PWK-200 labs
 ### Information gathering
