@@ -93,7 +93,7 @@
        
      Patch Management  
      Windows and Ubuntu operating systems that are not up to date wereidentified. These are shown to be vulnerable to publicly-availableexploits and could result in malicious execution of code, theftof sensitive information, or cause denial of services which        mayimpact the infrastructure. Using outdated applications increases thepossibility of an intruder gaining unauthorized access by exploitingknown vulnerabilities. Patch management ought to be improved andupdates should be applied in conjunction with change      management.
-    - **technical findings and recommendation** (what vulnerability is + why dangerous + outcome + steps to exploit)
+    - **technical findings and recommendation** (what vulnerability is + why dangerous + outcome + steps to exploit)  
       <img src="https://github.com/xasyhack/oscp2025/blob/main/images/Table%202%20-%20Findings%20and%20Recommendations.png" alt="Alt text" width="400"/>  
       affected URL/endpoint + method of triggering the vulnerability  
     - **appendices**: articles, reference
@@ -113,6 +113,7 @@
 2. Windows privilege escalation
 3. Common web application attacks
 4. Information gathering
+   **Passive**
    - **OSINT**: public available info of a target
    - **Whois**: domain name info  
      `whois megacorpone.com -h 192.168.50.251`: lookup personnel contact, name server  
@@ -128,6 +129,11 @@
    - **open-source code** search (small repo:[GitHub](https://github.com/), [GitHub Gist](https://gist.github.com/), [GitLab](https://about.gitlab.com/), [SourceForge](https://sourceforge.net/). larger repos: [Gitrob](https://github.com/michenriksen/gitrob), [Gitleaks](https://github.com/zricethezav/gitleaks))  
      `./gitleaks dir /home/kali/offsec/megacorpone.com/megacorpone -v`: scans for API keys, private keys, credentials
    - [Shodan](https://www.shodan.io/): search engine for internet-connected devices to discover servers, devices, DBs, IoT
+   - [security headers and SSL/TLS](https://securityheaders.com/)
+   - [Qualys SSL Labs](https://www.ssllabs.com/ssltest/)
+   - LLM: chatGPT prompt; can you provide the best 20 google dorks for megacorpone.com website tailored for a penetration test; Retrieve the technology stack of the megacorpone.com website
+
+     **Active**
    - **nmap**  
      `nmap -sVC -p- -v -T4 -sT --open IP_ADDRESS -oN results`: scans all open 65535 TCP ports  
      `sudo nmap -sU -p 1-1024 -v IP_ADDRESS -oA results_UDP`: scans 1-1024 common UDP ports  
@@ -143,8 +149,6 @@
       | `--open`     | Shows **only open ports**, hides closed or filtered ports                   |
       | `IP_ADDRESS` | Target IP address to scan (replace with actual target)                      |
       | `-oN results`| Saves output in **normal format** to a file named `results`                 |
-
-   - dd
 6. Vulnerability scanning
 7. Windows privilege escalation
 8. Introduction to web applcation attacks
