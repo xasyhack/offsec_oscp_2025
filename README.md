@@ -150,8 +150,8 @@
    - Fingerprinting Web Servers with Nmap
      `sudo nmap -p80 -sV 192.168.50.20`: grab the web server banner
      `sudo nmap -p80 --script=http-enum 192.168.50.20`: fingerprint web server
-   - [Wappalyzer](): technology stack
-   - [Gobuster](): wordlists to discover directories and files
+   - [Wappalyzer](https://www.wappalyzer.com/): technology stack
+   - [Gobuster](https://www.kali.org/tools/gobuster/): wordlists to discover directories and files
      `obuster dir -u 192.168.50.20 -w /usr/share/wordlists/dirb/common.txt -t5`  
    - Burp Suite
      - Only http traffic, no cert install_, enable_intercept(forward or drop), proxy listerner on localhost:8080
