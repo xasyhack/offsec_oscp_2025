@@ -75,7 +75,7 @@
    - [Datanyze](),6sense(): web tech stack response
 
    **Active**
-   - DNS (friendly domain names to IP)
+   - **DNS (friendly domain names to IP)**
      - NS (authoritative server), A (IPv4), AAAA (Ipv6), MX (Main exchange), PTR (reverse lookup zones), CNAME (alias for other host records), TXT (domain ownershiip verification)
      - `host www.megacorpone.com`: use host to find IP/A record
      - `host -t mx www.megacorpone.com`: use -t to find other record types  
@@ -86,6 +86,30 @@
      - `dnsrecon -d megacorpone.com -t std`: automate DNS enumeration (domain name + standard type enumeration)
      - `dnsrecon -d megacorpone.com -D ~/list.txt -t brt`: brute force hostname by dnsrecon
      - `dnsenum megacorpone.com`: automate DNS enumeration
+     - `xfreerdp /u:student /p:lab /v:192.168.50.152`: rdp login
+     - `nslookup mail.megacorptwo.com`: use nslookup to enumerate host
+     - `nslookup -type=TXT info.megacorptwo.com 192.168.50.151`: use nslookup to query more info
+   - **TCP/UDP port scan**
+     - `nc -nvv -w 1 -z 192.168.50.152 3388-3390`: netcat TCP port scan
+     - `nc -nv -u -z -w 1 192.168.50.149 120-123`: netcat UDP port scan
+     - `nmap 192.168.50.149`: default 1000 ports scan
+     - `sudo nmap -sS 192.168.50.149`: SYN/stealth scan
+     - `nmap -sT 192.168.50.149`: TCP connect scan
+     - `sudo nmap -sU 192.168.50.149`: UDP scan
+     - `sudo nmap -sU -sS 192.168.50.149`: UDP + SYN scan (reveal additional open UDP ports)
+     - `nmap -sn 192.168.50.1-253`: network sweep for large volumes of hosts. 
+     - `nmap -v -sn 192.168.50.1-253 -oG ping-sweep.txt` `grep Up ping-sweep.txt | cut -d " " -f 2`: grep live host
+     - `nmap -p 80 192.168.50.1-253 -oG web-sweep.txt`: scan for port 80
+     - `nmap -sT -A --top-ports=20 192.168.50.1-253 -oG top-port-sweep.txt`: scan multiple IPs
+     - `cat /usr/share/nmap/nmap-services`: show open frequency
+     - `sudo nmap -O 192.168.50.14 --osscan-guess`: OS finger printing
+     - `nmap -sT -A 192.168.50.14`: banner grabbing and/or service enumeration
+     - `nmap --script http-headers 192.168.50.6`: nmap’s scripting engine (NSE) for OS fingerprinting
+     - `Test-NetConnection -Port 445 192.168.50.151`: Port scanning SMB via PowerShell. Result returns TcpTestSucceeded : True
+     - `1..1024 | % {echo ((New-Object Net.Sockets.TcpClient).Connect("192.168.50.151", $_)) "TCP port $_ is open"} 2>$null`: Automating the PowerShell portscanning****
+   - **SMB Enumeration**
+   - **SMTP Enumeration**
+   - **SNMP Enumeration**
    - **nmap**  
      `nmap -sVC -p- -v -T4 -sT --open IP_ADDRESS -oN results`: scans all open 65535 TCP ports  
      `sudo nmap -sU -p 1-1024 -v IP_ADDRESS -oA results_UDP`: scans 1-1024 common UDP ports  
@@ -101,6 +125,12 @@
       | `--open`     | Shows **only open ports**, hides closed or filtered ports                   |
       | `IP_ADDRESS` | Target IP address to scan (replace with actual target)                      |
       | `-oN results`| Saves output in **normal format** to a file named `results`                 |
+
+  **LLM Passive Information Gathering**
+  - ddd
+  - ddd
+  - ddd
+    
 8. Vulnerability scanning
 9. Introduction to web applcation attacks
    - Fingerprinting Web Servers with Nmap
