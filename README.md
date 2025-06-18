@@ -1,12 +1,13 @@
 ## 📑 Table of Contents
 
 - [Resources](#resources)
-- [Kali setup](#kali-setup)
-- [Penetration testing stages](#penetration-testing-stages)
-- [Penetration testing report](#penetration-testing-report)
+- [Methodology](#methodology)
 - [PWK-200 syallabus](#pwk-200-syallabus)
 - [PWK-200 labs](#pwk-200-labs)  
   - [Information gathering](#information-gathering)
+- [Penetration testing report](#penetration-testing-report)
+- [Penetration testing stages](#penetration-testing-stages)
+- [Kali setup](#kali-setup)
 
 ## 📚 Resources
 - [OffSec student portal](https://help.offsec.com/hc/en-us/articles/9550819362964-Connectivity-Guide) 
@@ -17,7 +18,40 @@
   - Credentials (🔒 username:Eric.Wallows, password:EricLikesRunning800)
   - Flag format: `OS{68c1a60008e872f3b525407de04e48a3}`
 
-## Methodology/Playbook
+## Methodology 
+
+## Protocols login
+| Protocol        | Port    | Tool                | Kali 2025 Login Command Example                                                                                      |
+|-----------------|---------|---------------------|----------------------------------------------------------------------------------------------------------------------|
+| **SSH**         | 22      | `ssh`               | `ssh user@10.10.10.10`                                                                                                |
+|                 |         | `hydra`             | `hydra -l admin -P /usr/share/wordlists/rockyou.txt ssh://10.10.10.10`                                               |
+| **FTP**         | 21      | `ftp`               | `ftp 10.10.10.10`                                                                                                    |
+|                 |         | `hydra`             | `hydra -l anonymous -p '' ftp://10.10.10.10`                                                                         |
+| **Telnet**      | 23      | `telnet`            | `telnet 10.10.10.10`                                                                                                 |
+|                 |         | `hydra`             | `hydra -l root -P /usr/share/wordlists/rockyou.txt telnet://10.10.10.10`                                              |
+| **HTTP(S)**     | 80/443  | `hydra`             | `hydra -l admin -P /usr/share/wordlists/rockyou.txt 10.10.10.10 http-post-form "/login.php:user=^USER^&pass=^PASS^:F=Incorrect"` |
+| **SMB**         | 445     | `smbclient`         | `smbclient -L //10.10.10.10 -U user%password`                                                                         |
+|                 |         | `smbmap`            | `smbmap -H 10.10.10.10 -u user -p password`                                                                           |
+|                 |         | `crackmapexec`      | `crackmapexec smb 10.10.10.10 -u user -p password`                                                                    |
+| **RDP**         | 3389    | `xfreerdp`          | `xfreerdp /v:10.10.10.10 /u:user /p:Pass123 /cert-ignore`                                                             |
+|                 |         |                     | `xfreerdp /v:10.10.10.10 /u:user /pth:0123456789ABCDEF0123456789ABCDEF /cert-ignore`                                  |
+| **WinRM**       | 5985    | `evil-winrm`        | `evil-winrm -i 10.10.10.10 -u Administrator -p Pass123`                                                               |
+|                 |         |                     | `evil-winrm -i 10.10.10.10 -u Administrator -H AABBCCDDEEFF00112233445566778899`                                        |
+|                 |         |                     | `evil-winrm -i 10.10.10.10 -u Administrator -p Pass123 -S`  (SSL mode)                                                 |
+| **MySQL**       | 3306    | `mysql`             | `mysql -h 10.10.10.10 -u root -p`                                                                                      |
+| **PostgreSQL**  | 5432    | `psql`              | `psql -h 10.10.10.10 -U postgres`                                                                                      |
+| **MSSQL**       | 1433    | `impacket-mssqlclient.py` | `mssqlclient.py user@10.10.10.10 -windows-auth`                                                                    |
+|                 |         |                     | `mssqlclient.py user@10.10.10.10 -windows-auth -hashes :<NTLM_HASH>`                                                   |
+| **VNC**         | 5900    | `vncviewer`         | `vncviewer 10.10.10.10:5900`                                                                                           |
+|                 |         | `hydra`             | `hydra -P /usr/share/wordlists/rockyou.txt -t 4 vnc://10.10.10.10`                                                    |
+| **POP3**        | 110     | `hydra`             | `hydra -l user -P /usr/share/wordlists/rockyou.txt pop3://10.10.10.10`                                                 |
+| **IMAP**        | 143     | `hydra`             | `hydra -l user -P /usr/share/wordlists/rockyou.txt imap://10.10.10.10`                                                 |
+| **LDAP**        | 389     | `ldapsearch`        | `ldapsearch -x -h 10.10.10.10 -b "dc=example,dc=local"`                                                                |
+| **SNMP**        | 161     | `snmpwalk`          | `snmpwalk -v2c -c public 10.10.10.10`                                                                                   |
+| **NFS**         | 2049    | `showmount`         | `showmount -e 10.10.10.10`                                                                                             |
+|                 |         | `mount`             | `mount -t nfs 10.10.10.10:/share /mnt`                                                                                 |
+
+
 ## 🛠️ Kali setup
 1. Register [Broadcom account](https://profile.broadcom.com/web/registration)
 1. Download "VMware Workstation Pro"
@@ -58,55 +92,7 @@
     - Stores AD data for querying & analysis: Neo4j  
       `sudo neo4j console`
 
-## Penetration testing report 
-- note editor:
-  - [Sublime-syntax highlight](https://www.sublimetext.com/download)
-  - [CherryTree Kali](https://github.com/giuspen/cherrytree)
-  - [Obsidian-markdown editor](https://obsidian.md/)
-- taking screenshots:
-  - snipping tool （win:win+shift+S. Linux:shift+print screen)
-  - [flameshot](https://github.com/flameshot-org/flameshot)
-- penetration testing notes: application name, URL, request type, issue detail, proof of concept payload  
-- effective penetration testing report
-  - purpose: highlights all the present flaws, remediation, scope
-  - tailor for audience:  
-    - **c-suite**: scope + timeframeout, rules of engagement + methodology + executive summary (impact/work-case scenario, trends, strategic advise)  
-     **--engagement**    
-     The Client hired OffSec to conduct a penetration test of their kali.org web application in October of 2025. The test was conducted from a remote IP between the hours of 9 AM and 5 PM, with no users provided by the Client."  
-     **--positives**    
-     The application had many forms of hardening in place. First, OffSec was unable toupload malicious files due to the strong filteringin place. OffSec was also unable to brute force user accountsbecause of the robust lockout policy in place. Finally, the strongpassword policy made trivial password attacks unlikely to succeed.This points to a commendable culture of user account protections    
-     **--vulnerabilities**    
-     However, there were still areas of concern within the application.OffSec was able to inject arbitrary JavaScript into the browser ofan unwitting victim that would then be run in the context of thatvictim. In conjunction with the username enumeration on the loginfield, there seems to be a trend of unsanitized user input compoundedby verbose error messages being returned to the user. This can leadto some impactful issues, such as password or session stealing. It isrecommended that all input and error messages that are returned to theuser be sanitized and made generic to prevent this class of issue fromcropping up.  
-     **--conclusion**    
-     These vulnerabilities and their remediations are described in moredetail below. Should any questions arise, OffSec is happyto provide further advice and remediation help
-    - **technical staff/summary**: technical detail + impact + remediation    
-      - User and Privilege Management
-      - Architecture
-      - Authorization
-      - Patch Management
-      - Integrity and Signatures
-      - Authentication
-      - Access Control
-      - Audit, Log Management and Monitoring
-      - Traffic and Data Encryption
-      - Security Misconfigurations
-       
-     Patch Management  
-     Windows and Ubuntu operating systems that are not up to date wereidentified. These are shown to be vulnerable to publicly-availableexploits and could result in malicious execution of code, theftof sensitive information, or cause denial of services which        mayimpact the infrastructure. Using outdated applications increases thepossibility of an intruder gaining unauthorized access by exploitingknown vulnerabilities. Patch management ought to be improved andupdates should be applied in conjunction with change      management.
-    - **technical findings and recommendation** (what vulnerability is + why dangerous + outcome + steps to exploit)  
-      <img src="https://github.com/xasyhack/oscp2025/blob/main/images/Table%202%20-%20Findings%20and%20Recommendations.png" alt="Alt text" width="400"/>  
-      affected URL/endpoint + method of triggering the vulnerability  
-    - **appendices**: articles, reference
 
-## Penetration testing stages
-1. scope: IP range, hosts, applications
-1. info gathering (passive or active): org infra, assets, personnel
-1. vulnerability detection
-1. initial foothold
-1. privilege escalation
-1. lateral movement
-1. report
-1. remediation
 
 ## PWK-200 syallabus
 6. Information gathering
@@ -128,9 +114,21 @@
    - [Shodan](https://www.shodan.io/): search engine for internet-connected devices to discover servers, devices, DBs, IoT
    - [security headers and SSL/TLS](https://securityheaders.com/)
    - [Qualys SSL Labs](https://www.ssllabs.com/ssltest/)
-   - LLM: chatGPT prompt; can you provide the best 20 google dorks for megacorpone.com website tailored for a penetration test; Retrieve the technology stack of the megacorpone.com website
+   - LLM: chatGPT prompt; can you provide the best 20 google dorks for megacorpone.com website tailored for a penetration test; Retrieve the technology stack of the megacorpone.com website; 20 Google dorks aimed to our target website
+   - [Datanyze](),6sense(): web tech stack response
 
-     **Active**
+   **Active**
+   - DNS (friendly domain names to IP)
+     - NS (authoritative server), A (IPv4), AAAA (Ipv6), MX (Main exchange), PTR (reverse lookup zones), CNAME (alias for other host records), TXT (domain ownershiip verification)
+     - `host www.megacorpone.com`: use host to find IP/A record
+     - `host -t mx www.megacorpone.com`: use -t to find other record types  
+     - `host -t txt megacorpone.com`: find more info  
+     - `host idontexist.megacorpone.com`: use host to search invalid host
+     - `for ip in $(cat /usr/share/seclists); do host $ip.megacorpone.com; done`: find possible hostname. Note: `sudo apt install seclists`
+     - `for ip in $(seq 200 254); do host 51.222.169.$ip; done | grep -v "not found"`: using reverse DNS lookups to scan IP 51.122.169.200-254 and filter out not found results
+     - `dnsrecon -d megacorpone.com -t std`: automate DNS enumeration (domain name + standard type enumeration)
+     - `dnsrecon -d megacorpone.com -D ~/list.txt -t brt`: brute force hostname by dnsrecon
+     - `dnsenum megacorpone.com`: automate DNS enumeration
    - **nmap**  
      `nmap -sVC -p- -v -T4 -sT --open IP_ADDRESS -oN results`: scans all open 65535 TCP ports  
      `sudo nmap -sU -p 1-1024 -v IP_ADDRESS -oA results_UDP`: scans 1-1024 common UDP ports  
@@ -146,8 +144,8 @@
       | `--open`     | Shows **only open ports**, hides closed or filtered ports                   |
       | `IP_ADDRESS` | Target IP address to scan (replace with actual target)                      |
       | `-oN results`| Saves output in **normal format** to a file named `results`                 |
-7. Vulnerability scanning
-8. Introduction to web applcation attacks
+8. Vulnerability scanning
+9. Introduction to web applcation attacks
    - Fingerprinting Web Servers with Nmap
      `sudo nmap -p80 -sV 192.168.50.20`: grab the web server banner
      `sudo nmap -p80 --script=http-enum 192.168.50.20`: fingerprint web server
@@ -188,7 +186,7 @@
       -d '{"password": "pwned"}'
       ```
    - dd
-9. Common Web Application attacks
+10. Common Web Application attacks
     - **Directory traversal**: access files outside of the web root by using relative paths
       - absolute path: `cat /home/kali/etc/passwd`  
       - relative path: `cat ../../etc/pwd`: move 2 directories back to root file
@@ -200,13 +198,13 @@
     - File inclusion vulnerabilities
     - File upload vulnerabilities
     - Command injection
-10. SQL injection attacks
-11. Phishing Basics
-12. Client-site attacks
-13. Locating public exploits
-14. Fixing exploits
-15. Antivirus evasion
-16. Password attacks
+11. SQL injection attacks
+12. Phishing Basics
+13. Client-site attacks
+14. Locating public exploits
+15. Fixing exploits
+16. Antivirus evasion
+17. Password attacks
     - confirm ssh service running
       `sudo nmap -sV -p 2222 192.168.50.201`
     - unzip rockyou
@@ -218,7 +216,7 @@
     - ddd
     - ddd
     - ddd
-17. Windows Privilege Escalation
+18. Windows Privilege Escalation
     - Goal: bypass UAC to execute at high integrity (admin member does not mean run with high integrity)
     - Enumeration
       - username, hostname: `whoami`
@@ -294,5 +292,54 @@
   
 - 16.2.1
 
+## Penetration testing report 
+- note editor:
+  - [Sublime-syntax highlight](https://www.sublimetext.com/download)
+  - [CherryTree Kali](https://github.com/giuspen/cherrytree)
+  - [Obsidian-markdown editor](https://obsidian.md/)
+- taking screenshots:
+  - snipping tool （win:win+shift+S. Linux:shift+print screen)
+  - [flameshot](https://github.com/flameshot-org/flameshot)
+- penetration testing notes: application name, URL, request type, issue detail, proof of concept payload  
+- effective penetration testing report
+  - purpose: highlights all the present flaws, remediation, scope
+  - tailor for audience:  
+    - **c-suite**: scope + timeframeout, rules of engagement + methodology + executive summary (impact/work-case scenario, trends, strategic advise)  
+     **--engagement**    
+     The Client hired OffSec to conduct a penetration test of their kali.org web application in October of 2025. The test was conducted from a remote IP between the hours of 9 AM and 5 PM, with no users provided by the Client."  
+     **--positives**    
+     The application had many forms of hardening in place. First, OffSec was unable toupload malicious files due to the strong filteringin place. OffSec was also unable to brute force user accountsbecause of the robust lockout policy in place. Finally, the strongpassword policy made trivial password attacks unlikely to succeed.This points to a commendable culture of user account protections    
+     **--vulnerabilities**    
+     However, there were still areas of concern within the application.OffSec was able to inject arbitrary JavaScript into the browser ofan unwitting victim that would then be run in the context of thatvictim. In conjunction with the username enumeration on the loginfield, there seems to be a trend of unsanitized user input compoundedby verbose error messages being returned to the user. This can leadto some impactful issues, such as password or session stealing. It isrecommended that all input and error messages that are returned to theuser be sanitized and made generic to prevent this class of issue fromcropping up.  
+     **--conclusion**    
+     These vulnerabilities and their remediations are described in moredetail below. Should any questions arise, OffSec is happyto provide further advice and remediation help
+    - **technical staff/summary**: technical detail + impact + remediation    
+      - User and Privilege Management
+      - Architecture
+      - Authorization
+      - Patch Management
+      - Integrity and Signatures
+      - Authentication
+      - Access Control
+      - Audit, Log Management and Monitoring
+      - Traffic and Data Encryption
+      - Security Misconfigurations
+       
+     Patch Management  
+     Windows and Ubuntu operating systems that are not up to date wereidentified. These are shown to be vulnerable to publicly-availableexploits and could result in malicious execution of code, theftof sensitive information, or cause denial of services which        mayimpact the infrastructure. Using outdated applications increases thepossibility of an intruder gaining unauthorized access by exploitingknown vulnerabilities. Patch management ought to be improved andupdates should be applied in conjunction with change      management.
+    - **technical findings and recommendation** (what vulnerability is + why dangerous + outcome + steps to exploit)  
+      <img src="https://github.com/xasyhack/oscp2025/blob/main/images/Table%202%20-%20Findings%20and%20Recommendations.png" alt="Alt text" width="400"/>  
+      affected URL/endpoint + method of triggering the vulnerability  
+    - **appendices**: articles, reference
+
+## Penetration testing stages
+1. scope: IP range, hosts, applications
+1. info gathering (passive or active): org infra, assets, personnel
+1. vulnerability detection
+1. initial foothold
+1. privilege escalation
+1. lateral movement
+1. report
+1. remediation
 
 
