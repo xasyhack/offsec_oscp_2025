@@ -218,7 +218,30 @@
     - ddd
     - ddd
     - ddd
-18. Windows Privilege Escalation
+17. Windows Privilege Escalation
+    - Goal: bypass UAC to execute at high integrity (admin member does not mean run with high integrity)
+    - Enumeration
+      - username, hostname: `whoami`
+      - existing users & groups: `whoami /groups`
+      - enumerate the existing groups of user: `Get-LocalGroup` (powershell)
+      - other users and groups: `Get-LocalUser` (powershell)
+      - review the group member: `Get-LocalGroupMember adminteam`
+      - OS, version, architecture, network info, installed apps, running processes
+    - 
+    - Security Identifier (SID)
+      - Local Security Authority (LSA) - local users
+      - Domain Controller (DC) - domain users
+      - Format: S-1-5-21-3623811015-3361044348-30300820-1013
+      - RID (last digit of SID): 500 (admin), 501 (guest), 1000+ (normal user), 512 (domain admins), 513 (domain users)
+      - S-1-0-0 (nobody), S-1-1-0 (everybody), S-1-5-11 (authenticated users), S-1-5-18 (local system), S-1-5-domainidentifier-500 (administrator)
+    - access token
+      - primary token: specify permission sets  
+      - impersonation token  
+    - Mandatory Integrity Control
+      - integrity levels: system (kernel), high (admin), medium (standard), low (restricted). Process explorer can see the integrity level.
+    - User Account Control
+      - standard user token (non-privileged operations)
+      - administrator token (require UCA concent prompt)
 19. Linux privilege escalation
 20. Port redirection and SSH tunneling
 21. Tunneling through deep packet inspectation
