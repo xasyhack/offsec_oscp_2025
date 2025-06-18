@@ -8,8 +8,11 @@
 - [Penetration testing report](#penetration-testing-report)
 - [Penetration testing stages](#penetration-testing-stages)
 - [Kali setup](#kali-setup)
+- [Recommended OSCP Cracking Tools & Usage (2025)](#recommended-oscp-cracking-tools-&-usage-(2025))
+- [OSCP Pro Tips](#oscp-pro-tips)
+- 
 
-## 📚 Resources
+## Resources
 - [OffSec student portal](https://help.offsec.com/hc/en-us/articles/9550819362964-Connectivity-Guide) 
 - [OffSec Discord](https://discord.gg/offsec)
   - OffSec portal > Explorer > Discord > link OffSec account to discord
@@ -329,7 +332,7 @@
 1. report
 1. remediation
 
-## 🛠️ Kali setup
+## Kali setup
 1. Register [Broadcom account](https://profile.broadcom.com/web/registration)
 1. Download "VMware Workstation Pro"
 1. Download [Kali VM](https://help.offsec.com/hc/en-us/articles/360049796792-Kali-Linux-Virtual-Machine)
