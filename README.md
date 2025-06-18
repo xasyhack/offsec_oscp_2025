@@ -7,9 +7,9 @@
   - [Information gathering](#information-gathering)
 - [Penetration testing report](#penetration-testing-report)
 - [Penetration testing stages](#penetration-testing-stages)
-- [Kali setup](#kali-setup)
 - [Recommended OSCP Cracking Tools & Usage (2025)](#recommended-oscp-cracking-tools--usage-2025)
 - [OSCP Pro Tips](#oscp-pro-tips)
+- [Kali setup](#kali-setup)
 
 ## Resources
 - [OffSec student portal](https://help.offsec.com/hc/en-us/articles/9550819362964-Connectivity-Guide) 
@@ -331,46 +331,6 @@
 1. report
 1. remediation
 
-## Kali setup
-1. Register [Broadcom account](https://profile.broadcom.com/web/registration)
-1. Download "VMware Workstation Pro"
-1. Download [Kali VM](https://help.offsec.com/hc/en-us/articles/360049796792-Kali-Linux-Virtual-Machine)
-1. Launching the VM (browse the .vmx file)
-1. Login kali (🔒 username:kali, password:kali)
-1. Kali terminal `sudo updatedb`
-1. Download VPNs from OffSec portal (Explorer > VPN)
-1. Connect to PWK Lab
-   - `locate universal.ovpn`
-   - `cd /home/kali/Downloads`
-   - `mkdir /home/kali/offsec`
-   - `mv universal.ovpn /home/kali/offsec/universal.ovpn`
-   - `cd ../offsec`
-   - `sudo openvpn universal.ovpn`
-   - output reads "Initialization Sequence Completed"
-   - disconnect VPN by pressing Ctrl+C
-1. Package install
-   - `sudo apt update`
-   - `sudo apt install golang`
- 1. Recommended software
-    - Notetaking: [notion.so](http://notion.so)  or Obsidian
-    - Scanning tool: [Rustscan](https://github.com/RustScan/RustScan/releases)  
-      `dpkg -i rustscan_2.3.0_amd64.deb`
-    - file upload/transfer purpose: Updog    
-      ```  
-      pip3 install updog  
-      export PATH="/home/kali/.local/bin:$PATH"
-      ```
-    - Privilege Escalation: peass  
-      `sudo apt install peass`
-    - DNS: Gobuster  
-      `sudo apt install gobuster`
-    - Hosting a WebDAV share (for exploits, exfil, or testing): WsgiDAV  
-      `sudo apt install wsgidav`
-    - Lateral movement / privilege escalation: Bloodhound  
-      `sudo apt update && sudo apt install -y bloodhound`
-    - Stores AD data for querying & analysis: Neo4j  
-      `sudo neo4j console`
-
 ## Recommended OSCP Cracking Tools & Usage (2025)
 | Tool              | Purpose                                  | Sample Command | Info / Output |
 |------------------|------------------------------------------|----------------|----------------|
@@ -490,3 +450,43 @@
 | `cherrytree`      | Reporting and note keeping            | GUI |
 | `keepnote`        | Note organization                     | GUI |
 | `rm`, `Clear-EventLog` | Clean traces (if allowed)        | Manual cleanup |
+
+## Kali setup
+1. Register [Broadcom account](https://profile.broadcom.com/web/registration)
+1. Download "VMware Workstation Pro"
+1. Download [Kali VM](https://help.offsec.com/hc/en-us/articles/360049796792-Kali-Linux-Virtual-Machine)
+1. Launching the VM (browse the .vmx file)
+1. Login kali (🔒 username:kali, password:kali)
+1. Kali terminal `sudo updatedb`
+1. Download VPNs from OffSec portal (Explorer > VPN)
+1. Connect to PWK Lab
+   - `locate universal.ovpn`
+   - `cd /home/kali/Downloads`
+   - `mkdir /home/kali/offsec`
+   - `mv universal.ovpn /home/kali/offsec/universal.ovpn`
+   - `cd ../offsec`
+   - `sudo openvpn universal.ovpn`
+   - output reads "Initialization Sequence Completed"
+   - disconnect VPN by pressing Ctrl+C
+1. Package install
+   - `sudo apt update`
+   - `sudo apt install golang`
+ 1. Recommended software
+    - Notetaking: [notion.so](http://notion.so)  or Obsidian
+    - Scanning tool: [Rustscan](https://github.com/RustScan/RustScan/releases)  
+      `dpkg -i rustscan_2.3.0_amd64.deb`
+    - file upload/transfer purpose: Updog    
+      ```  
+      pip3 install updog  
+      export PATH="/home/kali/.local/bin:$PATH"
+      ```
+    - Privilege Escalation: peass  
+      `sudo apt install peass`
+    - DNS: Gobuster  
+      `sudo apt install gobuster`
+    - Hosting a WebDAV share (for exploits, exfil, or testing): WsgiDAV  
+      `sudo apt install wsgidav`
+    - Lateral movement / privilege escalation: Bloodhound  
+      `sudo apt update && sudo apt install -y bloodhound`
+    - Stores AD data for querying & analysis: Neo4j  
+      `sudo neo4j console`
