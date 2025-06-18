@@ -51,49 +51,6 @@
 | **NFS**         | 2049    | `showmount`         | `showmount -e 10.10.10.10`                                                                                             |
 |                 |         | `mount`             | `mount -t nfs 10.10.10.10:/share /mnt`                                                                                 |
 
-
-## 🛠️ Kali setup
-1. Register [Broadcom account](https://profile.broadcom.com/web/registration)
-1. Download "VMware Workstation Pro"
-1. Download [Kali VM](https://help.offsec.com/hc/en-us/articles/360049796792-Kali-Linux-Virtual-Machine)
-1. Launching the VM (browse the .vmx file)
-1. Login kali (🔒 username:kali, password:kali)
-1. Kali terminal `sudo updatedb`
-1. Download VPNs from OffSec portal (Explorer > VPN)
-1. Connect to PWK Lab
-   - `locate universal.ovpn`
-   - `cd /home/kali/Downloads`
-   - `mkdir /home/kali/offsec`
-   - `mv universal.ovpn /home/kali/offsec/universal.ovpn`
-   - `cd ../offsec`
-   - `sudo openvpn universal.ovpn`
-   - output reads "Initialization Sequence Completed"
-   - disconnect VPN by pressing Ctrl+C
-1. Package install
-   - `sudo apt update`
-   - `sudo apt install golang`
- 1. Recommended software
-    - Notetaking: [notion.so](http://notion.so)  or Obsidian
-    - Scanning tool: [Rustscan](https://github.com/RustScan/RustScan/releases)  
-      `dpkg -i rustscan_2.3.0_amd64.deb`
-    - file upload/transfer purpose: Updog    
-      ```  
-      pip3 install updog  
-      export PATH="/home/kali/.local/bin:$PATH"
-      ```
-    - Privilege Escalation: peass  
-      `sudo apt install peass`
-    - DNS: Gobuster  
-      `sudo apt install gobuster`
-    - Hosting a WebDAV share (for exploits, exfil, or testing): WsgiDAV  
-      `sudo apt install wsgidav`
-    - Lateral movement / privilege escalation: Bloodhound  
-      `sudo apt update && sudo apt install -y bloodhound`
-    - Stores AD data for querying & analysis: Neo4j  
-      `sudo neo4j console`
-
-
-
 ## PWK-200 syallabus
 6. Information gathering
    **Passive**
@@ -342,4 +299,64 @@
 1. report
 1. remediation
 
+## 🛠️ Kali setup
+1. Register [Broadcom account](https://profile.broadcom.com/web/registration)
+1. Download "VMware Workstation Pro"
+1. Download [Kali VM](https://help.offsec.com/hc/en-us/articles/360049796792-Kali-Linux-Virtual-Machine)
+1. Launching the VM (browse the .vmx file)
+1. Login kali (🔒 username:kali, password:kali)
+1. Kali terminal `sudo updatedb`
+1. Download VPNs from OffSec portal (Explorer > VPN)
+1. Connect to PWK Lab
+   - `locate universal.ovpn`
+   - `cd /home/kali/Downloads`
+   - `mkdir /home/kali/offsec`
+   - `mv universal.ovpn /home/kali/offsec/universal.ovpn`
+   - `cd ../offsec`
+   - `sudo openvpn universal.ovpn`
+   - output reads "Initialization Sequence Completed"
+   - disconnect VPN by pressing Ctrl+C
+1. Package install
+   - `sudo apt update`
+   - `sudo apt install golang`
+ 1. Recommended software
+    - Notetaking: [notion.so](http://notion.so)  or Obsidian
+    - Scanning tool: [Rustscan](https://github.com/RustScan/RustScan/releases)  
+      `dpkg -i rustscan_2.3.0_amd64.deb`
+    - file upload/transfer purpose: Updog    
+      ```  
+      pip3 install updog  
+      export PATH="/home/kali/.local/bin:$PATH"
+      ```
+    - Privilege Escalation: peass  
+      `sudo apt install peass`
+    - DNS: Gobuster  
+      `sudo apt install gobuster`
+    - Hosting a WebDAV share (for exploits, exfil, or testing): WsgiDAV  
+      `sudo apt install wsgidav`
+    - Lateral movement / privilege escalation: Bloodhound  
+      `sudo apt update && sudo apt install -y bloodhound`
+    - Stores AD data for querying & analysis: Neo4j  
+      `sudo neo4j console`
 
+## Recommended OSCP Cracking Tools & Usage (2025)
+| Tool              | Purpose                                  | Sample Command |
+|------------------|------------------------------------------|----------------|
+| **Hydra**         | Brute-force login to services (SSH, FTP, etc.) | `hydra -l admin -P /usr/share/wordlists/rockyou.txt ssh://10.10.10.10` |
+| **John the Ripper** | Offline password hash cracking           | `john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt` |
+| **Hashcat**       | GPU-accelerated hash cracking             | `hashcat -m 1000 -a 0 hash.txt rockyou.txt` |
+| **Nmap**          | Network scan & service enumeration        | `nmap -sC -sV -oN scan.txt 10.10.10.10` |
+| **AutoRecon**     | Automated enumeration & scanning          | `autorecon 10.10.10.10` |
+| **Gobuster**      | Web directory brute-forcing               | `gobuster dir -u http://10.10.10.10 -w wordlist.txt` |
+| **Feroxbuster**   | Fast recursive content discovery          | `feroxbuster -u http://10.10.10.10 -w wordlist.txt` |
+| **WFuzz**         | Web fuzzing tool                          | `wfuzz -c -z file,rockyou.txt --hc 404 http://target/FUZZ` |
+| **Impacket**      | Windows SMB, RPC, MSSQL enumeration       | `wmiexec.py user:pass@10.10.10.10` |
+| **CrackMapExec**  | SMB + post-exploitation framework         | `crackmapexec smb 10.10.10.10 -u user -p pass` |
+| **Evil-WinRM**    | WinRM shell for Windows                   | `evil-winrm -i 10.10.10.10 -u admin -p pass123` |
+| **Metasploit**    | Exploits, payloads, post-exploitation     | `msfconsole` → use exploits |
+| **Responder**     | Capture NetNTLM hashes via LLMNR poisoning| `responder -I eth0` |
+| **Burp Suite**    | Web interception and vulnerability testing| GUI Tool |
+| **FFUF**          | Fast web content discovery                | `ffuf -u http://target/FUZZ -w wordlist.txt` |
+| **XFreeRDP**      | RDP client with hash support              | `xfreerdp /v:10.10.10.10 /u:user /pth:<NTLM_HASH> /cert-ignore` |
+| **LinPEAS**       | Linux local privilege escalation script   | `./linpeas.sh` |
+| **SecLists**      | Wordlists for brute-force/fuzzing         | Use with tools above 
