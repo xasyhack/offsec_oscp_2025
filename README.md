@@ -53,6 +53,71 @@
 | **NFS**         | 2049    | `showmount`         | `showmount -e 10.10.10.10`                                                                                             |
 |                 |         | `mount`             | `mount -t nfs 10.10.10.10:/share /mnt`                                                                                 |
 
+## OSCP Attack Vectors Checklist
+
+| Category               | Attack Vector / Tool                             | Description / Use Case                         |
+|------------------------|------------------------------------------------|-----------------------------------------------|
+| **Host Discovery**     | `ping`, `fping`, `arp-scan`, `nmap -sn`        | Identify live hosts on network                 |
+| **Port Scanning**      | `nmap -sS -sV -p-`, `rustscan`, `masscan`      | Discover open ports and running services       |
+| **Service Enumeration**| `enum4linux`, `smbclient`, `smbmap`, `ldapsearch`, `rpcclient`, `snmpwalk`, `nikto`, `wpscan`, `gobuster`, `feroxbuster` | Enumerate SMB, LDAP, SNMP, HTTP services and web content |
+| **Web Exploitation**   | SQL Injection (`sqlmap`), LFI/RFI, Command Injection, File Upload Bypass | Exploit web application vulnerabilities        |
+| **Common Service Exploits** | FTP (anonymous login), SMB (EternalBlue), MSSQL/MySQL (xp_cmdshell, UDF), Redis (unauthenticated write), RDP (bruteforce) | Service-specific exploitation techniques        |
+| **Tunneling & Pivoting**| SSH tunneling (`ssh -L/-R/-D`), tools like `chisel`, `ligolo`, `socat`, proxychains | Bypass network restrictions, access internal hosts |
+| **Priv Esc (Linux)**   | `sudo -l`, SUID binaries, kernel exploits (Dirty COW, Dirty Pipe), writable cron/systemd | Escalate privileges on Linux systems            |
+| **Priv Esc (Windows)** | AlwaysInstallElevated, Unquoted service paths, weak service perms, token impersonation (JuicyPotato) | Windows privilege escalation techniques          |
+| **Credential Hunting** | Extract hashes from `/etc/shadow`, SAM; check bash history, config files | Find credentials for lateral movement or privilege escalation |
+
+1. Host Discovery
+- `ping`, `fping`, `arp-scan`
+- `nmap -sn`
+
+2. Port Scanning
+- `nmap -sS -sV -p-`
+- `rustscan`, `masscan`
+
+3. Service Enumeration
+- SMB: `enum4linux`, `smbclient`, `smbmap`, `crackmapexec`
+- LDAP: `ldapsearch`, `ldapenum`
+- SNMP: `snmpwalk`
+- RPC: `rpcclient`
+- HTTP/Web: `nikto`, `whatweb`, `wpscan`, `gobuster`, `feroxbuster`
+
+4. Web Exploitation
+- SQL Injection (Error, Blind, Time-based): `sqlmap`, manual payloads
+- LFI/RFI and Path Traversal
+- Command Injection
+- File Upload Vulnerabilities
+- CSRF, XSS (less common for OSCP)
+
+5. Common Service Exploits
+- FTP: anonymous login, weak creds
+- SMB: EternalBlue, weak shares
+- MSSQL/MySQL: xp_cmdshell, UDF uploads
+- Redis: unauthenticated write
+- RDP: brute-force with `hydra`, `ncrack`
+
+6. Tunneling and Pivoting
+- SSH tunneling: `ssh -L`, `-R`, `-D`
+- Tools: `chisel`, `ligolo`, `socat`
+- Proxychains setup and usage
+
+7. Privilege Escalation (Linux)
+- `sudo -l`
+- SUID binaries
+- Kernel exploits (e.g., Dirty COW, Dirty Pipe)
+- Writable cron jobs / systemd services
+
+8. Privilege Escalation (Windows)
+- AlwaysInstallElevated policy
+- Unquoted service paths
+- Weak service permissions
+- Token impersonation exploits (JuicyPotato, RottenPotato, etc.)
+
+9. Credential Hunting
+- `/etc/passwd`, `/etc/shadow`, SAM
+- History files and config files
+- Scripts or backups with credentials
+- 
 ## PWK-200 syallabus
 6. Information gathering
    **Passive**
@@ -110,6 +175,8 @@
      - `Test-NetConnection -Port 445 192.168.50.151`: Port scanning SMB via PowerShell. Result returns TcpTestSucceeded : True
      - `1..1024 | % {echo ((New-Object Net.Sockets.TcpClient).Connect("192.168.50.151", $_)) "TCP port $_ is open"} 2>$null`: Automating the PowerShell portscanning****
    - **SMB Enumeration**
+     - `nmap -v -p 139,445 -oG smb.txt 192.168.50.1-254`: scan for the NetBIOS service
+     - `sudo nbtscan -r 192.168.50.0/24`: nbtscan to collect additional NetBIOS information
    - **SMTP Enumeration**
    - **SNMP Enumeration**
    - **nmap**  
