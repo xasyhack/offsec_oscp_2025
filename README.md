@@ -451,6 +451,20 @@
 | `keepnote`        | Note organization                     | GUI |
 | `rm`, `Clear-EventLog` | Clean traces (if allowed)        | Manual cleanup |
 
+## Port tunneling and port redirection 
+**Option 1: Port Redirection using socat (Simple)**
+Pivot machine A: socat TCP-LISTEN:8888,fork TCP:172.16.10.10:80
+Kali: curl http://10.10.10.5:8888
+
+**Option 2: SSH Tunneling - Local Forwarding (if SSH access on A)**
+kali: ssh -L 8888:172.16.10.10:80 user@10.10.10.5
+kali: curl http://localhost:8888
+
+**Option 3: Dynamic Proxy via SSH (SOCKS5)**
+kali: ssh -D 9050 user@10.10.10.5
+Edit /etc/proxychains.conf: socks5  127.0.0.1 9050
+kali: proxychains nmap -Pn -sT -p80 172.16.10.10
+
 ## Kali setup
 1. Register [Broadcom account](https://profile.broadcom.com/web/registration)
 1. Download "VMware Workstation Pro"
