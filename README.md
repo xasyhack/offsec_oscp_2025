@@ -219,7 +219,11 @@
   **LLM Passive Information Gathering**
   - Using public data from MegacorpOne's website and any information that can be inferred about its organizational structure, products, or services, generate a comprehensive list of potential subdomain names: DNS subdomain wordlist
   - `gobuster dns -d megacorpone.com -w wordlist.txt -t 10`: gobuster DNS subdomain enumeration with our LLM-generated wordlist
-  - ddd
+  - What is the WHOIS information for the domain megacorpone.com?" Based on the response, who is listed as the registrant of megacorpone.com?
+  - Can you generate the best Google dorks for the website megacorpone.com?
+  - What public information is available about the leadership of MegacorpOne.com and their social media presence?
+  - Can you provide the top Google dorks to search for exposed repositories related to megacorpone.com?
+  - 
     
 8. Vulnerability scanning
 9. Introduction to web applcation attacks
@@ -262,7 +266,7 @@
       -H 'Authorization: OAuth eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NDkyNzE3OTQsImlhdCI6MTY0OTI3MTQ5NCwic3ViIjoib2Zmc2VjIn0.OeZH1rEcrZ5F0QqLb IHbJI7f9KaRAkrywoaRUAsgA4' \
       -d '{"password": "pwned"}'
       ```
-   - dd
+    
 10. Common Web Application attacks
     - **Directory traversal**: access files outside of the web root by using relative paths
       - absolute path: `cat /home/kali/etc/passwd`  
