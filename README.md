@@ -354,8 +354,70 @@
   tags = ["password", "apache", "htpasswd"]
   ```
   `./gitleaks dir /home/kali/offsec/megacorpone.com/megacorpone -v -c=config/gitleaks.toml` (Leaks found on home/kali/offsec/megacorpone.com/megacorpone/xampp.users)  
-- 6.2.5 Shodan
-- 6.2.6 Security Headers and SSL/TLS
+- 6.4.1 DNS enumeration
+  - Perform a DNS enumeration on the MX records of megacorpone.com (lower priroty valid higher preference)  
+    `host -t mx megacorpone.com`  
+  - How many TXT records are associated with the megacorpone.com domain  
+    `host -t txt megacorpone.com`  
+  -  IP of the siem.megacorpone.com  
+     `dnsenum siem.megacorpone.com`  
+  -  RDP to win11 + enumerate megacorptwo.com and its subdomains through nslookup. TXT record of the info.megacorptwo.com domain
+     ```
+     xfreerdp3 /u:student /p:lab /v:192.168.165.152
+     nslookup megacorptwo.com 
+     nslookup -type=TXT info.megacorptwo.com 192.168.165.151
+     ```
+- 6.4.2 TCP/UDP Port scanning
+  - Netcat scan for port 1-1000 (show open port only)  
+    `nc -nvv -w 1 -z 192.168.165.151 1-1000 2>&1 | grep open`
+  - Netcat TCP port scan 1-10000 (show open port only)
+    `nc -nvv -w 1 -z 192.168.165.151 1-10000 2>&1 | grep open`
+  - Netcat UDP port scan
+    `nc -nv -u -z -w 1 192.168.165.151 150-200 2>&1 | grep open`
+- 6.4.3 Port scanning with Nmap
+  - SYN scan for /24 subnet + port 25 open  
+    `sudo nmap -sS -p 25 192.168.165.0/24 --open`  
+  - SYN scan for /24 subnet + port WHOIS open  
+    `sudo nmap -sT -p 43 192.168.165.0/24 --open`  
+  - RDP to win11 + TCP port discovery against windows DC, first 4 open TCP ports  
+    `xfreerdp3 /u:student /p:lab /v:192.168.165.152`  
+    `PS: 1..1024 | % {echo ((New-Object Net.Sockets.TcpClient).Connect("192.168.165.151", $_)) "TCP port $_ is open"} 2>$null`  
+  - TCP port scan 50000-60000 to identify the highest TCP port  
+    `sudo nmap -sT -p 50000-60000 192.168.165.52 --open`  
+    `nc 192.168.165.52 59811`  
+  - NSE website title and read the flag in index.html  
+    `sudo nmap -p 80,8080 --script=http-title 192.168.165.0/24`  
+    `curl http://192.168.165.6/index.html`  
+- 6.4.4 SMB enumeration
+  - nmap SMB (port 139, 445)
+    `nmap -v -p 445 --open -oG smb.txt 192.168.165.0/24`
+  - RDP Win11 + shares enumeration against dc01 via net view
+    `net view \\dc01 /all`  
+  - enum4linux for local users alfred
+    ```
+    sudo nmap -p 139,445 --open -oG smb_hosts.txt 192.168.165.0/24
+    grep "/open/" smb_hosts.txt | awk '{print $2}' > smb_targets.txt
+    enum4linux -a 192.168.165.13
+    ```
+- 6.4.5 SMTP enumeration
+  - search open SMTP, netcat on port 25, VRFY user 'root' and get the response code
+    ```
+    nmap -sT -p 25 --open 192.168.165.0/24  
+    nc 192.168.165.8 25
+    VRFY root
+    ```
+- 6.4.6 SNMP enumeration
+  - use onesixtyone to identify SNMP servers. List the all the running process.
+    ```
+    echo public > community
+    echo private >> community
+    echo manager >> community
+    for ip in $(seq 1 254); do echo 192.168.165.$ip; done > ips
+    onesixtyone -c community -i ips
+    snmpwalk -c public -v1 192.168.165.151 1.3.6.1.2.1.25.4.2.1.2
+    ```
+  - enumerate interface descriptions with ASCII decoding (hex to ASCII)  
+    `snmpwalk -c public -v1 -t 10 -Oa 192.168.165.151`  
 
 ### Password Attacks  
 - 16.1.1 SSH and RDP
