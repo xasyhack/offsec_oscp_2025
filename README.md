@@ -317,7 +317,9 @@
      Patch Management  
      Windows and Ubuntu operating systems that are not up to date wereidentified. These are shown to be vulnerable to publicly-availableexploits and could result in malicious execution of code, theftof sensitive information, or cause denial of services which        mayimpact the infrastructure. Using outdated applications increases thepossibility of an intruder gaining unauthorized access by exploitingknown vulnerabilities. Patch management ought to be improved andupdates should be applied in conjunction with change      management.
     - **technical findings and recommendation** (what vulnerability is + why dangerous + outcome + steps to exploit)  
-      <img src="https://github.com/xasyhack/oscp2025/blob/main/images/Table%202%20-%20Findings%20and%20Recommendations.png" alt="Alt text" width="400"/>  
+
+      <img src="https://github.com/xasyhack/oscp2025/blob/main/images/Table%202%20-%20Findings%20and%20Recommendations.png" alt="Alt text" width="400"/>
+      
       affected URL/endpoint + method of triggering the vulnerability  
     - **appendices**: articles, reference
 
@@ -452,18 +454,20 @@
 | `rm`, `Clear-EventLog` | Clean traces (if allowed)        | Manual cleanup |
 
 ## Port tunneling and port redirection 
-**Option 1: Port Redirection using socat (Simple)**
-Pivot machine A: socat TCP-LISTEN:8888,fork TCP:172.16.10.10:80
-Kali: curl http://10.10.10.5:8888
+<img src="https://github.com/xasyhack/oscp2025/blob/main/images/port%20forward%20and%20tunneling.png" alt="" width="400"/>  
 
-**Option 2: SSH Tunneling - Local Forwarding (if SSH access on A)**
-kali: ssh -L 8888:172.16.10.10:80 user@10.10.10.5
-kali: curl http://localhost:8888
+**Option 1: Port Redirection using socat (Simple)**  
+Pivot machine A: socat TCP-LISTEN:8888,fork TCP:172.16.10.10:80  
+Kali: curl http://10.10.10.5:8888  
 
-**Option 3: Dynamic Proxy via SSH (SOCKS5)**
-kali: ssh -D 9050 user@10.10.10.5
-Edit /etc/proxychains.conf: socks5  127.0.0.1 9050
-kali: proxychains nmap -Pn -sT -p80 172.16.10.10
+**Option 2: SSH Tunneling - Local Forwarding (if SSH access on A)**  
+kali: ssh -L 8888:172.16.10.10:80 user@10.10.10.5  
+kali: curl http://localhost:8888  
+
+**Option 3: Dynamic Proxy via SSH (SOCKS5)**  
+kali: ssh -D 9050 user@10.10.10.5  
+Edit /etc/proxychains.conf: socks5  127.0.0.1 9050  
+kali: proxychains nmap -Pn -sT -p80 172.16.10.10  
 
 ## Kali setup
 1. Register [Broadcom account](https://profile.broadcom.com/web/registration)
