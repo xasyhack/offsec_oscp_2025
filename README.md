@@ -175,10 +175,31 @@
      - `Test-NetConnection -Port 445 192.168.50.151`: Port scanning SMB via PowerShell. Result returns TcpTestSucceeded : True
      - `1..1024 | % {echo ((New-Object Net.Sockets.TcpClient).Connect("192.168.50.151", $_)) "TCP port $_ is open"} 2>$null`: Automating the PowerShell portscanning****
    - **SMB Enumeration**
-     - `nmap -v -p 139,445 -oG smb.txt 192.168.50.1-254`: scan for the NetBIOS service
-     - `sudo nbtscan -r 192.168.50.0/24`: nbtscan to collect additional NetBIOS information
+     - `nmap -v -p 139,445 -oG smb.txt 192.168.50.1-254`: scan for the NetBIOS service  
+     - `sudo nbtscan -r 192.168.50.0/24`: nbtscan to collect additional NetBIOS information  
+     - `ls -1 /usr/share/nmap/scripts/smb*`: Finding various nmap SMB NSE scripts (SMBv1)  
+     - `nmap -v -p 139,445 --script smb-os-discovery 192.168.50.152`: nmap scripting engine to perform OS discovery (might be incorrect)  
+     - `net view \\dc01 /all`: ‘net view’ to list remote shares  
    - **SMTP Enumeration**
+     - `nc -nv 192.168.50.8 25`: Using nc to validate SMTP users  
+     - `python3 smtp.py root 192.168.50.8`: Python script to perform SMTP user enumeration  
+     - `Test-NetConnection -Port 25 192.168.50.8`: Port scanning SMB via PowerShell. `dism /online /Enable-Feature /FeatureName:TelnetClient`: install TelnetClient. `telnet 192.168.50.8 25`: interat with SMTP service via Telnet on Windows  
    - **SNMP Enumeration**
+     - Ip spoofing， replay attacks, SNMPv1,2,2c no traffic encryption
+     - `sudo nmap -sU --open -p 161 192.168.50.1-254 -oG open-snmp.txt`: nmap SNMP scan to obtain email (c:community string, v:SNMP version, t:timeout)
+     - Using onesixtyone to brute force community strings
+       ```
+       echo public > community
+       echo private >> community
+       echo manager >> community
+       for ip in $(seq 1 254); do echo 192.168.50.$ip; done > ips
+       onesixtyone -c community -i ips
+       ```
+     - `snmpwalk -c public -v1 -t 10 192.168.50.151`: snmpwalk to enumerate the entire MIB tree
+     - `snmpwalk -c public -v1 192.168.50.151 1.3.6.1.4.1.77.1.2.25`: snmpwalk (OID) to enumerate Windows users
+     - `snmpwalk -c public -v1 192.168.50.151 1.3.6.1.2.1.25.4.2.1.2`: snmpwalk to enumerate Windows processes
+     - `snmpwalk -c public -v1 192.168.50.151 1.3.6.1.2.1.25.6.3.1.2`: snmpwalk to enumerate installed software
+     -  `snmpwalk -c public -v1 192.168.50.151 1.3.6.1.2.1.6.13.1.3`: snmpwalk to enumerate open TCP ports
    - **nmap**  
      `nmap -sVC -p- -v -T4 -sT --open IP_ADDRESS -oN results`: scans all open 65535 TCP ports  
      `sudo nmap -sU -p 1-1024 -v IP_ADDRESS -oA results_UDP`: scans 1-1024 common UDP ports  
@@ -196,8 +217,8 @@
       | `-oN results`| Saves output in **normal format** to a file named `results`                 |
 
   **LLM Passive Information Gathering**
-  - ddd
-  - ddd
+  - Using public data from MegacorpOne's website and any information that can be inferred about its organizational structure, products, or services, generate a comprehensive list of potential subdomain names: DNS subdomain wordlist
+  - `gobuster dns -d megacorpone.com -w wordlist.txt -t 10`: gobuster DNS subdomain enumeration with our LLM-generated wordlist
   - ddd
     
 8. Vulnerability scanning
