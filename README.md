@@ -222,10 +222,32 @@
   - What is the WHOIS information for the domain megacorpone.com?" Based on the response, who is listed as the registrant of megacorpone.com?
   - Can you generate the best Google dorks for the website megacorpone.com?
   - What public information is available about the leadership of MegacorpOne.com and their social media presence?
-  - Can you provide the top Google dorks to search for exposed repositories related to megacorpone.com?
-  - 
-    
+  - Can you provide the top Google dorks to search for exposed repositories related to megacorpone.com?    
 8. Vulnerability scanning
+   - host discovery
+   - port scanning
+   - OS, service, version detection
+   - Matching results to vulnerability db ([NVD](https://nvd.nist.gov/), [CVE](https://cve.mitre.org/cve/search_cve_list.html), [CVSS](https://portal.offsec.com/courses/pen-200-44065/learning/vulnerability-scanning-48659/vulnerability-scanning-theory-48706/how-vulnerability-scanners-work-48663), [CVSS calculator](https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator)
+   - unauthenticated (view from external attacker) and authenticated scan (privileged user check for vulnerable packages, missing patches, or configuration vulnerabilities)
+   - internal vulnerability scan (VPN or scan on-site) and DMZ + External (public facing) scan
+   - consideration: scanning duration, accessible, firewalls, rate limiting, impact
+   - [Nessus scan](https://www.tenable.com/downloads/nessus?loginAttempted=true) (pg 173 install) > scan template > launch scan > host > findings > vulnerability priority rating (VPR) > remediation > report
+     ```
+     echo "4987776fef98bb2a72515abc0529e90572778b1d7aeeb1939179ff1f4de1440d Nessus-10.5.0- debian10_amd64.deb" > sha256sum_nessus
+     sha256sum -c sha256sum_nessus
+     sudo apt install ./Nessus-10.5.0-debian10_amd64.deb
+     sudo /bin/systemctl start nessusd.service (start nessus after successful Nessus install)
+     ```  
+     - launch a browser https://127.0.0.1:8834
+     - Nessus scan templates: discovery (host), compliance (windows config compliance), vulnerabilities (CVE, missing patches, minconfig)
+     - Basic network scan: name, targets (IP), custom scan type (port 80,443), ping remote host (off)
+     - Authenticated scan: credential patch audit, credentials (SSH; SMB or WMI against Windows), AV/Firewall/UAC blocking check
+     - Specific plugin: Advanced Dynamic Scan, credentilas, Dynamic Plugins (CVE), select plugin family (ubuntu local security checks)
+   - nmap NSE
+     - found in "/usr/share/nmap/scripts/"
+     - `sudo nmap -sV -p 443 --script "vuln" 192.168.50.124`: vuln scan n port 443
+     - Google "CVE-2021-41773 nse" and download NSE from github `sudo cp /home/kali/Downloads/http-vuln-cve-2021-41773.nse /usr/share/nmap/scripts/http-vuln-cve2021-41773.nse`
+     - `sudo nmap -sV -p 443 --script "http-vuln-cve2021-41773" 192.168.50.124`: provide vuln name, target, port > additional vulnerability 
 9. Introduction to web applcation attacks
    - Fingerprinting Web Servers with Nmap
      `sudo nmap -p80 -sV 192.168.50.20`: grab the web server banner
@@ -642,6 +664,60 @@ kali: proxychains nmap -Pn -sT -p80 172.16.10.10
 | 6        | Configure proxychains                 | Add `socks5 127.0.0.1 1080` in `/etc/proxychains.conf`                                           | Kali              |
 | 7        | Use proxychains to access internal   | `proxychains nmap -Pn -sT -p80 172.16.10.10` <br> `proxychains curl http://172.16.10.10`         | Kali              |
 
+## OSCP Vulnerable Software Versions Cheat Sheet
+**Remote Exploits / Service Exploits**
+
+| Software          | Vulnerable Version(s) | Exploit / CVE                           |
+|------------------|------------------------|-----------------------------------------|
+| Apache Tomcat    | 7.x < 7.0.81           | CVE-2017-12615 (PUT upload RCE)         |
+| vsftpd           | 2.3.4                  | Backdoor RCE                            |
+| Exim             | < 4.89                 | CVE-2019-10149 (Command Injection)      |
+| ProFTPD          | 1.3.5                  | CVE-2015-3306 (mod_copy RCE)            |
+| MySQL            | 5.5.5 (config issue)   | CVE-2012-2122 (Auth bypass)             |
+| Apache httpd     | 2.2.x, 2.4.x (old)     | mod_ssl, mod_cgi RCEs                   |
+| PHP              | < 5.6.x, < 7.1.x       | Unserialize RCE                         |
+| Drupal           | 7.x / 8.x              | CVE-2018-7600 (Drupalgeddon 2)          |
+| Jenkins          | 1.x / 2.x              | Script console RCE                      |
+| Nagios XI        | Various                | Command Injection                       |
+| Webmin           | 1.910                  | CVE-2019-15107 (Password change RCE)    |
+| OpenSSH          | 7.2p2, 5.x             | CVE-2016-0777 (Key leak)                |
+| Samba            | 3.x / 4.5.x            | CVE-2017-7494 (Writable share RCE)      |
+| Django           | ≤ 1.2.1                | Template injection RCE                  |
+| Windows SMB      | Win 7 / Server 2008    | CVE-2017-0144 (EternalBlue)             |
+| FTP (anonymous)  | Misconfigured          | Upload shell access                     |
+| WordPress        | ≤ 4.7.0                | REST API content injection              |
+| phpMyAdmin       | ≤ 4.8.x                | Auth bypass / LFI                       |
+| Elasticsearch    | < 1.6                  | CVE-2015-1427 (Groovy script RCE)       |
+| DotNetNuke (DNN) | < 9.2                  | CVE-2017-9822 (Install RCE)             |
+
+**Local Privilege Escalation**
+
+| OS / Software     | Vulnerable Version(s) | Exploit / CVE                       |
+|------------------|------------------------|-------------------------------------|
+| Linux Kernel      | 2.6.32 – 4.4.x         | CVE-2016-5195 (DirtyCow)            |
+| Linux Kernel      | ≤ 4.15                 | OverlayFS (Ubuntu)                 |
+| Linux Kernel      | 2.6.37 – 5.x           | CVE-2022-0847 (DirtyPipe)           |
+| Polkit (pkexec)   | ≤ 0.105                | CVE-2021-4034 (PwnKit)              |
+| Sudo              | ≤ 1.8.25p1             | CVE-2019-14287 (Bypass)             |
+| Cron              | Misconfigured          | PATH hijacking                      |
+| /etc/passwd       | Writable               | Root shell via user change          |
+| MySQL             | Running as root        | UDF-based privesc                   |
+| NFS               | no_root_squash         | Root shell via mount                |
+| Cron + writable   | Root cron job          | Privesc via script injection        |
+| Windows: AlwaysInstallElevated | Enabled   | SYSTEM shell via .msi               |
+| Windows: Service Path | Unquoted path      | Binary replacement                  |
+| Windows: Weak perms| Modifiable service    | Replace exe                         |
+| Windows: Token abuse | SeImpersonate enabled| Juicy Potato / Rogue Potato         |
+| Windows: UAC bypass| Win 7 / 10            | fodhelper / sdclt                   |
+| Windows: DLL Hijack| Misconfigured service | Load custom DLL as SYSTEM           |
+
+**Sample SearchSploit Usage**
+searchsploit vsftpd 2.3.4
+searchsploit samba 3.0
+searchsploit tomcat 7.0.81
+searchsploit linux kernel 4.15
+
+
 ## Kali setup
 1. Register [Broadcom account](https://profile.broadcom.com/web/registration)
 1. Download "VMware Workstation Pro"
@@ -681,3 +757,7 @@ kali: proxychains nmap -Pn -sT -p80 172.16.10.10
       `sudo apt update && sudo apt install -y bloodhound`
     - Stores AD data for querying & analysis: Neo4j  
       `sudo neo4j console`
+
+    ## Kali useful command
+    - clean terminal history command: `bash` `history -c`
+    - search history: history | grep dnf
