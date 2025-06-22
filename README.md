@@ -223,7 +223,7 @@
   - Can you generate the best Google dorks for the website megacorpone.com?
   - What public information is available about the leadership of MegacorpOne.com and their social media presence?
   - Can you provide the top Google dorks to search for exposed repositories related to megacorpone.com?    
-8. Vulnerability scanning
+7. Vulnerability scanning
    - host discovery
    - port scanning
    - OS, service, version detection
@@ -247,8 +247,9 @@
      - found in "/usr/share/nmap/scripts/"
      - `sudo nmap -sV -p 443 --script "vuln" 192.168.50.124`: vuln scan n port 443
      - Google "CVE-2021-41773 nse" and download NSE from github `sudo cp /home/kali/Downloads/http-vuln-cve-2021-41773.nse /usr/share/nmap/scripts/http-vuln-cve2021-41773.nse`
-     - `sudo nmap -sV -p 443 --script "http-vuln-cve2021-41773" 192.168.50.124`: provide vuln name, target, port > additional vulnerability 
-9. Introduction to web applcation attacks
+     - `sudo nmap -sV -p 443 --script "http-vuln-cve2021-41773" 192.168.50.124`: provide vuln name, target, port > additional vulnerability
+       
+8. Introduction to web applcation attacks
    - Fingerprinting Web Servers with Nmap
      `sudo nmap -p80 -sV 192.168.50.20`: grab the web server banner
      `sudo nmap -p80 --script=http-enum 192.168.50.20`: NSE enum web server (pages discovery)
@@ -327,12 +328,7 @@
         ```  
         - XSS stored in the WordPress DB. Login WP as admin, then click the visitor plugins
         
-    - Cross-site scripting
-    - Cross-site scripting
-    - Cross-site scripting
-    
-    
-10. Common Web Application attacks
+9. Common Web Application attacks
     - **Directory traversal**: access files outside of the web root by using relative paths
       - absolute path: `cat /home/kali/etc/passwd`  
       - relative path: `cat ../../etc/pwd`: move 2 directories back to root file
@@ -344,13 +340,13 @@
     - File inclusion vulnerabilities
     - File upload vulnerabilities
     - Command injection
-11. SQL injection attacks
-12. Phishing Basics
-13. Client-site attacks
-14. Locating public exploits
-15. Fixing exploits
-16. Antivirus evasion
-17. Password attacks
+10. SQL injection attacks
+11. Phishing Basics
+12. Client-site attacks
+13. Locating public exploits
+14. Fixing exploits
+15. Antivirus evasion
+16. Password attacks
     - confirm ssh service running
       `sudo nmap -sV -p 2222 192.168.50.201`
     - unzip rockyou
@@ -362,7 +358,7 @@
     - ddd
     - ddd
     - ddd
-18. Windows Privilege Escalation
+17. Windows Privilege Escalation
     - Goal: bypass UAC to execute at high integrity (admin member does not mean run with high integrity)
     - Enumeration
       - username, hostname: `whoami`
@@ -386,16 +382,16 @@
     - User Account Control
       - standard user token (non-privileged operations)
       - administrator token (require UCA concent prompt)
-19. Linux privilege escalation
-20. Port redirection and SSH tunneling
-21. Tunneling through deep packet inspectation
-22. The metassploit framework
-23. Active directory introduction and enumeration
-24. Attacking active drectiory authentication
-25. Lateral movement in active directory
-26. Enumerating AWS Cloud Infrastruture
-27. Attacking AWS cloud infrastruture 
-28. Assembling the pieces
+18. Linux privilege escalation
+19. Port redirection and SSH tunneling
+20. Tunneling through deep packet inspectation
+21. The metassploit framework
+22. Active directory introduction and enumeration
+23. Attacking active drectiory authentication
+24. Lateral movement in active directory
+25. Enumerating AWS Cloud Infrastruture
+26. Attacking AWS cloud infrastruture 
+27. Assembling the pieces
 
 ## PWK-200 labs
 ### Information gathering
