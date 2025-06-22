@@ -243,7 +243,8 @@
   - What is the WHOIS information for the domain megacorpone.com?" Based on the response, who is listed as the registrant of megacorpone.com?
   - Can you generate the best Google dorks for the website megacorpone.com?
   - What public information is available about the leadership of MegacorpOne.com and their social media presence?
-  - Can you provide the top Google dorks to search for exposed repositories related to megacorpone.com?    
+  - Can you provide the top Google dorks to search for exposed repositories related to megacorpone.com?
+    
 ### 7. Vulnerability scanning
    - host discovery
    - port scanning
