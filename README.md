@@ -12,8 +12,7 @@
   - [12. Client-site attacks](#12-client-site-attacks)
   - [13. Locating public exploits](#13-locating-public-exploits)
   - [14. Fixing exploits](#14-fixing-exploits)
-  - [15. Antivirus evasion](#15-antivirus-evasion)![image](https://github.com/user-attachments/assets/ab252aac-a0dd-446a-8df2-081dbc09ce7a)
-
+  - [15. Antivirus evasion](#15-antivirus-evasion)
   - [16. Password attacks](#16-password-attacks)
   - [18. Linux privilege escalation](#18-linux-privilege-escalation)
   - [19. Port redirection and SSH tunneling](#19-port-redirection-and-ssh-tunneling)
