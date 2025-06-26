@@ -287,16 +287,17 @@
      - Specific plugin: Advanced Dynamic Scan, credentilas, Dynamic Plugins (CVE), select plugin family (ubuntu local security checks)
    - nmap NSE
      - found in "/usr/share/nmap/scripts/"
+     - `sudo nmap --script-updatedb`
      - `sudo nmap -sV -p 443 --script "vuln" 192.168.50.124`: vuln scan n port 443
      - Google "CVE-2021-41773 nse" and download NSE from github `sudo cp /home/kali/Downloads/http-vuln-cve-2021-41773.nse /usr/share/nmap/scripts/http-vuln-cve2021-41773.nse`
      - `sudo nmap -sV -p 443 --script "http-vuln-cve2021-41773" 192.168.50.124`: provide vuln name, target, port > additional vulnerability
        
 ### 8. Introduction to web applcation attacks
-   - **Fingerprinting Web Servers** with Nmap
-     `sudo nmap -p80 -sV 192.168.50.20`: grab the web server banner
-     `sudo nmap -p80 --script=http-enum 192.168.50.20`: NSE enum web server (pages discovery)
+   - **Fingerprinting Web Servers** with Nmap  
+     `sudo nmap -p80 -sV 192.168.50.20`: grab the web server banner  
+     `sudo nmap -p80 --script=http-enum 192.168.50.20`: NSE enum web server (pages discovery)  
    - [Wappalyzer](https://www.wappalyzer.com/): technology stack
-   - [Gobuster](https://www.kali.org/tools/gobuster/): wordlists to discover directories and files
+   - [Gobuster](https://www.kali.org/tools/gobuster/): wordlists to discover directories and files  
      `gobuster dir -u 192.168.50.20 -w /usr/share/wordlists/dirb/common.txt -t5`  
    - Burp Suite
      - Only http traffic, no cert install_, enable_intercept(forward or drop), proxy listerner on localhost:8080
