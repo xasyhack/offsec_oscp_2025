@@ -388,8 +388,11 @@
   systemctl start apache2
   cd /var/www/html
   ```
-  
-### 12. Client-site attacks
+   
+### 12. Client-site attacks  
+- metadata analysis: google dork (site:example.com filetype:pdf), gobuster -x (file extension)
+- `exiftool -a -u brochure.pdf`: retrieve metadata
+- [Canarytoken](https://canarytokens.org/nest/): fingerprint
 ### 13. Locating public exploits
 ### 14. Fixing exploits
 ### 15. Antivirus evasion
