@@ -726,6 +726,39 @@
   type C:\inetpub\flag.txt  
 
 ### SQL injection attacks
+- 10.1.2 DB types and characteristic
+  - MYSQL retrieve record
+    ```
+    mysql -u root -p'root' -h 192.168.132.16 -P 3306 --skip-ssl
+    SELECT version();
+    SELECT system_user();
+    SHOW databases;  --db
+    USE mysql;  --use db
+    SHOW TABLES;  --table
+    DESCRIBE user;  --columns
+    SELECT user, plugin FROM mysql.user WHERE user = 'offsec';
+
+    exit
+    ```
+  - MSSQL system table
+    ```
+    impacket-mssqlclient Administrator:Lab123@192.168.132.18 -windows-auth
+    SELECT @@version;
+    SELECT name FROM sys.databases;  --db
+    USE master;  --use db
+    SELECT * FROM information_schema.tables; --table
+    SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'user'; --columns
+    SELECT name FROM sysobjects WHERE xtype = 'S'; --systemtables sysusers
+    SELECT uid, name from sysusers order by uid;  --first record
+    ```
+  - MYSQL to explore table
+    ```
+    mysql -u root -p'root' -h 192.168.132.16 -P 3306 --skip-ssl
+    USE test;
+    SHOW TABLES;
+    SELECT * FROM users
+    ```
+- 
 
 ### Client-site attacks  
 - 12.1.1 Information Gathering
