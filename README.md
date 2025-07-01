@@ -400,7 +400,11 @@
 - macros in files downloaded from the internet (with MOTW) are blocked by default, and users can no longer enable them with a single click (like the old “Enable Content” button). Instead, they must explicitly unblock the file via the file properties or follow other administrative steps.
 - possible to avoid getting a file flagged with Mark of the Web (MOTW) by embedding it within container formats such as .7z, .iso, or .img
   
-### 13. Locating public exploits
+### 13. Locating public exploits  
+- An exploit is a program or script that can leverage a flaw or vulnerability of a target system. E.g DoS, RCE, privilege escalation.
+- caution: asking root privilege, hex-encoded string of shell command, 
+- [Exploit-DB](https://www.exploit-db.com/)
+- [Packet storm](https://x.com/packet_storm)
 ### 14. Fixing exploits
 ### 15. Antivirus evasion
 ### 16. Password attacks
