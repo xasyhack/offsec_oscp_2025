@@ -65,8 +65,42 @@
     - aspx: cmdasp.aspx
     - php: simple-backdoor.php (cmd), php-reverse-shell.php (reverse web shell)
     - netcat: https://github.com/int0x33/nc.exe/blob/master/nc64.exe
-  - Kali port: 4444 (reverse shell), 8080 (burp suite), 8888 (WebDAV shared), 8000 (Powercat/Python), 9001 (alternative to 4444 various reverse shell listeners)  
-  - Target port: 22 (ssh), 21 (ftp), 80 (http), 3389 (RDP), 
+  - Kali port:
+    - 4444 (reverse shell)
+    - 8080 (burp suite)
+    - 8888 (WebDAV shared)
+    - 8000 (Powercat/Python)
+    - 9001 (alternative to 4444 various reverse shell listeners)  
+  - Target port
+	| Port | Protocol | Service              | Description / Use Case                                  |
+	|------|----------|----------------------|----------------------------------------------------------|
+	| 21   | TCP      | FTP                  | Anonymous login, misconfig, potential file upload        |
+	| 22   | TCP      | SSH                  | Weak passwords, key reuse, outdated versions             |
+	| 23   | TCP      | Telnet               | Plain-text credentials, banner info                      |
+	| 25   | TCP      | SMTP                 | User enum, phishing, open relay                          |
+	| 53   | TCP/UDP  | DNS                  | Zone transfers, DNS enumeration                          |
+	| 80   | TCP      | HTTP                 | Web apps (SQLi, LFI/RFI), Gobuster, Nikto                |
+	| 88   | TCP      | Kerberos             | AS-REP roasting, Kerberoasting (Active Directory)        |
+	| 110  | TCP      | POP3                 | Cleartext creds, vulnerable auth                         |
+	| 111  | TCP/UDP  | RPCBind              | NFS, remote procedure enumeration                        |
+	| 135  | TCP      | MS RPC               | Lateral movement, DCOM exploitation                      |
+	| 139  | TCP      | NetBIOS              | SMB enumeration, shares                                  |
+	| 143  | TCP      | IMAP                 | Cleartext creds, mailbox enum                            |
+	| 161  | UDP      | SNMP                 | Public community strings, SNMPwalk                       |
+	| 389  | TCP/UDP  | LDAP                 | AD enum, user/group info                                 |
+	| 445  | TCP      | SMB                  | EternalBlue, shares, null sessions, LPE                 |
+	| 512  | TCP      | RSH                  | Remote shell, legacy service                             |
+	| 513  | TCP      | RLogin               | Legacy login service                                     |
+	| 587  | TCP      | SMTP (Submission)    | Authenticated email sending                              |
+	| 5985 | TCP      | WinRM                | Remote PowerShell execution                              |
+	| 8000 | TCP      | HTTP-alt             | Python web server, custom services                       |
+	| 8080 | TCP      | Web Proxies          | Tomcat, Jenkins, apps on alt ports                       |
+	| 8443 | TCP      | HTTPS-alt            | Web services over TLS                                    |
+	| 8888 | TCP      | Web Apps             | Jupyter, Flask, development interfaces                   |
+	| 3306 | TCP      | MySQL                | SQLi, default creds, data extraction                     |
+	| 3389 | TCP      | RDP                  | GUI access (if creds found)                              |
+	| 5432 | TCP      | PostgreSQL           | SQLi, privilege escalation                               |
+	| 5900 | TCP      | VNC                  | GUI access, no auth                                      |
   - File transfer
     - windows <> Kali
       ```
