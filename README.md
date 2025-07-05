@@ -59,7 +59,7 @@
   - Flag format: `OS{68c1a60008e872f3b525407de04e48a3}`
   - Find flag:  
     Linux: `find / -name "flag.txt" 2>/dev/null`  (cat flag.txt)  
-    Windows: C:\Windows\system32> `where /r C:\ flag.txt`  (type flag.txt)
+    Windows: C:\Windows\system32> `where /r C:\ flag.txt`  (type flag.txt)  
     Windows: PS C:\Windows\System32\WindowsPowerShell\v1.0> `gci C:\ -Filter flag.txt -Recurse -ea SilentlyContinue` (type flag.txt)  
   - webshell (asp, aspx, cfm, jsp, laudanum, perl, php) locate in kali `/usr/share/webshells/`
     - aspx: cmdasp.aspx
