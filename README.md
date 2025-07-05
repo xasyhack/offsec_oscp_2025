@@ -55,17 +55,28 @@
 - [OffSec Discord](https://discord.gg/offsec)
   - OffSec portal > Explorer > Discord > link OffSec account to discord
 - [OffSec Study Plan and Exam FAQ](https://help.offsec.com/hc/en-us/sections/6970444968596-Penetration-Testing-with-Kali-Linux-PEN-200)
-- PWK Labs  
-  - Credentials (🔒 username:Eric.Wallows, password:EricLikesRunning800)
+- Capture the Flag  
   - Flag format: `OS{68c1a60008e872f3b525407de04e48a3}`
   - Find flag:  
     Linux: `find / -name "flag.txt" 2>/dev/null`  (cat flag.txt)  
     Windows: `C:\Windows\system32> where /r C:\ flag.txt`  (type flag.txt)  
-  - webshell (asp, aspx, cfm, jsp, laudanum, perl, php)
-    - aspx: /usr/share/webshells/aspx/cmdasp.aspx
-    - php: simple-backdoor.php (cmd)
-    - php: php-reverse-shell.php (reverse web shell)
-    - nc.exe: https://github.com/int0x33/nc.exe/blob/master/nc64.exe  
+  - webshell (asp, aspx, cfm, jsp, laudanum, perl, php) locate in kali `/usr/share/webshells/`
+    - aspx: cmdasp.aspx
+    - php: simple-backdoor.php (cmd), php-reverse-shell.php (reverse web shell)
+    - netcat: https://github.com/int0x33/nc.exe/blob/master/nc64.exe
+  - File transfer
+    - windows <> Kali
+      ```
+      sudo apt install pipx -y
+      pipx ensurepath
+      pipx install wsgidav
+      mkdir ~/share
+
+      wsgidav --host=0.0.0.0 --port=8888 --auth=anonymous --root ~/share
+
+      On RDP Windows Machine> Right click PC > Map Network Drive > http://<KALI>:8888/
+      ```  
+    - Linux <> Kali  
 
 ## Methodology 
 
@@ -417,6 +428,20 @@
 - MOTW (Mark of the Web) is not added to files on FAT32-formatted devices because FAT32 does not support NTFS Alternate Data Streams (ADS), which is where MOTW is stored.
 - macros in files downloaded from the internet (with MOTW) are blocked by default, and users can no longer enable them with a single click (like the old “Enable Content” button). Instead, they must explicitly unblock the file via the file properties or follow other administrative steps.
 - possible to avoid getting a file flagged with Mark of the Web (MOTW) by embedding it within container formats such as .7z, .iso, or .img
+
+**Obtaining Code Execution via Windows Library Files**  
+Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upload/download files, map like a network drive
+  ```
+  sudo apt install pipx -y
+  pipx ensurepath
+  pipx install wsgidav
+  ```
+- Create a shared folder (/home/kali/share)
+  `mkdir ~/share`
+- Start WsgiDAV server
+  `wsgidav --host=0.0.0.0 --port=8888 --auth=anonymous --root ~/share`
+- On RDP Windows Machine > Right click PC > Map Network Drive  > `http://<KALI>:8888/`  
+
   
 ### 13. Locating public exploits  
 - An exploit is a program or script that can leverage a flaw or vulnerability of a target system. E.g DoS, RCE, privilege escalation.
