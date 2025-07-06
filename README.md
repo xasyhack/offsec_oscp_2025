@@ -131,13 +131,11 @@
       ```  
     - Linux <> Kali
     - SMB (port 445)
-      - `smbclient -L \\\\192.168.171.10`: List available SMB shares on the target
-      - `smbclient \\\\192.168.171.10\\Users -N`: Connect to the Users share anonymously`
-        ```
-        smb: \> ls
-	smb: \offsec\Downloads\> ls
-	smb: \offsec\Downloads\> get flag.txt
-        ```
+      - `smbclient -L \\\\192.168.171.10`: List available SMB shares on the target  
+      - `smbclient \\\\192.168.171.10\\Users -N`: Connect to the Users share anonymously  
+        smb: \> ls  
+	smb: \offsec\Downloads\> ls  
+	smb: \offsec\Downloads\> get flag.txt  
   - Selecting [exploit](https://www.exploit-db.com/) rules
     - Priority
       - match service + version, unauthenticated exploit, RCE, exploit in python/bash, exploit with shellcode/reversell, exploit available in 'searchsploit'
