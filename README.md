@@ -646,7 +646,20 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
    - run the exploit
      `wine syncbreeze_exploit.exe`
 - **Fixing web exploits**
-  - 
+  - consideration: http/https, specific web path, pre-authentication vulnerability, GET/POST, rely on app setting
+  - selecting vulnerability and fixing the code  (apache2, [CMS Made Simple 2.2.5 - (Authenticated) Remote Code Execution](https://www.exploit-db.com/exploits/44976))
+    ```
+    base_url = "https://10.11.0.128/admin"
+    username = "admin"
+    password = "HUYfaw763"
+
+    //Modified post requests to ignore SSL verification.
+    response  = requests.post(url, data=data, allow_redirects=False, verify=False)
+    response = requests.post(url, data=data, files=txt, cookies=cookies, verify=False)
+    response = requests.post(url, data=data, cookies=cookies, allow_redirects=False, verify=False)
+    ```
+    - 
+  - change
      
 ### 15. Antivirus evasion
 ### 16. Password attacks
