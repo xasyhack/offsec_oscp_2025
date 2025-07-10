@@ -137,7 +137,8 @@
       - `smbclient \\\\192.168.171.10\\Users -N`: Connect to the Users share anonymously  
         smb: \> ls  
 	smb: \offsec\Downloads\> ls  
-	smb: \offsec\Downloads\> get flag.txt  
+	smb: \offsec\Downloads\> get flag.txt
+    - Kali find file: `find ~/ -iname "mimikatz.exe"`  
   - Selecting [exploit](https://www.exploit-db.com/) rules
     - Priority
       - match service + version, unauthenticated exploit, RCE, exploit in python/bash, exploit with shellcode/reversell, exploit available in 'searchsploit'
@@ -1961,6 +1962,10 @@ searchsploit linux kernel 4.15
       `sudo apt update && sudo apt install -y bloodhound`
     - Stores AD data for querying & analysis: Neo4j  
       `sudo neo4j console`
+    - Mimmikatz
+      ```
+      find ~/ -iname "mimikatz.exe"  
+      ```
 
     ## Kali useful command
     - clean terminal history command: `bash` `history -c`
