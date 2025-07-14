@@ -1014,31 +1014,88 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
       C:\Users\offsec\Desktop>whoami
       ```
 
-
 ### 17. Windows Privilege Escalation
-    - Goal: bypass UAC to execute at high integrity (admin member does not mean run with high integrity)
-    - Enumeration
-      - username, hostname: `whoami`
-      - existing users & groups: `whoami /groups`
-      - enumerate the existing groups of user: `Get-LocalGroup` (powershell)
-      - other users and groups: `Get-LocalUser` (powershell)
-      - review the group member: `Get-LocalGroupMember adminteam`
-      - OS, version, architecture, network info, installed apps, running processes
-    - 
-    - Security Identifier (SID)
-      - Local Security Authority (LSA) - local users
-      - Domain Controller (DC) - domain users
-      - Format: S-1-5-21-3623811015-3361044348-30300820-1013
-      - RID (last digit of SID): 500 (admin), 501 (guest), 1000+ (normal user), 512 (domain admins), 513 (domain users)
-      - S-1-0-0 (nobody), S-1-1-0 (everybody), S-1-5-11 (authenticated users), S-1-5-18 (local system), S-1-5-domainidentifier-500 (administrator)
-    - access token
-      - primary token: specify permission sets  
-      - impersonation token  
-    - Mandatory Integrity Control
-      - integrity levels: system (kernel), high (admin), medium (standard), low (restricted). Process explorer can see the integrity level.
-    - User Account Control
-      - standard user token (non-privileged operations)
-      - administrator token (require UCA concent prompt)
+- Goal: bypass UAC to execute at high integrity (admin member does not mean run with high integrity)  
+- [Mimikatz](https://github.com/gentilkiwi/mimikatz): pass-the-hash, pass-the-ticket or build Golden tickets
+- Enumerating Windows
+  - username, hostname: `whoami`
+  - existing users & groups: `whoami /groups`
+  - enumerate the existing groups of user: `Get-LocalGroup` (powershell)
+  - other users and groups: `Get-LocalUser` (powershell)
+  - review the group member: `Get-LocalGroupMember adminteam`
+  - OS, version, architecture, network info, installed apps, running processes
+- Security Identifier (SID)
+  - Local Security Authority (LSA) - local users
+  - Domain Controller (DC) - domain users
+  - Format: S-1-5-21-3623811015-3361044348-30300820-1013
+  - RID (last digit of SID): 500 (admin), 501 (guest), 1000+ (normal user), 512 (domain admins), 513 (domain users)
+    - S-1-0-0 (nobody), S-1-1-0 (everybody), S-1-5-11 (authenticated users), S-1-5-18 (local system), S-1-5-domainidentifier-500 (administrator)
+  - access token
+    - primary token: specify permission sets  
+    - impersonation token  
+  - Mandatory Integrity Control
+    - integrity levels: system (kernel), high (admin), medium (standard), low (restricted). Process explorer can see the integrity level.
+  - User Account Control
+    - standard user token (non-privileged operations)
+    - administrator token (require UCA concent prompt)  
+- Information gather
+  - Username and hostname
+  - Group memberships of the current user
+  - Existing users and groups
+  - Operating system, version and architecture
+  - Network information
+  - Installed applications
+  - Running processes
+- Situation awareness
+  - Connect to the bind shell and obtain username and hostname  
+    `nc 192.168.124.220 4444` `whoami` > clientwk220\dave  
+  - Group memberships of the user 'dave' (544-admin, 545-standard, 547 limited privilege/power users, 555 RDP access)
+    `C:\Users\dave> whoami /groups` > CLIENTWK220\helpdesk, BUILTIN\Remote Desktop Users  
+  - Display other local users on CLIENT220: Administrator (disabled), BackupAdmin, dave, daveadmin, steve
+    ```
+    C:\Users\dave> powershell
+    PS C:\Users\dave> Get-LocalUser
+    ```
+  - Display other local groups on CLIENTWK220 > adminteam, second floor, BackupUsers, helpdesk
+    `PS C:\Users\dave> Get-LocalGroup` 
+  - Display members of the group adminteam
+    `PS C:\Users\dave> Get-LocalGroupMember adminteam` > CLIENTWK220\daveadmin
+    `PS C:\Users\dave> Get-LocalGroupMember Administrators` > CLIENTWK220\daveadmin, CLIENTWK220\backupadmin
+  - Information about the operating system and architecture > OS Name, version, system type, [windows version~build](https://en.wikipedia.org/wiki/List_of_Microsoft_Windows_versions)
+    `PS C:\Users\dave> systeminfo`  
+  - Information about the network configuration  > physical add, DHCP enabled, IPv4, Default gateway, DNS servers  
+    `PS C:\Users\dave> ipconfig /all`  
+  - routing table on CLIENTWK220  
+    `PS C:\Users\dave> route print`  
+  - Active network connections on CLIENTWK220   > local add  0.0.0.0:80, 0.0.0.0:443, 0.0.0.0:3306, 0.0.0.0:3389, 192.168.50.220:3389, 192.168.50.220:4444 (port 80,443, MySQL 3306, RDP 3389)
+    `netstat -ano`
+  - Installed applications on CLIENTWK220 (list both 32 and 64 bit apps) + review "Downloads" directory to find more potential programs> FileZilla, KeePass, 7-Zip, XAMPP
+    ```
+    Get-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" | select displayname
+    Get-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" | select displayname 
+
+    displayname  
+    ```
+    
+    ```
+    Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*" | select displayname
+    Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*" | select displayname
+    
+    DisplayName   
+    ```
+  - Running processes on CLIENTWK220 >  bind shell with ID 2064 ,  PowerShell session with ID 9756, mysql, httpd
+    `PS C:\Users\dave> Get-Process`
+  - summary
+    ```
+    64-bit Windows 11 Pro Build 22621
+    web server on ports 80 and 443
+    MySQL server on port 3306
+    bind shell on port 4444
+    RDP connection on port 3389 from 192.168.48.3
+    KeePass Password Manager, 7Zip, and XAMPP are installed
+    ```
+  - ddd
+- dd  
 ### 18. Linux privilege escalation
 ### 19. Port redirection and SSH tunneling
 ### 20. Tunneling through deep packet inspectation
