@@ -1885,7 +1885,19 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
 
     Decode it [System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String('ewANAAoAIAAgACIAYgBvAG8AbABlAGEAbgAiADoAIAB0AHIAdQBlACwADQAKACAAIAAiAGEAZABtAGkAbgAiADoAIABmAGEAbABzAGUALAANAAoAIAAgACIAdQBzAGUAcgAiADoAI    AB7AA0ACgAgACAAIAAgACIAbgBhAG0AZQAiADoAIAAiAHIAaQBjAGgAbQBvAG4AZAAiACwADQAKACAAIAAgACAAIgBwAGEAcwBzACIAOgAgACIARwBvAHQAaABpAGMATABpAGYAZQBTAHQAeQBsAGUAMQAzADMANwAhACIADQAKACAAIAB9AA0ACgB9AA=='))
     ```
-- Information Goldmine PowerShell 
+- Information Goldmine PowerShell
+  - Q1 obtain an interactive shell as daveadmin and find the flag  
+    `evil-winrm -i 192.168.145.220 -u daveadmin -p "qwertqwertqwert123\!\!"`  
+  - Q2 connect daveadmin via RDP. Use the Event Viewer to search for events recorded by Script Block Logging  
+    Event Viewer-->Application and Services → Microsoft → Windows → PowerShell → Operational:  
+    Click Filter Current Log and search for 4104 event  
+  - Q3 connect mac via RDP. Enumerate the machine  
+    ```
+    Get-History
+    (Get-PSReadlineOption).HistorySavePath
+    type C:\Users\dave\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
+    ```
+- dd
 
 ## Penetration testing report 
 - note editor:
