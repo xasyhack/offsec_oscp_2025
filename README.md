@@ -1112,7 +1112,17 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     `net user backupadmin`  
   - Using Runas to execute cmd as user backupadmin  
     `runas /user:backupadmin cmd`  
-- dd  Searching for text files and password manager databases in the home directory of dave
+- Information goldmine PowerShell
+  ```
+  Get-History
+  Clear-History 
+  ```
+  - Display path of the history file from PSReadline
+    `(Get-PSReadlineOption).HistorySavePath`
+  - ddd
+  - dd
+  - dd 
+- Automated Enumeration  
 ### 18. Linux privilege escalation
 ### 19. Port redirection and SSH tunneling
 ### 20. Tunneling through deep packet inspectation
@@ -1829,17 +1839,36 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
 ### Windows Privilege Escalation  
 - 17.1.2 Situation Awareness
   `nc 192.168.139.220 4444` `whoami` `Get-LocalUser`  `Get-LocalGroup` `Get-Content -Path .\LocalUsersGroups.csv`  
-  - Display member for group "Remote Management Users"
+  - Display member for group "Remote Management Users"  
     `Get-LocalGroupMember "Remote Management Users"`
   - List installed apps
     ```
     Get-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" 
     Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*" 
     ```
-  - another member of local admin group
+  - another member of local admin group  
     `Get-LocalGroupMember "Administrators"`
-  - List the process and file path
-    `Get-Process`  `(Get-Process -Id 2552).MainModule.FileName`  
+  - List the process and file path  
+    `Get-Process`  `(Get-Process -Id 2552).MainModule.FileName`
+- Hidden in Plain view
+  - Find the flag on the desktop of backupadmin
+    ```
+    nc 192.168.145.220 4444
+    runas /user:backupadmin cmd
+    Get-ChildItem -Path C:\Users\backupadmin\ -Include *.txt -File -Recurse -ErrorAction SilentlyContinue
+    type C:\Users\backupadmin\Desktop\flag.txt
+    ```
+  - Search the file system in user's directory  
+    `Get-ChildItem -Path C:\Users\steve -Include *.txt,*.ini -File -Recurse -ErrorAction SilentlyContinue`  
+  - Decode base64 ini file
+    ```
+    runas /user:richmond cmd
+    Get-ChildItem -Path C:\Users\ -Include *.txt,*.ini -File -Recurse -ErrorAction SilentlyContinue
+    type C:\Users\Public\Documents\install.ini
+
+    Decode it [System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String('ewANAAoAIAAgACIAYgBvAG8AbABlAGEAbgAiADoAIAB0AHIAdQBlACwADQAKACAAIAAiAGEAZABtAGkAbgAiADoAIABmAGEAbABzAGUALAANAAoAIAAgACIAdQBzAGUAcgAiADoAI    AB7AA0ACgAgACAAIAAgACIAbgBhAG0AZQAiADoAIAAiAHIAaQBjAGgAbQBvAG4AZAAiACwADQAKACAAIAAgACAAIgBwAGEAcwBzACIAOgAgACIARwBvAHQAaABpAGMATABpAGYAZQBTAHQAeQBsAGUAMQAzADMANwAhACIADQAKACAAIAB9AA0ACgB9AA=='))
+    ```
+- Information Goldmine PowerShell 
 
 ## Penetration testing report 
 - note editor:
