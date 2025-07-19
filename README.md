@@ -1242,7 +1242,8 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
  - wait a higher privilege user to run the application and trigger the loading of our malicious DLL  
  - check new user created  
    `net user` `net localgroup administrators`  
-- Unquoted Service Paths  
+- Unquoted Service Paths
+  - 
 - Scheduled Tasks
 - Using Exploits   
 ### 18. Linux privilege escalation
