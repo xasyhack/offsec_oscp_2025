@@ -1200,7 +1200,7 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
 - DLL hijacking
   - placing a malicious DLL (with the name of the missing DLL) in a path of the DLL search order so it executes when the binary is started  
   - Displaying information about the running service >FileZilla (research shows that this app contain a DLL hijacking vulnerability)  
-    `Get-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" | select displayname displayname`  
+    `Get-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" | select displayname`  
   - Check if we have permission to write FileZilla  
     `echo "test" > 'C:\FileZilla\FileZilla FTP Client\test.txt'`  
     `type 'C:\FileZilla\FileZilla FTP Client\test.txt'`  
