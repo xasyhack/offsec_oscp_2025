@@ -2374,6 +2374,27 @@ Reference
        ```
     -  RDP enterpriseadmin `xfreerdp3 /u:enterpriseadmin /p:S3cureStore /v:192.168.185.222 /cert:ignore /drive:share,/home/kali/share`  
 
+### Linux Privilege Escalation  
+- 18.1.2 Manual Enumeration
+  ssh joe@192.168.185.214
+  - Q1 Linux distribution codename (VERSION_CODENAME=buster)
+    ```
+    cat /etc/issue
+    cat /etc/os-release
+    uname -a
+    ```
+  - Q2  crontab parameter is needed to list every cron job
+    `crontab -l //current user`  
+    `sudo crontab -l //root`  
+    ```
+  - Q3 inherited UID called that allows a given binary to be executed with root permissions even when launched by a lower-privileged user: setuid
+  - Q4 inside one of the SUID binaries available on the system
+    `find / -perm -u=s -type f 2>/dev/null`
+    `strings /usr/bin/passwd_flag | grep "OS{"`  
+- 18.1.3 Automated Enumeration
+- 18.2.1 Inspecting User Trails
+- 18.2.2 Inspecting Service Footprints
+
 ## Penetration testing report 
 - note editor:
   - [Sublime-syntax highlight](https://www.sublimetext.com/download)
