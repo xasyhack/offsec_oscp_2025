@@ -1319,8 +1319,55 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     .\SigmaPotato "net user dave4 lab /add"
     .\SigmaPotato "net localgroup Administrators dave4 /add"
     ```
-    
-### 18. Linux privilege escalation
+
+### 18. Linux privilege escalation  
+Reference  
+- https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Linux%20-%20Privilege%20Escalation.md
+- https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation/index.html
+- https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/  
+- enumerating linux
+  - current user  
+    `id` > uid=1000(joe) gid=1000(joe) groups=1000(joe)
+    `cat /etc/passwd` > 
+    root:x:0:0:root:/root:/bin/bash
+    joe:x:1000:1000:joe,,,:/home/joe:/bin/bash
+    www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin   
+    Login name: joe, Encrypted Password: x, UID user ID, GID group ID, home folder /home/joe,  /usr/sbin/nologin block remote 
+  - `hostname`  
+  - OS  
+    ```
+    cat /etc/issue  //Debian GNU/Linux 10 \n \l
+    cat /etc/os-release  //PRETTY_NAME="Debian GNU/Linux 10 (buster)"
+    uname -a   //kernel version and architect: Linux debian-privesc 4.19.0-21-amd64 
+    ```
+  - system processes  
+    `ps aux`
+  - listing TCP/IP configs on all adapters > network  
+    `ip a` `routel` `ss -anp`
+  - Inspecting custom IP table > -A INPUT -p tcp -m tcp --dport 1999 -j ACCEPT  
+    `cat /etc/iptables/rules.v4`
+  - List schedule/cron jobs > /etc/cron.daily  
+    `ls -lah /etc/cron*`
+  - List con job for current user > no cron job  
+    `crontab -l` root user: `sudo crontab -l`
+  - List all installed packages on Debian Linux >  Apache HTTP Server  
+    `dpkg -l`
+  - List all writable directories > /home/joe/.scripts  
+    `find / -writable -type d 2>/dev/null`
+  - List content of /etc/fstab and all mounted drives
+    `cat /etc/fstab`  `mount`
+  - View drives > sda1,2,3  
+    `lsblk`
+  - List loaded drivers > lsmod  
+    `lsmod`
+  - diplay additional info about a module  > filename: /lib/modules/4.19.0-21-amd64/kernel/drivers/ata/libata.ko
+    `/sbin/modinfo libata`  
+  - 2 special right setuid, setgid
+    `find / -perm -u=s -type f 2>/dev/null`
+- exposed confidential info  
+- insecure file permission  
+- abuse system linux components  
+
 ### 19. Port redirection and SSH tunneling
 ### 20. Tunneling through deep packet inspectation
 ### 21. The metassploit framework
