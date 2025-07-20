@@ -2392,11 +2392,16 @@ Reference
     `find / -perm -u=s -type f 2>/dev/null`
     `strings /usr/bin/passwd_flag | grep "OS{"`  
 - 18.1.3 Automated Enumeration
-  - Running unix_privesc_check
-    `unix-privesc-check`
-  - transfer the script to target system
-    `./unix-privesc-check standard > output.txt`
-  - ddd
+  ```
+  ==Kali===
+  wget https://pentestmonkey.net/tools/unix-privesc-check/unix-privesc-check-1.4.tar.gz
+  tar -xzf unix-privesc-check-1.4.tar.gz
+  
+  ==Target==
+  scp /home/kali/offsec/unix-privesc-check-1.4/unix-privesc-check joe@192.168.185.214:/home/joe
+  ./unix-privesc-check standard > output.txt
+  Look for "World write is set for" in output.txt
+  ```
 - 18.2.1 Inspecting User Trails
 - 18.2.2 Inspecting Service Footprints
 
