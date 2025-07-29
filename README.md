@@ -2695,6 +2695,21 @@ Reference
   - connect to DB through port forward 2222  
     `ssh database_admin@192.168.124.63 -p2222`  
 - SSH Tunneling
+  - SSH local port forwarding
+    - Kali 192.168.45.250 to confluence 192.168.114.63 to DB 10.4.114.215 to HR 172.16.114.217 
+    - Enable Python's pty module after getting a shell on Confluence.
+      `confluence@confluence01:/opt/atlassian/confluence/bin$ python3 -c 'import pty; pty.spawn("/bin/sh")'`
+    - Open port forward 4242 on confluence
+      `ssh -N -L 0.0.0.0:4242:172.16.114.217:4242 database_admin@10.4.114.215`  
+    - Check if the port open now
+      `nc -zv 192.168.114.63 4242`  
+    - Download ssh_local_client via browser.
+      `wget http://192.168.114.63:8090/exercises/ssh_local_client`
+    - Connect to HR server via port 4242
+      `./ssh_local_client -i 192.168.114.63 -p 4242`
+  - SSH dynamic port forwarding
+  - SSH remote port forwarding
+  - SSH remote dynamic port forwarding 
 - Port forward with window tools  
 
 ## Penetration testing report 
