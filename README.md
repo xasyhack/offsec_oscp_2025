@@ -2871,7 +2871,8 @@ Reference
   - RDP to MULTISERVER03 by using [Plink](https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe)
   ```
   #kali
-  kali@kali:~$ sudo systemctl start apache2
+  sudo systemctl start ssh
+  sudo systemctl start apache2
   find / -name nc.exe 2>/dev/null 
   sudo cp /usr/share/windows-resources/binaries/nc.exe /var/www/html/
 
