@@ -2900,6 +2900,33 @@ Reference
   kali@kali:~$ xfreerdp3 /u:rdp_admin /p:P@ssw0rd! /v:127.0.0.1:9833
   ```
 - Port forward with window tools Netsh
+  - MULTISERVER03  192.168.120.64, PGDATABASE01 10.4.120.215  
+  - Create a port forward with Netsh, in order to SSH into PGDATABASE01 from the Kali machine  
+    ```
+    #kali RDP to MULTISERVER03
+    kali@kali:~$ xfreerdp3 /u:rdp_admin /p:P@ssw0rd! /v:192.168.120.64  -->MULTISERVER03 
+
+    #target poke a hole 2222 in MULTISERVER03 (run cmd as administrator)
+    C:\Windows\system32>netsh interface portproxy add v4tov4 listenport=2222 listenaddress=192.168.120.64 connectport=22 connectaddress=10.4.120.215   -->MULTISERVER03 , DB  
+    C:\Windows\system32>netstat -anp TCP | find "2222"
+    C:\Windows\system32>netsh interface portproxy show all
+    C:\Windows\system32> netsh advfirewall firewall add rule name="port_forward_ssh_2222" protocol=TCP dir=in localip=192.168.120.64 localport=2222 action=allow  ->MULTISERVER03 
+
+    $kali login to DB
+    kali@kali:~$ ssh database_admin@192.168.120.64 -p2222  -->MULTISERVER03 
+    ```
+  - Create a port forward on MULTISERVER03 that allows you to run this binary against port 4545 on PGDATABASE01
+    ```
+    kali@kali:~$ xfreerdp3 /u:rdp_admin /p:P@ssw0rd! /v:192.168.120.64  -->MULTISERVER03 
+
+    #target poke a hole 2222 in MULTISERVER03 (run cmd as administrator)
+    C:\Windows\system32>netsh interface portproxy add v4tov4 listenport=4545 listenaddress=192.168.120.64 connectport=4545 connectaddress=10.4.120.215   -->MULTISERVER03 , DB  
+    C:\Windows\system32>netstat -anp TCP | find "4545"
+    C:\Windows\system32> netsh advfirewall firewall add rule name="port_forward_ssh_4545" protocol=TCP dir=in localip=192.168.120.64 localport=4545 action=allow  ->MULTISERVER03 
+
+    $kali login to DB
+    kali@kali:~$  sudo ./netsh_exercise_client -i 192.168.120.64 -p 4545 ->MULTISERVER03
+    ```
 
 ## Penetration testing report 
 - note editor:
