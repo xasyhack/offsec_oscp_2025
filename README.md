@@ -36,7 +36,7 @@
   - [Antivirus evasion](#antivirus-evasion)
   - [Password attacks](#password-attacks)
   - [Linux privilege escalation](#linux-privilege-escalation)
-  - [](#port-redirection-and-ssh-tunneling)
+  - [Port redirection and SSH tunneling](#port-redirection-and-ssh-tunneling)
   - [Tunneling through deep packet inspectation](#tunneling-through-deep-packet-inspectation)
   - [The metassploit framework](#the-metassploit-framework)
   - [Active directory introduction and enumeration](#active-directory-introduction-and-enumeration)
@@ -1468,7 +1468,7 @@ Reference
     - obtain a root shell via kernel exploitation  
       `./cve-2017-16995` `id`  
 
-### 19.   
+### 19. Port redirection and SSH tunneling
 - **Port redirection** modifies the data flow by redirecting packets from one socket to another. Configure a host to listen on one port and relay all packets received on that port to another destination
 - **Tunneling** means encapsulating one type of data stream within another, for example, transporting Hypertext Transfer Protocol (HTTP) traffic within a Secure Shell (SSH) connection
 - A **DMZ** is a network containing devices that may be more exposed to a wider, less trusted network
