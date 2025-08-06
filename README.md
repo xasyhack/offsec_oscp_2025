@@ -1737,7 +1737,7 @@ Reference
     www.feline.corp	text = "here's something useful!"
     www.feline.corp	text = "here's something else less useful."
     ```
-- DNS tunneling with dbscat2
+- DNS tunneling with dnscat2
   - Starting tcpdump to listen for packets on UDP port 53  
     `kali@felineauthority:~$ sudo tcpdump -i ens192 udp port 53`
   - Starting the dnscat2 server. > Starting Dnscat2 DNS server on 0.0.0.0:53  
