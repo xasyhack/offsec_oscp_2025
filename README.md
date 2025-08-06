@@ -1707,6 +1707,9 @@ Reference
     auth-zone=feline.corp
     auth-server=feline.corp
     ```
+  - The basic configuration for our Dnsmasq server  
+    `kali@felineauthority:~$ cd dns_tunneling`
+    `kali@felineauthority:~/dns_tunneling$ cat dnsmasq.conf`  
   - Starting Dnsmasq with the basic configuration  
     `kali@felineauthority:~/dns_tunneling$ sudo dnsmasq -C dnsmasq.conf -d`
   - Another shell, Starting tcpdump on FELINEAUTHORITY  
