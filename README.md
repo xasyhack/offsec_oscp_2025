@@ -3056,7 +3056,7 @@ Reference
     kali@kali:~$  sudo ./netsh_exercise_client -i 192.168.120.64 -p 4545 ->MULTISERVER03
     ```
 
-### Tunneling through Deep Packet Inspection  
+### Tunneling through deep packet inspectation  
 - HTTP tunneling with chisel  
   - Set up Chisel as a reverse SOCKS proxy. SSH into PGDATABASE01
     ```
