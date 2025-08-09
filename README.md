@@ -2098,27 +2098,27 @@ Reference
   
 **Manual enumeration**
 - Legacy window tools
-  - Connecting to the Windows 11 client using "xfreerdp"
-    `kali@kali:~$ xfreerdp /u:stephanie /d:corp.com /v:192.168.50.75` //password: LegmanTeamBenzoin!!
-  - remote choice: RDP then PowerShell or winrm
-  - enumerate users
+  - Connecting to the Windows 11 client using "xfreerdp"  
+    `kali@kali:~$ xfreerdp3 /u:stephanie /d:corp.com /v:192.168.50.75` //password: LegmanTeamBenzoin!!
+  - remote choice: RDP then PowerShell or winrm  
+  - enumerate users  
     `C:\Users\stephanie>net user /domain`
-  - enumerate specific user > domain Admins
+  - enumerate specific user > domain Admins  
     `C:\Users\stephanie>net user jeffadmin /domain`
-  - enumerate groups > Development Department, Management Department, Sales Department
+  - enumerate groups > Development Department, Management Department, Sales Department  
     `C:\Users\stephanie>net group /domain`
-  - enumerate members for specific group > pete, stephanie
+  - enumerate members for specific group > pete, stephanie  
     `PS C:\Tools> net group "Sales Department" /domain`
 - PowerShell and .NET classes
-  - Remote Server Administration Tools (RSAT) rarely present and needs admin privilege to install.
-  - leverage an Active Directory Services Interface (ADSI) to use LDAP
-  - LDAP path format
+  - Remote Server Administration Tools (RSAT) rarely present and needs admin privilege to install.  
+  - leverage an Active Directory Services Interface (ADSI) to use LDAP  
+  - LDAP path format  
     `LDAP://HostName[:PortNumber][/DistinguishedName]`
-  - Use Primary Domain Controller (PDC) > find the DC holding the PdcRoleOwner property
-  - A DN is a name that uniquely identifies an object in AD (E.g: CN=Stephanie,CN=Users,DC=corp,DC=com)
-  - Domain class from System.DirectoryServices.ActiveDirectory namespace > PdcRoleOwner: DC1.corp.com
+  - Use Primary Domain Controller (PDC) > find the DC holding the PdcRoleOwner property  
+  - A DN is a name that uniquely identifies an object in AD (E.g: CN=Stephanie,CN=Users,DC=corp,DC=com)  
+  - Domain class from System.DirectoryServices.ActiveDirectory namespace > PdcRoleOwner: DC1.corp.com  
     `PS C:\Users\stephanie> [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()`  
-  - Creating script "enumeration.ps1"- storing domain object in our first variable
+  - Creating script "enumeration.ps1"- storing domain object in our first variable  
     ```
     # Store the domain object in the $domainObj variable
     $domainObj = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
