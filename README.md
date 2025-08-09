@@ -2090,8 +2090,98 @@ Reference
   ```
 - Listing all resource scripts provided by Metasploit  
   `kali@kali:~$ ls -l /usr/share/metasploit-framework/scripts/resource`
-- ddd
-### 22. Active directory introduction and enumeration
+
+### 22. Active directory introduction and enumeration  
+- Active Directory (AD): The overall directory service for the domain (e.g., corp.com).
+- Domain Controller (DC): One or more servers that hold the AD database and manage authentication and replication of information.
+- Organizational Units (OUs): Logical containers within the AD domain used to organize users, computers, and groups for easier management and application of policies.
+  
+**Manual enumeration**
+- Legacy window tools
+  - Connecting to the Windows 11 client using "xfreerdp"
+    `kali@kali:~$ xfreerdp /u:stephanie /d:corp.com /v:192.168.50.75` //password: LegmanTeamBenzoin!!
+  - remote choice: RDP then PowerShell or winrm
+  - enumerate users
+    `C:\Users\stephanie>net user /domain`
+  - enumerate specific user > domain Admins
+    `C:\Users\stephanie>net user jeffadmin /domain`
+  - enumerate groups > Development Department, Management Department, Sales Department
+    `C:\Users\stephanie>net group /domain`
+  - enumerate members for specific group > pete, stephanie
+    `PS C:\Tools> net group "Sales Department" /domain`
+- PowerShell and .NET classes
+  - Remote Server Administration Tools (RSAT) rarely present and needs admin privilege to install.
+  - leverage an Active Directory Services Interface (ADSI) to use LDAP
+  - LDAP path format
+    `LDAP://HostName[:PortNumber][/DistinguishedName]`
+  - Use Primary Domain Controller (PDC) > find the DC holding the PdcRoleOwner property
+  - A DN is a name that uniquely identifies an object in AD (E.g: CN=Stephanie,CN=Users,DC=corp,DC=com)
+  - Domain class from System.DirectoryServices.ActiveDirectory namespace > PdcRoleOwner: DC1.corp.com
+    `PS C:\Users\stephanie> [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()`  
+  - Creating script "enumeration.ps1"- storing domain object in our first variable
+    ```
+    # Store the domain object in the $domainObj variable
+    $domainObj = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
+
+    # Print the variable
+    $domainObj
+    ```
+  - To run the script, we must bypass the execution policy to keep us accidentlly running PowerShell scripts
+    `PS C:\Users\stephanie> powershell -ep bypass`  
+    `PS C:\Users\stephanie> .\enumeration.ps1`  
+  - Adding the **$PDC** variable to our script and extracting PdcRoleOwner name to it
+    ```
+    # Store the domain object in the $domainObj variable
+    $domainObj = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
+
+    # Store the PdcRoleOwner name to the $PDC variable
+    $PDC = $domainObj.PdcRoleOwner.Name
+
+    # Print the $PDC variable
+    $PDC
+    ```
+  - Using ADSI to obtain the DN for the domain
+    `PS C:\Users\stephanie> ([adsi]'').distinguishedName`
+  - Adding the **$DN** variable to our script
+    ```
+    # Store the domain object in the $domainObj variable
+    $domainObj = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
+
+    # Store the PdcRoleOwner name to the $PDC variable
+    $PDC = $domainObj.PdcRoleOwner.Name
+
+    # Store the Distinguished Name variable into the $DN variable
+    $DN = ([adsi]'').distinguishedName
+
+    # Print the $DN variable
+    $DN
+    ```
+  - Script which will create the full LDAP path required for enumeration
+    ```
+    $PDC = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain().PdcRoleOwner.Name
+    $DN = ([adsi]'').distinguishedName 
+    $LDAP = "LDAP://$PDC/$DN"
+    $LDAP
+    ```
+  - Run the script to create the full LDAP path
+    `PS C:\Users\stephanie> .\enumeration.ps1`  
+    LDAP://DC1.corp.com/DC=corp,DC=com
+  - ddd
+  - ddd
+- script
+- PowerView
+
+**Info gathering**
+- Enumerating OS
+- Permissions and Logged on Users
+- Services Principals Names
+- Object Permissions
+- Domain Shares
+
+**Automated enumeration**  
+- Collecting data with SharpHound
+- Analysing data using BloodHound
+- 
 ### 23. Attacking active drectiory authentication
 ### 24. Lateral movement in active directory
 ### 25. Enumerating AWS Cloud Infrastruture
