@@ -3976,7 +3976,45 @@ Reference
     PS C:\Users\stephanie> .\enumeration.ps1
     ```
 - Seach functionality in script
-- PowerView    
+  - numerate the domain groups “Service Personnel”， then enumerate the attributes for the last direct user member
+    ```
+    notepad .\function.ps1
+	function LDAPSearch {
+	    param (
+	        [string]$LDAPQuery
+	    )
+	
+	    $PDC = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain().PdcRoleOwner.Name
+	    $DistinguishedName = ([adsi]'').distinguishedName
+	
+	    $DirectoryEntry = New-Object System.DirectoryServices.DirectoryEntry("LDAP://$PDC/$DistinguishedName")
+	
+	    $DirectorySearcher = New-Object System.DirectoryServices.DirectorySearcher($DirectoryEntry, $LDAPQuery)
+	
+	    return $DirectorySearcher.FindAll()
+	}
+
+	PS C:\Users\stephanie> powershell -ep bypass
+    PS C:\Users\stephanie> Import-Module .\function.ps1
+
+    PS C:\Users\stephanie> $group = LDAPSearch -LDAPQuery "(&(objectCategory=group)(cn=Service Personnel*))"
+    PS C:\Users\stephanie> $group.properties.member
+
+    PS C:\Users\stephanie\Desktop> $group = LDAPSearch -LDAPQuery "(&(objectCategory=user)(cn=michelle*))"
+    PS C:\Users\stephanie\Desktop> $group.properties
+    ```
+- PowerView
+  - `Import-Module .\PowerView.ps1`  
+  - List domain groups  
+    `Get-NetGroup`
+  - Which new user is a part of the Domain Admins group?  
+    ```
+    Get-NetUser | select cn,whencreated
+    Get-NetGroup "Domain Admins" | select member
+    ```
+- ddd
+
+
 ## Penetration testing report 
 - note editor:
   - [Sublime-syntax highlight](https://www.sublimetext.com/download)
