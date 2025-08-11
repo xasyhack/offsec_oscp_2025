@@ -2166,10 +2166,128 @@ Reference
   - Run the script to create the full LDAP path
     `PS C:\Users\stephanie> .\enumeration.ps1`  
     LDAP://DC1.corp.com/DC=corp,DC=com
-  - ddd
-  - ddd
-- script
-- PowerView
+- search functionality in script
+  - `PS C:\Users\stephanie> .\enumeration.ps1` to search AD
+    ```
+    $PDC = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain().PdcRoleOwner.Name
+    $DN = ([adsi]'').distinguishedName 
+    $LDAP = "LDAP://$PDC/$DN"
+
+    $direntry = New-Object System.DirectoryServices.DirectoryEntry($LDAP)
+
+    $dirsearcher = New-Object System.DirectoryServices.DirectorySearcher($direntry)
+    $dirsearcher.FindAll()
+    ...
+    LDAP://DC1.corp.com/DC=corp,DC=com
+    LDAP://DC1.corp.com/CN=Users,DC=corp,DC=com
+    ```
+ - Using **samAccountType** attribute to filter normal user accounts
+   ```
+   $dirsearcher.filter="samAccountType=805306368"
+   ...
+   LDAP://DC1.corp.com/CN=Administrator,CN=Users,DC=corp,DC=com {logoncount, codepage, objectcategory, description...}
+   LDAP://DC1.corp.com/CN=Guest,CN=Users,DC=corp,DC=com         {logoncount, codepage, objectcategory, description...}
+   ```
+ - Adding a nested loop which will print each property on its own line
+   ```
+   $domainObj = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
+   $PDC = $domainObj.PdcRoleOwner.Name
+   $DN = ([adsi]'').distinguishedName 
+   $LDAP = "LDAP://$PDC/$DN"
+
+   $direntry = New-Object System.DirectoryServices.DirectoryEntry($LDAP)
+
+   $dirsearcher = New-Object System.DirectoryServices.DirectorySearcher($direntry)
+   $dirsearcher.filter="samAccountType=805306368"
+   $result = $dirsearcher.FindAll()
+
+   Foreach($obj in $result)
+   {
+      Foreach($prop in $obj.Properties)
+      {
+        $prop
+      }
+
+      Write-Host "-------------------------------"
+   }
+   ```
+ - Adding the name property to the filter and only print the "memberof" attribute in the nested loop
+   ```
+   $dirsearcher = New-Object System.DirectoryServices.DirectorySearcher($direntry)
+   $dirsearcher.filter="name=jeffadmin"
+   $result = $dirsearcher.FindAll()
+	
+   Foreach($obj in $result)
+   {
+	  Foreach($prop in $obj.Properties)
+	  {
+	     $prop.memberof
+	  }
+	
+	  Write-Host "-------------------------------"
+	}
+   ```
+ - Running script to only show jeffadmin and which groups he is a member of
+   ```
+   PS C:\Users\stephanie> .\enumeration.ps1
+   CN=Domain Admins,CN=Users,DC=corp,DC=com
+   CN=Administrators,CN=Builtin,DC=corp,DC=com
+   ```
+ - A function that accepts user input
+   ```
+   function LDAPSearch {
+    param (
+        [string]$LDAPQuery
+    )
+
+    $PDC = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain().PdcRoleOwner.Name
+    $DistinguishedName = ([adsi]'').distinguishedName
+
+    $DirectoryEntry = New-Object System.DirectoryServices.DirectoryEntry("LDAP://$PDC/$DistinguishedName")
+
+    $DirectorySearcher = New-Object System.DirectoryServices.DirectorySearcher($DirectoryEntry, $LDAPQuery)
+
+    return $DirectorySearcher.FindAll()
+
+   }
+   ```
+ - Importing our function to memory  
+   `Import-Module .\function.ps1`
+ - Performing a user search using the new function  
+   `PS C:\Users\stephanie> LDAPSearch -LDAPQuery "(samAccountType=805306368)"`
+   `PS C:\Users\stephanie> LDAPSearch -LDAPQuery "(objectclass=group)"`
+ - Using "foreach" to iterate through the objects in $group variable
+   ```
+   PS C:\Users\stephanie\Desktop> foreach ($group in $(LDAPSearch -LDAPQuery "(objectCategory=group)")) {
+	 $group.properties | select {$_.cn}, {$_.member}
+   }
+   ```
+ - Adding the search to our variable called $sales
+   `PS C:\Users\stephanie> $sales = LDAPSearch -LDAPQuery "(&(objectCategory=group)(cn=Sales Department))"`
+ - printing the member attribute on the Sales Department group object
+   ```
+   $sales.properties.member
+   ...
+   CN=Development Department,DC=corp,DC=com
+   ```
+ - Printing the member attribute on the Development Department group object
+   ```
+   PS C:\Users\stephanie> $group = LDAPSearch -LDAPQuery "(&(objectCategory=group)(cn=Development Department*))"
+   PS C:\Users\stephanie> $group.properties.member
+   ...
+   CN=Management Department,DC=corp,DC=com
+   ```
+ - Printing the member attribute on the Management Department group object
+   ```
+   PS C:\Users\stephanie\Desktop> $group = LDAPSearch -LDAPQuery "(&(objectCategory=group)(cn=Management Department*))"
+
+   PS C:\Users\stephanie\Desktop> $group.properties.member
+   ...
+   CN=jen,CN=Users,DC=corp,DC=com
+   ```
+ - sds
+ - sss
+- PowerView 
 
 **Info gathering**
 - Enumerating OS
@@ -3827,6 +3945,26 @@ Reference
   - Capture the flag  
     `meterpreter > shell` `C:\Windows\system32>type C:\Users\itwk04admin\Desktop\flag.txt`  
 
+### Active Directory Introduction and Enumeration  
+- Legacy Window Tools
+  - Which user is a member of the Management Department group?
+    `xfreerdp3 /u:stephanie /p:'LegmanTeamBenzoin!!' /d:corp.com /v:192.168.231.75 /cert:ignore /drive:share,/home/kali/share`
+    `net group "Management Department" /domain`
+- PowerShell and .NET Classes
+  - LDAP path
+    ```
+    PS C:\Users\stephanie> powershell -ep bypass
+    
+	notepad enumeration.ps1
+	$PDC = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain().PdcRoleOwner.Name
+	$DN = ([adsi]'').distinguishedName 
+	$LDAP = "LDAP://$PDC/$DN"
+	$LDAP
+
+    PS C:\Users\stephanie> .\enumeration.ps1
+    ```
+- Seach functionality in script
+- PowerView    
 ## Penetration testing report 
 - note editor:
   - [Sublime-syntax highlight](https://www.sublimetext.com/download)
