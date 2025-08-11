@@ -2254,7 +2254,7 @@ Reference
  - Importing our function to memory  
    `Import-Module .\function.ps1`
  - Performing a user search using the new function  
-   `PS C:\Users\stephanie> LDAPSearch -LDAPQuery "(samAccountType=805306368)"`
+   `PS C:\Users\stephanie> LDAPSearch -LDAPQuery "(samAccountType=805306368)"`  
    `PS C:\Users\stephanie> LDAPSearch -LDAPQuery "(objectclass=group)"`
  - Using "foreach" to iterate through the objects in $group variable
    ```
