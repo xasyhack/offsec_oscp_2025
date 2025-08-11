@@ -2262,22 +2262,22 @@ Reference
 	 $group.properties | select {$_.cn}, {$_.member}
    }
    ```
- - Adding the search to our variable called $sales
+ - Adding the search to our variable called $sales  
    `PS C:\Users\stephanie> $sales = LDAPSearch -LDAPQuery "(&(objectCategory=group)(cn=Sales Department))"`
- - printing the member attribute on the Sales Department group object
+ - printing the member attribute on the Sales Department group object  
    ```
    $sales.properties.member
    ...
    CN=Development Department,DC=corp,DC=com
    ```
- - Printing the member attribute on the Development Department group object
+ - Printing the member attribute on the Development Department group object  
    ```
    PS C:\Users\stephanie> $group = LDAPSearch -LDAPQuery "(&(objectCategory=group)(cn=Development Department*))"
    PS C:\Users\stephanie> $group.properties.member
    ...
    CN=Management Department,DC=corp,DC=com
    ```
- - Printing the member attribute on the Management Department group object
+ - Printing the member attribute on the Management Department group object  
    ```
    PS C:\Users\stephanie\Desktop> $group = LDAPSearch -LDAPQuery "(&(objectCategory=group)(cn=Management Department*))"
 
@@ -2285,9 +2285,21 @@ Reference
    ...
    CN=jen,CN=Users,DC=corp,DC=com
    ```
- - sds
- - sss
-- PowerView 
+- PowerView
+  - Importing PowerView to memory  `PS C:\Tools> Import-Module .\PowerView.ps1`  
+  - Obtaining domain information  
+    `PS C:\Tools> Get-NetDomain`
+  - Querying users in the domain  
+    `PS C:\Tools> Get-NetUser`
+  - Querying users using select statement  
+    `PS C:\Tools> Get-NetUser | select cn`
+  - querying users displaying pwdlastset and lastlogon  
+    `PS C:\Tools> Get-NetUser | select cn,pwdlastset,lastlogon`
+  - Querying groups in the domain using PowerView  
+    `PS C:\Tools> Get-NetGroup | select cn`
+  - Enumerating the "Sales Department" group  
+    `PS C:\Tools> Get-NetGroup "Sales Department" | select member`  
+  - dd
 
 **Info gathering**
 - Enumerating OS
