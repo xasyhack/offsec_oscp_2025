@@ -2299,11 +2299,36 @@ Reference
     `PS C:\Tools> Get-NetGroup | select cn`
   - Enumerating the "Sales Department" group  
     `PS C:\Tools> Get-NetGroup "Sales Department" | select member`  
-  - dd
 
 **Info gathering**
 - Enumerating OS
-- Permissions and Logged on Users
+  - Partial domain computer overview > dnshostname: DC1.corp.com; operatingsystem: Windows Server 2022 Standard  
+    `PS C:\Tools> Get-NetComputer`  
+    `PS C:\Tools> Get-NetComputer | select operatingsystem,dnshostname`  
+- Permissions and Logged on Users  
+  - don't necessarily need to immediately escalate to Domain Admins because there may be other accounts that have higher privileges than a regular domain use  
+  - Scanning domain to find local administrative privileges for our user  
+    `PS C:\Tools> Find-LocalAdminAccess` > client74.corp.com
+  - Checking logged on users with Get-NetSession  
+    `PS C:\Tools> Get-NetSession -ComputerName files04 -Verbose`  
+  - Administrative privileges on CLIENT74 with stephanie > the IP address in CName (192.168.50.75) does not match the IP address for CLIENT74  
+    `PS C:\Tools> Get-NetSession -ComputerName client74`  
+  - Displaying permissions on the DefaultSecurity registry hive  
+    ```
+    PS C:\Tools> Get-Acl -Path HKLM:SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity\ | fl
+    ...
+    Access : BUILTIN\Users Allow  ReadKey  
+    Get-Acl -Path HKLM:SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity\ | fl   
+    ```
+  - Querying operating system and version   
+    `PS C:\Tools> Get-NetComputer | select dnshostname,operatingsystem,operatingsystemversion`  
+    ...
+    CLIENT76.corp.com Windows 10 Pro  10.0 (16299)
+  - Using PsLoggedOn to see user logons at Files04 > Users logged on locally: CORP\jeff  
+    `PS C:\Tools\PSTools> .\PsLoggedon.exe \\files04`  
+    `PS C:\Tools\PSTools> .\PsLoggedon.exe \\web04` //might be false positive  
+    `PS C:\Tools\PSTools> .\PsLoggedon.exe \\client74` //admin privilege  
+  - dd
 - Services Principals Names
 - Object Permissions
 - Domain Shares
