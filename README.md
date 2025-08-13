@@ -3984,7 +3984,7 @@ Reference
 
 ### Active Directory Introduction and Enumeration  
 - Legacy Window Tools
-  - Which user is a member of the Management Department group?
+  - Which user is a member of the Management Department group?  
     `xfreerdp3 /u:stephanie /p:'LegmanTeamBenzoin!!' /d:corp.com /v:192.168.231.75 /cert:ignore /drive:share,/home/kali/share`
     `net group "Management Department" /domain`
 - PowerShell and .NET Classes
@@ -4037,7 +4037,19 @@ Reference
     Get-NetUser | select cn,whencreated
     Get-NetGroup "Domain Admins" | select member
     ```
-- ddd
+- Enumerating OS
+  - `powershell -ep bypass`  
+  - `Import-Module .\PowerView.ps1`  
+  - What is the DistinguishedName for the WEB04 machine > CN=web04,CN=Computers,DC=corp,DC=com
+    `Get-NetComputer -Name WEB04 | select distinguishedname`  
+  - What is the exact operating system version for FILES04 > 10.0 (20348)
+    `Get-NetComputer -Name FILES04 | select operatingsystem, operatingsystemversion`  
+    `Get-NetComputer | select name, operatingsystem, operatingsystemversion`   
+- Getting overview of permissions and logged on users
+  - Find out which new machine has administrative privileges
+    `Find-LocalAdminAccess`
+    `xfreerdp3 /u:stephanie /p:'LegmanTeamBenzoin!!' /d:corp.com /v:192.168.154.72 /cert:ignore /drive:share,/home/kali/share`  
+  - dd
 
 
 ## Penetration testing report 
