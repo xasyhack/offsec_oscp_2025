@@ -2328,9 +2328,32 @@ Reference
     `PS C:\Tools\PSTools> .\PsLoggedon.exe \\files04`  
     `PS C:\Tools\PSTools> .\PsLoggedon.exe \\web04` //might be false positive  
     `PS C:\Tools\PSTools> .\PsLoggedon.exe \\client74` //admin privilege  
-  - dd
-- Services Principals Names
+- Services Principals Names (SPN)
+  - Listing SPN linked to a certain user account > Registered ServicePrincipalNames for CN=iis_service,CN=Users,DC=corp,DC=com:
+    `c:\Tools>setspn -L iis_service`  
+  - Listing the SPN accounts in the domain > samaccountname serviceprincipalname
+    `PS C:\Tools> Get-NetUser -SPN | select samaccountname,serviceprincipalname` //{HTTP/web04.corp.com, HTTP/web04, HTTP/web04.corp.com:80}
+  - Resolving the web04.corp.com named > Address:  192.168.50.72
+    `PS C:\Tools\> nslookup.exe web04.corp.com`  
 - Object Permissions
+  - Running Get-ObjectAcl specifying our user > ObjectSID: S-1-5-21-1987370270-658905905-1781884369-1104; ActiveDirectoryRights: ReadProperty; SecurityIdentifier: S-1-5-21-1987370270-658905905-1781884369-553  
+    `PS C:\Tools> Get-ObjectAcl -Identity stephanie`
+  - use PowerView's Convert-SidToName command to convert it to an actual domain object name > CORP\stephanie  
+    `PS C:\Tools> Convert-SidToName S-1-5-21-1987370270-658905905-1781884369-1104`
+  - Converting the SecurityIdentifier into name > CORP\RAS and IAS Servers  
+    `PS C:\Tools> Convert-SidToName S-1-5-21-1987370270-658905905-1781884369-553`
+  - Enumerating ACLs for the Management Group  
+    `PS C:\Tools> Get-ObjectAcl -Identity "Management Department" | ? {$_.ActiveDirectoryRights -eq "GenericAll"} | select SecurityIdentifier,ActiveDirectoryRights`
+  - Converting all SIDs that have GenericAll permission on the Management Group > CORP\Domain Admins...  
+    `PS C:\Tools> "S-1-5-21-1987370270-658905905-1781884369-512","S-1-5-21-1987370270-658905905-1781884369-1104","S-1-5-32-548","S-1-5-18","S-1-5-21-1987370270-658905905-1781884369-519" | Convert-SidToName`
+  - Using "net.exe" to add ourselves to domain group  
+    `PS C:\Tools> net group "Management Department" stephanie /add /domain`
+  - Running "Get-NetGroup" to enumerate "Management Department" (verify if stephanie now added to the group)  > {CN=jen,CN=Users,DC=corp,DC=com, CN=stephanie,CN=Users,DC=corp,DC=com}  
+    `PS C:\Tools> Get-NetGroup "Management Department" | select member`
+  - Using "net.exe" to remove ourselves from domain group
+    `PS C:\Tools> net group "Management Department" stephanie /del /domain`
+  - ddd
+  - ddd
 - Domain Shares
 
 **Automated enumeration**  
