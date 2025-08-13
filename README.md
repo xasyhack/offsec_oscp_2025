@@ -2372,8 +2372,42 @@ Reference
 
 **Automated enumeration**  
 - Collecting data with SharpHound
+  - Import Sharphound script  
+    ```
+    PS C:\Users\stephanie> powershell -ep bypass
+    PS C:\Users\stephanie> Import-Module .\Sharphound.ps1
+    PS C:\Users\stephanie\Downloads> Get-Help Invoke-BloodHound
+    ```
+  - Collect domain data > audit_20240810201601_BloodHound.zip  
+    `PS C:\Users\stephanie\Downloads> Invoke-BloodHound -CollectionMethod All -OutputDirectory C:\Users\stephanie\Desktop\ -OutputPrefix "corp audit"`
+  - Starting the Neo4j service in Kali Linux
+    ```
+    sudo apt update
+    sudo apt install neo4j -y
+    sudo neo4j start
+    ...
+    web interface at http://localhost:7474 //credential: neo4j  > neo4j1 (change password)
+    ```  
+ 
 - Analysing data using BloodHound
-- 
+  - Install and Starting BloodHound in Kali Linux  
+    https://blog.spookysec.net/Deploying-BHCE/ (admin:LxZQwhnHcY7RiPDfjX5pasciuYHHEZdb)
+    ```
+    apt install docker-compose
+    wget https://github.com/SpecterOps/bloodhound-cli/releases/latest/download/bloodhound-cli-linux-amd64.tar.gz && tar -xzf ./bloodhound-cli-linux-amd64.tar.gz && rm bloodhound-cli-linux-amd64.tar.gz
+    Login: admin; ./bloodhound-cli config get default_password
+    
+    --troubleshooting
+    sudo lsof -i :7687 //confirm port is free
+    sudo neo4j stop       # if installed as service
+    sudo pkill -f neo4j   # if running in console mode
+    ```
+  - Update data "corp audit_xxxx_BloodHound.zip" in Bloodhound UI  
+  - stephanie@corp.com  AdminTo Client74.corp.com > Mark User as Owned  
+  - jeffadmin@corp.com  
+  - run the Shortest Paths to Domain Admins from Owned Principals  
+  - stephanie user should be able to connect to CLIENT74, where jeffadmin has a session. jeffadmin is a part of the Domain Admins  
+  
 ### 23. Attacking active drectiory authentication
 ### 24. Lateral movement in active directory
 ### 25. Enumerating AWS Cloud Infrastruture
