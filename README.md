@@ -2396,13 +2396,15 @@ Reference
     apt install docker-compose
     wget https://github.com/SpecterOps/bloodhound-cli/releases/latest/download/bloodhound-cli-linux-amd64.tar.gz && tar -xzf ./bloodhound-cli-linux-amd64.tar.gz && rm bloodhound-cli-linux-amd64.tar.gz
     Login: admin; ./bloodhound-cli config get default_password
+
+    sudo ./bloodhound-cli install
     
     --troubleshooting
     sudo lsof -i :7687 //confirm port is free
     sudo neo4j stop       # if installed as service
     sudo pkill -f neo4j   # if running in console mode
     ```
-  - Update data "corp audit_xxxx_BloodHound.zip" in Bloodhound UI  
+  - Upload data "corp audit_xxxx_BloodHound.zip" in Bloodhound UI  
   - stephanie@corp.com  AdminTo Client74.corp.com > Mark User as Owned  
   - jeffadmin@corp.com  
   - run the Shortest Paths to Domain Admins from Owned Principals  
