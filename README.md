@@ -2411,6 +2411,15 @@ Reference
   - stephanie user should be able to connect to CLIENT74, where jeffadmin has a session. jeffadmin is a part of the Domain Admins  
   
 ### 23. Attacking active drectiory authentication
+- NTLM authentication  
+- Kerberos authentication
+- Cached AD credentials
+- Password attacks
+- AS-REP roasting
+- Kerberoasting
+- Silver tickets
+- Domain controller synchronization
+  
 ### 24. Lateral movement in active directory
 ### 25. Enumerating AWS Cloud Infrastruture
 ### 26. Attacking AWS cloud infrastruture 
