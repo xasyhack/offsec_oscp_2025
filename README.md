@@ -2519,8 +2519,9 @@ Reference
   - Accessing the SMB share with the silver ticket  
     `PS C:\Tools> iwr -UseDefaultCredentials http://web04`
 - Domain controller synchronization
-  - Replicating Directory Changes, Replicating Directory Changes All, and Replicating Directory Changes in filtered set rights (All admin group have these rights assigned  
-  - dcsync attack in which we impersonate a domain controller  
+  - A DCSync attack is a technique where an attacker uses replication permissions in Active Directory to impersonate a Domain Controller and request user credentials (NTLM hashes, Kerberos keys, etc.) from another DC
+  - By default, Domain Admins, Enterprise Admins, and the KRBTGT account can replicate directory changes.
+  - Use tools like BloodHound to identify accounts with Replicating Directory Changes, Replicating Directory Changes All, and Replicating Directory Changes In Filtered Set  
   - Using **Mimikatz** to perform a dcsync attack to obtain the credentials of dave > **credentials**: Hash NTLM: 08d7a47a6f9f66b97b1bae4178747494  
     ```
     PS C:\Users\jeffadmin> cd C:\Tools\
