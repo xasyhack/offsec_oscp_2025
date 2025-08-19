@@ -1,9 +1,10 @@
 ## 📑 Table of Contents
 
 - [Resources](#resources)
-- [Methodology](#methodology)
-- [Reverse shell](#reverse-shell)
 - [Capture the flag](#capture-the-flag)
+- [Reverse shell](#reverse-shell)
+- [File transfer](#file-transfer)
+- [Methodology](#methodology)
 - [PWK-200 syallabus](#pwk-200-syallabus) 
   - [6. Information gathering](#6-information-gathering)
   - [7. Vulnerability scanning](#7-vulnerability-scanning)
@@ -114,8 +115,6 @@
       - match service + version, unauthenticated exploit, RCE, exploit in python/bash, exploit with shellcode/reversell, exploit available in 'searchsploit'
     - Non-priority
       - DoS, requires authentication, need compilation, PoC without reverse shell, MSF module, written in unfamiliar language like perl/Java
-
-## Capture the flag
 
 ## File transfer 
 - Download windows file to Kali
