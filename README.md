@@ -73,7 +73,7 @@
    - [security headers and SSL/TLS](https://securityheaders.com/)
    - [Qualys SSL Labs](https://www.ssllabs.com/ssltest/)
    - LLM: chatGPT prompt; can you provide the best 20 google dorks for megacorpone.com website tailored for a penetration test; Retrieve the technology stack of the megacorpone.com website; 20 Google dorks aimed to our target website
-   - [Datanyze](),6sense(): web tech stack response
+   - Datanyze,6sense: web tech stack response
 
    **Active**
    - **DNS (friendly domain names to IP)**
