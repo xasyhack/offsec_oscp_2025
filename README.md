@@ -73,7 +73,6 @@
    - [security headers and SSL/TLS](https://securityheaders.com/)
    - [Qualys SSL Labs](https://www.ssllabs.com/ssltest/)
    - LLM: chatGPT prompt; can you provide the best 20 google dorks for megacorpone.com website tailored for a penetration test; Retrieve the technology stack of the megacorpone.com website; 20 Google dorks aimed to our target website
-   - Datanyze,6sense: web tech stack response
 
    **Active**
    - **DNS (friendly domain names to IP)**
@@ -162,7 +161,7 @@
    - host discovery
    - port scanning
    - OS, service, version detection
-   - Matching results to vulnerability db ([NVD](https://nvd.nist.gov/), [CVE](https://cve.mitre.org/cve/search_cve_list.html), [CVSS](https://portal.offsec.com/courses/pen-200-44065/learning/vulnerability-scanning-48659/vulnerability-scanning-theory-48706/how-vulnerability-scanners-work-48663), [CVSS calculator](https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator)
+   - Matching results to vulnerability db ([NVD](https://nvd.nist.gov/), [CVE](https://cve.mitre.org/cve/search_cve_list.html), [CVSS](https://portal.offsec.com/courses/pen-200-44065/learning/vulnerability-scanning-48659/vulnerability-scanning-theory-48706/how-vulnerability-scanners-work-48663), [CVSS calculator](https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator))  
    - unauthenticated (view from external attacker) and authenticated scan (privileged user check for vulnerable packages, missing patches, or configuration vulnerabilities)
    - internal vulnerability scan (VPN or scan on-site) and DMZ + External (public facing) scan
    - consideration: scanning duration, accessible, firewalls, rate limiting, impact
@@ -182,8 +181,9 @@
      - found in "/usr/share/nmap/scripts/"
      - `sudo nmap --script-updatedb`
      - `sudo nmap -sV -p 443 --script "vuln" 192.168.50.124`: vuln scan n port 443
-     - Google "CVE-2021-41773 nse" and download NSE from github `sudo cp /home/kali/Downloads/http-vuln-cve-2021-41773.nse /usr/share/nmap/scripts/http-vuln-cve2021-41773.nse`
-     - `sudo nmap -sV -p 443 --script "http-vuln-cve2021-41773" 192.168.50.124`: provide vuln name, target, port > additional vulnerability
+     - Google "CVE-2021-41773 nse" and download NSE from github  
+       `sudo cp /home/kali/Downloads/http-vuln-cve-2021-41773.nse /usr/share/nmap/scripts/http-vuln-cve2021-41773.nse`  
+       `sudo nmap -sV -p 443 --script "http-vuln-cve2021-41773" 192.168.50.124`: provide vuln name, target, port > additional vulnerability  
        
 ### 8. Introduction to web applcation attacks
    - **Fingerprinting Web Servers** with Nmap  
@@ -2664,9 +2664,9 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
 - 6.4.2 TCP/UDP Port scanning
   - Netcat scan for port 1-1000 (show open port only)  
     `nc -nvv -w 1 -z 192.168.165.151 1-1000 2>&1 | grep open`
-  - Netcat TCP port scan 1-10000 (show open port only)
+  - Netcat TCP port scan 1-10000 (show open port only)  
     `nc -nvv -w 1 -z 192.168.165.151 1-10000 2>&1 | grep open`
-  - Netcat UDP port scan
+  - Netcat UDP port scan  
     `nc -nv -u -z -w 1 192.168.165.151 150-200 2>&1 | grep open`
 - 6.4.3 Port scanning with Nmap
   - SYN scan for /24 subnet + port 25 open  
@@ -2683,9 +2683,9 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
     `sudo nmap -p 80,8080 --script=http-title 192.168.165.0/24`  
     `curl http://192.168.165.6/index.html`  
 - 6.4.4 SMB enumeration
-  - nmap SMB (port 139, 445)
+  - nmap SMB (port 139, 445)  
     `nmap -v -p 445 --open -oG smb.txt 192.168.165.0/24`
-  - RDP Win11 + shares enumeration against dc01 via net view
+  - RDP Win11 + shares enumeration against dc01 via net view  
     `net view \\dc01 /all`  
   - enum4linux for local users alfred
     ```
