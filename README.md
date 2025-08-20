@@ -1,8 +1,6 @@
 ## 📑 Table of Contents
 
 - [Resources](#resources)
-
-- [Methodology](#methodology)
 - [PWK-200 syallabus](#pwk-200-syallabus) 
   - [6. Information gathering](#6-information-gathering)
   - [7. Vulnerability scanning](#7-vulnerability-scanning)
@@ -46,10 +44,6 @@
   - [Enumerating AWS Cloud Infrastruture](#enumerating-aws-cloud-infrastruture)
   - [Attacking AWS cloud infrastruture](#attacking-aws-cloud-infrastruture)
   - [Assembling the pieces](#assembling-the-pieces)
-- [Penetration testing report](#penetration-testing-report)
-- [Penetration testing stages](#penetration-testing-stages)
-- [Recommended OSCP Cracking Tools & Usage (2025)](#recommended-oscp-cracking-tools--usage-2025)
-- [OSCP Pro Tips](#oscp-pro-tips)
 - [Kali setup](#kali-setup)
 
 ## Resources
@@ -57,8 +51,6 @@
 - [OffSec Discord](https://discord.gg/offsec)
   - OffSec portal > Explorer > Discord > link OffSec account to discord
 - [OffSec Study Plan and Exam FAQ](https://help.offsec.com/hc/en-us/sections/6970444968596-Penetration-Testing-with-Kali-Linux-PEN-200)
-
-## Methodology 
 
 ## PWK-200 syallabus
 ### 6. Information gathering  
