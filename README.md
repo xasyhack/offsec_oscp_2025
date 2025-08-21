@@ -31,7 +31,7 @@
   - [SQL injection attacks](#sql-injection-attacks)
   - [Client-site attacks](#client-site-attacks)
   - [Locating public exploits](#locating-public-exploits)
-  - [F](#fixing-exploits)
+  - [Fixing exploits](#fixing-exploits)
   - [Antivirus evasion](#antivirus-evasion)
   - [Password attacks](#password-attacks)
   - [Linux privilege escalation](#linux-privilege-escalation)
