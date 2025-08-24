@@ -1224,12 +1224,12 @@ Reference
 - https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/  
 - enumerating linux
   - current user  
-    `id` > uid=1000(joe) gid=1000(joe) groups=1000(joe)
-    `cat /etc/passwd` > 
-    root:x:0:0:root:/root:/bin/bash
-    joe:x:1000:1000:joe,,,:/home/joe:/bin/bash
-    www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin   
-    Login name: joe, Encrypted Password: x, UID user ID, GID group ID, home folder /home/joe,  /usr/sbin/nologin block remote 
+    `id` > uid=1000(joe) gid=1000(joe) groups=1000(joe)  
+    `cat /etc/passwd` >  
+    root:x:0:0:root:/root:/bin/bash  
+    joe:x:1000:1000:joe,,,:/home/joe:/bin/bash  
+    www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin     
+    Login name: joe, Encrypted Password: x, UID user ID, GID group ID, home folder /home/joe,  /usr/sbin/nologin block remote   
   - `hostname`  
   - OS  
     ```
