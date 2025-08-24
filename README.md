@@ -34,6 +34,7 @@
   - [Fixing exploits](#fixing-exploits)
   - [Antivirus evasion](#antivirus-evasion)
   - [Password attacks](#password-attacks)
+  - [Windows privilege escalation](#windows-privilege-escalation)
   - [Linux privilege escalation](#linux-privilege-escalation)
   - [Port redirection and SSH tunneling](#port-redirection-and-ssh-tunneling)
   - [Tunneling through deep packet inspectation](#tunneling-through-deep-packet-inspectation)
