@@ -4885,6 +4885,20 @@ offsec:lab (admin)
     `rdesktop -u Administrator  -p lab -d corp.com -g 1280x860 -r disk:share=/home/kali/share 192.168.127.70`  
 
 ## Penetration testing report 
+- OSCP report format
+```
+- show IP address in every screenshot for target identification
+- display flag (user.txt, root.txt)
+- interactive shell required
+- capture every terminal command that leads to exploitation 
+- screenshot proof of compromise  
+- document in real-time
+- over document rather than under-document
+- someone with average technical skill should be able to replicate the attacks using your documented steps
+- exact commands & steps that led to compromise
+- highlight any changes made to tools or exploits
+- remember to document any environment variables you created
+```
 - note editor:
   - [Sublime-syntax highlight](https://www.sublimetext.com/download)
   - [CherryTree Kali](https://github.com/giuspen/cherrytree)
@@ -4926,8 +4940,6 @@ offsec:lab (admin)
       affected URL/endpoint + method of triggering the vulnerability  
     - **appendices**: articles, reference
 
-
-
 ## Kali setup
 1. Register [Broadcom account](https://profile.broadcom.com/web/registration)
 1. Download "VMware Workstation Pro"
@@ -4948,30 +4960,3 @@ offsec:lab (admin)
 1. Package install
    - `sudo apt update`
    - `sudo apt install golang`
- 1. Recommended software
-    - Notetaking: [notion.so](http://notion.so)  or Obsidian
-    - Scanning tool: [Rustscan](https://github.com/RustScan/RustScan/releases)  
-      `dpkg -i rustscan_2.3.0_amd64.deb`
-    - file upload/transfer purpose: Updog    
-      ```  
-      pip3 install updog  
-      export PATH="/home/kali/.local/bin:$PATH"
-      ```
-    - Privilege Escalation: peass  
-      `sudo apt install peass`
-    - DNS: Gobuster  
-      `sudo apt install gobuster`
-    - Hosting a WebDAV share (for exploits, exfil, or testing): WsgiDAV  
-      `sudo apt install wsgidav`
-    - Lateral movement / privilege escalation: Bloodhound  
-      `sudo apt update && sudo apt install -y bloodhound`
-    - Stores AD data for querying & analysis: Neo4j  
-      `sudo neo4j console`
-    - Mimmikatz
-      ```
-      find ~/ -iname "mimikatz.exe"  
-      ```
-
-    ## Kali useful command
-    - clean terminal history command: `bash` `history -c`
-    - search history: history | grep dnf
