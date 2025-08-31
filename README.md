@@ -21,8 +21,6 @@
   - [22. Active directory introduction and enumeration](#22-active-directory-introduction-and-enumeration)
   - [23. Attacking active drectiory authentication](#23-attacking-active-drectiory-authentication)
   - [24. Lateral movement in active directory](#24-lateral-movement-in-active-directory)
-  - [25. Enumerating AWS Cloud Infrastruture](#25-enumerating-aws-cloud-infrastruture)
-  - [26. Attacking AWS cloud infrastruture](#26-attacking-aws-cloud-infrastruture)
   - [27. Assembling the pieces](#27-assembling-the-pieces)
 - [PWK-200 labs](#pwk-200-labs)  
   - [Information gathering](#information-gathering)
@@ -42,9 +40,6 @@
   - [Active directory introduction and enumeration](#active-directory-introduction-and-enumeration)
   - [Attacking active drectiory authentication](#attacking-active-drectiory-authentication)
   - [Lateral movement in active directory](#lateral-movement-in-active-directory)
-  - [Enumerating AWS Cloud Infrastruture](#enumerating-aws-cloud-infrastruture)
-  - [Attacking AWS cloud infrastruture](#attacking-aws-cloud-infrastruture)
-  - [Assembling the pieces](#assembling-the-pieces)
 - [Kali setup](#kali-setup)
 
 ## Resources
