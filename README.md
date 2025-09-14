@@ -1420,7 +1420,9 @@ Reference
   - Listing SMB shares through the SSH local port forward running on CONFLUENCE01. > scripts  
     `kali@kali:~$ smbclient -p 4455 -L //192.168.114.63/ -U hr_admin --password=Welcome1234`
   - Listing files in the scripts share, using smbclient over our SSH local port forward running on CONFLUENCE01  
-    `smbclient -p 4455 //192.168.114.63/scripts -U hr_admin --password=Welcome1234` `smb: \> ls` `smb: \> get Provisioning.ps1`
+    `smbclient -p 4455 //192.168.114.63/scripts -U hr_admin --password=Welcome1234`    
+     `smb: \> ls`  
+     `smb: \> get Provisioning.ps1`  
 - SSH Tunneling (**dynamic** port forward)  
   - WAN (Kali) > DMZ (Confluence) > Internal (DB >>> HR)  
   - KALI 192.168.45.250, CONFLUENCE01 192.168.114.63, DB 10.4.114.215, HR 172.16.114.217  
